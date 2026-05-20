@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>البيع - نظام المبيعات</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg-dark:#0d1117;--bg-card:#161b22;--bg-sidebar:#0d1117;--border:#30363d;--accent:#d4a017;--accent-light:#f0c040;--text-main:#e6edf3;--text-muted:#8b949e;--success:#3fb950;--danger:#f85149;--info:#58a6ff;--warning:#d29922;--sidebar-w:260px;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Cairo',sans-serif;background:var(--bg-dark);color:var(--text-main);min-height:100vh;}
+    .sidebar{position:fixed;top:0;right:0;width:var(--sidebar-w);height:100vh;background:var(--bg-sidebar);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:1000;overflow-y:auto;}
+    .sidebar-brand{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .brand-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent-light));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#000;}
+    .brand-name{font-size:16px;font-weight:700;color:var(--text-main);line-height:1.2;}
+    .brand-sub{font-size:11px;color:var(--text-muted);}
+    .nav-section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);text-transform:uppercase;padding:20px 20px 8px;}
+    .sidebar-nav{list-style:none;padding:0 10px;}
+    .sidebar-nav li a{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:600;transition:all .2s;margin-bottom:2px;}
+    .sidebar-nav li a:hover{background:rgba(212,160,23,.08);color:var(--accent);}
+    .sidebar-nav li a.active{background:linear-gradient(90deg,rgba(212,160,23,.15),rgba(212,160,23,.05));color:var(--accent);border-right:3px solid var(--accent);}
+    .sidebar-nav li a i{width:18px;text-align:center;font-size:15px;}
+    .sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);text-align:center;}
+    .topbar{position:fixed;top:0;left:0;right:var(--sidebar-w);height:60px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:999;}
+    .topbar-title{font-size:18px;font-weight:700;}
+    .main-content{margin-right:var(--sidebar-w);margin-top:60px;height:calc(100vh - 60px);display:grid;grid-template-columns:1fr 380px;gap:0;overflow:hidden;}
+
+    /* ===== LEFT: Products area ===== */
+    .products-area{overflow-y:auto;padding:20px;border-left:1px solid var(--border);}
+    .search-filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+    .search-bar{position:relative;flex:1;min-width:180px;}
+    .search-bar input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text-main);border-radius:8px;padding:9px 14px 9px 38px;font-family:'Cairo',sans-serif;font-size:13px;width:100%;}
+    .search-bar input:focus{outline:none;border-color:var(--accent);}
+    .search-bar i{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);}
+    .cat-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+    .cat-tab{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text-muted);border-radius:20px;padding:6px 16px;font-family:'Cairo',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;}
+    .cat-tab:hover,.cat-tab.active{background:rgba(212,160,23,.12);color:var(--accent);border-color:var(--accent);}
+    .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;}
+    .prod-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .2s;position:relative;}
+    .prod-card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.3);}
+    .prod-card.out-of-stock{opacity:.5;cursor:not-allowed;}
+    .prod-card.out-of-stock:hover{transform:none;border-color:var(--border);}
+    .prod-card-img{width:100%;height:90px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.04);margin-bottom:10px;}
+    .prod-card-img-placeholder{width:100%;height:90px;border-radius:8px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;color:var(--border);font-size:28px;margin-bottom:10px;}
+    .prod-card-name{font-size:13px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .prod-card-price{font-size:14px;font-weight:900;color:var(--accent);}
+    .prod-card-qty{font-size:11px;color:var(--text-muted);margin-top:3px;}
+    .prod-card-note{font-size:10px;color:var(--warning);background:rgba(210,153,34,.08);padding:3px 6px;border-radius:4px;margin-top:5px;line-height:1.4;}
+    .out-badge{position:absolute;top:8px;left:8px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;}
+
+    /* ===== RIGHT: Cart area ===== */
+    .cart-area{display:flex;flex-direction:column;background:var(--bg-card);overflow:hidden;}
+    .cart-header{padding:16px 20px;border-bottom:1px solid var(--border);font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:space-between;}
+    .cart-items{flex:1;overflow-y:auto;padding:0;}
+    .cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);gap:10px;}
+    .cart-empty i{font-size:40px;color:var(--border);}
+    .cart-item{padding:12px 16px;border-bottom:1px solid rgba(48,54,61,.5);display:flex;flex-direction:column;gap:8px;}
+    .cart-item-row{display:flex;align-items:center;justify-content:space-between;}
+    .cart-item-name{font-size:13px;font-weight:700;flex:1;}
+    .cart-item-remove{background:none;border:none;color:var(--danger);cursor:pointer;font-size:15px;padding:2px;}
+    .cart-item-controls{display:flex;align-items:center;gap:8px;}
+    .qty-btn{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-main);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;}
+    .qty-btn:hover{background:rgba(212,160,23,.15);border-color:var(--accent);}
+    .qty-display{min-width:28px;text-align:center;font-size:13px;font-weight:700;}
+    .price-input{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text-main);border-radius:6px;padding:4px 8px;width:90px;font-family:'Cairo',sans-serif;font-size:13px;text-align:center;}
+    .price-input:focus{outline:none;border-color:var(--accent);}
+    .price-input.invalid{border-color:var(--danger);background:rgba(248,81,73,.06);}
+    .item-subtotal{font-size:13px;font-weight:700;color:var(--accent);}
+    .cart-item-note{font-size:11px;color:var(--warning);background:rgba(210,153,34,.08);padding:2px 8px;border-radius:4px;}
+    .cart-footer{padding:16px 20px;border-top:1px solid var(--border);}
+    .total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .total-label{font-size:13px;color:var(--text-muted);}
+    .total-value{font-size:13px;font-weight:700;}
+    .grand-total{font-size:20px;font-weight:900;color:var(--accent);}
+    .btn-checkout{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#000;font-weight:900;border:none;border-radius:10px;padding:14px;font-family:'Cairo',sans-serif;font-size:16px;cursor:pointer;margin-top:12px;transition:opacity .2s;}
+    .btn-checkout:hover{opacity:.88;}
+    .btn-checkout:disabled{opacity:.4;cursor:not-allowed;}
+    .btn-clear-cart{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:var(--danger);border-radius:8px;padding:7px 14px;font-family:'Cairo',sans-serif;font-size:12px;cursor:pointer;}
+    /* Modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;}
+    .modal-box{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:460px;padding:28px;}
+    .modal-title{font-size:17px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+    .receipt-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(48,54,61,.4);font-size:13px;}
+    .receipt-item:last-of-type{border-bottom:none;}
+    .btn-gold{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#000;font-weight:700;border:none;border-radius:8px;padding:9px 22px;font-family:'Cairo',sans-serif;cursor:pointer;}
+    .sidebar-toggle{display:none;background:none;border:none;color:var(--text-main);font-size:20px;cursor:pointer;}
+    @media(max-width:992px){.main-content{grid-template-columns:1fr;}.cart-area{position:fixed;bottom:0;left:0;right:0;height:50vh;border-top:2px solid var(--accent);z-index:500;}.products-area{padding-bottom:52vh;}.sidebar{transform:translateX(100%);transition:transform .3s;}.sidebar.open{transform:translateX(0);}.sidebar-toggle{display:block;}.topbar{right:0;}}
+    .toast-container-custom{position:fixed;bottom:24px;left:24px;z-index:9000;}
+    .my-toast{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:13px;color:var(--text-main);box-shadow:0 4px 20px rgba(0,0,0,.5);margin-top:8px;animation:slideIn .3s ease;}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+  </style>
+</head>
+<body>
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon"><i class="fas fa-store"></i></div>
+    <div><div class="brand-name" id="storeName">نظام المبيعات</div><div class="brand-sub">POS & Inventory</div></div>
+  </div>
+  <p class="nav-section-title">القائمة الرئيسية</p>
+  <ul class="sidebar-nav">
+    <li><a href="index.html"><i class="fas fa-chart-pie"></i> لوحة التحكم</a></li>
+    <li><a href="sales.html" class="active"><i class="fas fa-cash-register"></i> البيع</a></li>
+    <li><a href="products.html"><i class="fas fa-boxes"></i> المنتجات</a></li>
+    <li><a href="inventory.html"><i class="fas fa-warehouse"></i> الجرد</a></li>
+    <li><a href="reports.html"><i class="fas fa-chart-bar"></i> التقارير</a></li>
+    <li><a href="categories.html"><i class="fas fa-tags"></i> الأقسام</a></li>
+    <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
+  </ul>
+  <div class="sidebar-footer"><i class="fas fa-shield-alt me-1"></i> النظام يعمل بشكل طبيعي</div>
+</nav>
+
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <span class="topbar-title"><i class="fas fa-cash-register me-2" style="color:var(--accent)"></i>نقطة البيع</span>
+  </div>
+  <span id="clockDisplay" style="font-size:13px;color:var(--text-muted);"></span>
+</header>
+
+<main class="main-content">
+  <!-- Products -->
+  <div class="products-area">
+    <div class="search-filters">
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="بحث سريع عن منتج..." oninput="filterProducts()"/>
+        <i class="fas fa-search"></i>
+      </div>
+    </div>
+    <div class="cat-tabs" id="catTabs">
+      <button class="cat-tab active" onclick="filterByCat('', this)">الكل</button>
+    </div>
+    <div class="products-grid" id="productsGrid">
+      <div style="color:var(--text-muted);font-size:13px;padding:20px;"><i class="fas fa-spinner fa-spin me-2"></i>جارٍ التحميل...</div>
+    </div>
+  </div>
+
+  <!-- Cart -->
+  <div class="cart-area">
+    <div class="cart-header">
+      <span><i class="fas fa-shopping-cart me-2" style="color:var(--accent)"></i>الفاتورة <span id="cartCount" style="background:rgba(212,160,23,.15);color:var(--accent);border-radius:10px;padding:1px 8px;font-size:12px;margin-right:6px;">0</span></span>
+      <button class="btn-clear-cart" onclick="clearCart()"><i class="fas fa-trash me-1"></i>إفراغ</button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty">
+        <i class="fas fa-shopping-cart"></i>
+        <span>لم يتم إضافة منتجات بعد</span>
+        <span style="font-size:12px;">انقر على المنتج لإضافته</span>
+      </div>
+    </div>
+    <div class="cart-footer">
+      <div class="total-row">
+        <span class="total-label">عدد الأصناف</span>
+        <span class="total-value" id="totalItems">0</span>
+      </div>
+      <div class="total-row">
+        <span class="total-label">الإجمالي</span>
+        <span class="grand-total" id="grandTotal">0.00</span>
+      </div>
+      <div class="total-row">
+        <span class="total-label">الربح المتوقع</span>
+        <span class="total-value" style="color:var(--success)" id="expectedProfit">0.00</span>
+      </div>
+      <button class="btn-checkout" id="checkoutBtn" onclick="checkout()" disabled>
+        <i class="fas fa-check-circle me-2"></i>إتمام البيع
+      </button>
+    </div>
+  </div>
+</main>
+
+<!-- Modal تأكيد البيع -->
+<div class="modal-overlay" id="checkoutModal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title"><i class="fas fa-receipt" style="color:var(--accent)"></i> تأكيد الفاتورة</div>
+    <div id="receiptItems" style="margin-bottom:16px;"></div>
+    <div style="background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.2);border-radius:10px;padding:14px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+        <span style="color:var(--text-muted);font-size:13px;">الإجمالي</span>
+        <span style="font-size:20px;font-weight:900;color:var(--accent);" id="receiptTotal">0</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;">
+        <span style="color:var(--text-muted);font-size:13px;">الربح</span>
+        <span style="font-size:14px;font-weight:700;color:var(--success);" id="receiptProfit">0</span>
+      </div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">ملاحظة البيع (اختياري)</label>
+      <input type="text" id="saleNote" style="background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text-main);border-radius:8px;padding:9px 14px;font-family:'Cairo',sans-serif;font-size:13px;width:100%;" placeholder="اسم العميل أو ملاحظة..."/>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeCheckout()" style="background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;padding:9px 20px;font-family:'Cairo',sans-serif;cursor:pointer;">إلغاء</button>
+      <button class="btn-gold" onclick="confirmSale()"><i class="fas fa-check me-1"></i>تأكيد البيع</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal نجاح البيع -->
+<div class="modal-overlay" id="successModal" style="display:none;">
+  <div class="modal-box" style="max-width:380px;text-align:center;">
+    <div style="width:70px;height:70px;background:rgba(63,185,80,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;color:var(--success);">
+      <i class="fas fa-check-circle"></i>
+    </div>
+    <div style="font-size:20px;font-weight:900;margin-bottom:8px;">تم البيع بنجاح!</div>
+    <div id="successSummary" style="color:var(--text-muted);font-size:14px;margin-bottom:24px;"></div>
+    <button class="btn-gold" style="width:100%;" onclick="closeSuccess()">
+      <i class="fas fa-plus me-1"></i> بيع جديد
+    </button>
+  </div>
+</div>
+
+<div class="toast-container-custom" id="toastContainer"></div>
+
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, onValue, push, set, get, update }
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey:"AIzaSyC7EVNCSl48CQgIC_a8wdC5UG2tKLtNKjQ",
+    authDomain:"garag-system.firebaseapp.com",
+    databaseURL:"https://garag-system-default-rtdb.firebaseio.com",
+    projectId:"garag-system",
+    storageBucket:"garag-system.firebasestorage.app",
+    messagingSenderId:"330947022055",
+    appId:"1:330947022055:web:d0c9d378e200c7de45a642"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  let allProducts  = [];
+  let cart         = [];  // [{id, name, qty, price, minPrice, purchasePrice, note, stock}]
+  let currency     = 'ر.س';
+  let currentCat   = '';
+
+  // ساعة
+  function tick() {
+    document.getElementById('clockDisplay').textContent =
+      new Date().toLocaleTimeString('ar-SA', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  }
+  tick(); setInterval(tick, 1000);
+
+  // تحميل الإعدادات
+  get(ref(db, 'settings')).then(s => {
+    if (s.exists()) {
+      const st = s.val();
+      currency = st.currency || 'ر.س';
+      if (st.storeName) document.getElementById('storeName').textContent = st.storeName;
+    }
+  });
+
+  // تحميل الأقسام
+  onValue(ref(db, 'categories'), snap => {
+    const cats = snap.exists() ? Object.values(snap.val()) : [];
+    buildCatTabs(cats);
+  });
+
+  // تحميل المنتجات
+  onValue(ref(db, 'products'), snap => {
+    allProducts = snap.exists()
+      ? Object.entries(snap.val()).map(([id,v]) => ({ id, ...v }))
+      : [];
+    renderProducts(filterList());
+  });
+
+  function buildCatTabs(cats) {
+    const tabs = document.getElementById('catTabs');
+    const existing = cats.map(c => `<button class="cat-tab" onclick="filterByCat('${c.name}', this)">${c.name}</button>`).join('');
+    tabs.innerHTML = `<button class="cat-tab ${currentCat === '' ? 'active' : ''}" onclick="filterByCat('', this)">الكل</button>` + existing;
+  }
+
+  window.filterByCat = function(cat, el) {
+    currentCat = cat;
+    document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderProducts(filterList());
+  };
+
+  window.filterProducts = function() {
+    renderProducts(filterList());
+  };
+
+  function filterList() {
+    const q = document.getElementById('searchInput').value.trim().toLowerCase();
+    let list = allProducts;
+    if (currentCat) list = list.filter(p => p.category === currentCat);
+    if (q) list = list.filter(p => p.name.toLowerCase().includes(q));
+    return list;
+  }
+
+  function renderProducts(list) {
+    const grid = document.getElementById('productsGrid');
+    if (!list.length) {
+      grid.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:20px;grid-column:1/-1;text-align:center;">لا توجد منتجات</div>`;
+      return;
+    }
+    grid.innerHTML = list.map(p => {
+      const isOut  = (p.quantity || 0) === 0;
+      const imgEl  = p.imageUrl
+        ? `<img src="${p.imageUrl}" class="prod-card-img" alt="" onerror="this.style.display='none'">`
+        : `<div class="prod-card-img-placeholder"><i class="fas fa-image"></i></div>`;
+      const noteEl = p.note ? `<div class="prod-card-note">⚠️ ${p.note}</div>` : '';
+      return `
+        <div class="prod-card ${isOut ? 'out-of-stock' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
+          ${isOut ? '<span class="out-badge">نفذ</span>' : ''}
+          ${imgEl}
+          <div class="prod-card-name" title="${p.name}">${p.name}</div>
+          <div class="prod-card-price">${formatNum(p.salePrice)} ${currency}</div>
+          <div class="prod-card-qty">متوفر: ${p.quantity || 0}</div>
+          ${noteEl}
+        </div>`;
+    }).join('');
+  }
+
+  // إضافة للسلة
+  window.addToCart = function(id) {
+    const p = allProducts.find(x => x.id === id);
+    if (!p || (p.quantity || 0) === 0) return;
+
+    const existing = cart.find(c => c.id === id);
+    if (existing) {
+      if (existing.qty >= (p.quantity || 0)) {
+        showToast('⚠️ لا يمكن بيع أكثر من الكمية المتوفرة', 'warn'); return;
+      }
+      existing.qty++;
+    } else {
+      cart.push({
+        id: p.id,
+        name: p.name,
+        qty: 1,
+        price: p.salePrice || 0,
+        minPrice: p.minPrice || 0,
+        purchasePrice: p.purchasePrice || 0,
+        note: p.note || '',
+        stock: p.quantity || 0
+      });
+    }
+    renderCart();
+  };
+
+  function renderCart() {
+    const el = document.getElementById('cartItems');
+    if (!cart.length) {
+      el.innerHTML = `<div class="cart-empty"><i class="fas fa-shopping-cart"></i><span>لم يتم إضافة منتجات</span><span style="font-size:12px;">انقر على المنتج لإضافته</span></div>`;
+      document.getElementById('cartCount').textContent = '0';
+      document.getElementById('totalItems').textContent = '0';
+      document.getElementById('grandTotal').textContent = '0.00';
+      document.getElementById('expectedProfit').textContent = '0.00';
+      document.getElementById('checkoutBtn').disabled = true;
+      return;
+    }
+
+    el.innerHTML = cart.map((item, i) => `
+      <div class="cart-item">
+        <div class="cart-item-row">
+          <span class="cart-item-name">${item.name}</span>
+          <button class="cart-item-remove" onclick="removeFromCart(${i})"><i class="fas fa-times"></i></button>
+        </div>
+        ${item.note ? `<div class="cart-item-note">⚠️ ${item.note}</div>` : ''}
+        <div class="cart-item-controls">
+          <button class="qty-btn" onclick="changeQty(${i}, -1)"><i class="fas fa-minus"></i></button>
+          <span class="qty-display">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty(${i}, 1)"><i class="fas fa-plus"></i></button>
+          <span style="font-size:12px;color:var(--text-muted);margin-right:4px;">× السعر:</span>
+          <input type="number" class="price-input" id="price-${i}" value="${item.price}"
+            oninput="updatePrice(${i}, this)" min="0"/>
+        </div>
+        <div class="cart-item-row">
+          <span style="font-size:12px;color:var(--text-muted);">الحد الأدنى: ${formatNum(item.minPrice)} ${currency}</span>
+          <span class="item-subtotal">${formatNum(item.qty * item.price)} ${currency}</span>
+        </div>
+      </div>
+    `).join('');
+
+    // حساب الإجماليات
+    const total  = cart.reduce((s, c) => s + c.qty * c.price, 0);
+    const profit = cart.reduce((s, c) => s + c.qty * (c.price - c.purchasePrice), 0);
+    const count  = cart.reduce((s, c) => s + c.qty, 0);
+
+    document.getElementById('cartCount').textContent     = cart.length;
+    document.getElementById('totalItems').textContent    = count;
+    document.getElementById('grandTotal').textContent    = formatNum(total) + ' ' + currency;
+    document.getElementById('expectedProfit').textContent = formatNum(profit) + ' ' + currency;
+    document.getElementById('checkoutBtn').disabled      = false;
+  }
+
+  window.changeQty = function(i, delta) {
+    const item = cart[i];
+    const newQ = item.qty + delta;
+    if (newQ <= 0) { removeFromCart(i); return; }
+    if (newQ > item.stock) { showToast('⚠️ لا يمكن بيع أكثر من الكمية المتوفرة (' + item.stock + ')', 'warn'); return; }
+    item.qty = newQ;
+    renderCart();
+  };
+
+  window.removeFromCart = function(i) {
+    cart.splice(i, 1);
+    renderCart();
+  };
+
+  window.updatePrice = function(i, el) {
+    const val = parseFloat(el.value);
+    const item = cart[i];
+    if (isNaN(val) || val < 0) { el.classList.add('invalid'); return; }
+    if (val < item.minPrice) {
+      el.classList.add('invalid');
+      showToast(`❌ لا يمكن بيع "${item.name}" بأقل من الحد الأدنى المسموح (${formatNum(item.minPrice)} ${currency})`, 'error');
+      el.value = item.price;
+      return;
+    }
+    el.classList.remove('invalid');
+    item.price = val;
+    renderCart();
+  };
+
+  window.clearCart = function() {
+    cart = [];
+    renderCart();
+  };
+
+  // تحضير الفاتورة
+  window.checkout = function() {
+    // تحقق من الأسعار
+    for (const item of cart) {
+      if (item.price < item.minPrice) {
+        showToast(`❌ سعر "${item.name}" أقل من الحد الأدنى!`, 'error'); return;
+      }
+    }
+
+    const total  = cart.reduce((s, c) => s + c.qty * c.price, 0);
+    const profit = cart.reduce((s, c) => s + c.qty * (c.price - c.purchasePrice), 0);
+
+    document.getElementById('receiptItems').innerHTML = cart.map(item => `
+      <div class="receipt-item">
+        <span>${item.name} × ${item.qty}</span>
+        <span style="font-weight:700;">${formatNum(item.qty * item.price)} ${currency}</span>
+      </div>`).join('');
+    document.getElementById('receiptTotal').textContent  = formatNum(total) + ' ' + currency;
+    document.getElementById('receiptProfit').textContent = formatNum(profit) + ' ' + currency;
+    document.getElementById('saleNote').value = '';
+    document.getElementById('checkoutModal').style.display = 'flex';
+  };
+
+  window.closeCheckout = function() {
+    document.getElementById('checkoutModal').style.display = 'none';
+  };
+
+  // تأكيد البيع وحفظه في Firebase
+  window.confirmSale = async function() {
+    const note   = document.getElementById('saleNote').value.trim();
+    const total  = cart.reduce((s, c) => s + c.qty * c.price, 0);
+    const profit = cart.reduce((s, c) => s + c.qty * (c.price - c.purchasePrice), 0);
+    const ts     = Date.now();
+
+    const saleData = {
+      items: cart.map(c => ({ id: c.id, name: c.name, qty: c.qty, price: c.price, subtotal: c.qty * c.price })),
+      total, profit, note, timestamp: ts
+    };
+
+    try {
+      // حفظ عملية البيع
+      await push(ref(db, 'sales'), saleData);
+
+      // خصم الكميات وتسجيل حركات الجرد
+      for (const item of cart) {
+        const pSnap = await get(ref(db, `products/${item.id}`));
+        if (pSnap.exists()) {
+          const p = pSnap.val();
+          const newQty = Math.max(0, (p.quantity || 0) - item.qty);
+          await update(ref(db, `products/${item.id}`), { quantity: newQty });
+
+          // تسجيل حركة جرد
+          await push(ref(db, 'inventory'), {
+            productId: item.id,
+            productName: item.name,
+            type: 'بيع',
+            quantity: -item.qty,
+            note: `فاتورة بيع - ${note || ''}`,
+            timestamp: ts
+          });
+        }
+      }
+
+      closeCheckout();
+      const total2 = cart.reduce((s, c) => s + c.qty * c.price, 0);
+      document.getElementById('successSummary').innerHTML =
+        `إجمالي الفاتورة: <strong style="color:var(--accent)">${formatNum(total2)} ${currency}</strong><br>
+         ربح: <strong style="color:var(--success)">${formatNum(profit)} ${currency}</strong>`;
+
+      document.getElementById('successModal').style.display = 'flex';
+      cart = [];
+      renderCart();
+    } catch (e) {
+      showToast('❌ خطأ في حفظ البيع: ' + e.message, 'error');
+    }
+  };
+
+  window.closeSuccess = function() {
+    document.getElementById('successModal').style.display = 'none';
+  };
+
+  function formatNum(n) {
+    return Number(n || 0).toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function showToast(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'my-toast';
+    t.style.borderColor = type === 'error' ? 'var(--danger)' : type === 'warn' ? 'var(--warning)' : 'var(--success)';
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  window.toggleSidebar = function() {
+    document.getElementById('sidebar').classList.toggle('open');
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

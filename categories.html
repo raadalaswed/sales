@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>الأقسام - نظام المبيعات</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg-dark:#0d1117;--bg-card:#161b22;--bg-sidebar:#0d1117;
+      --border:#30363d;--accent:#d4a017;--accent-light:#f0c040;
+      --text-main:#e6edf3;--text-muted:#8b949e;
+      --success:#3fb950;--danger:#f85149;--info:#58a6ff;--warning:#d29922;
+      --sidebar-w:260px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Cairo',sans-serif;background:var(--bg-dark);color:var(--text-main);min-height:100vh;}
+    .sidebar{position:fixed;top:0;right:0;width:var(--sidebar-w);height:100vh;background:var(--bg-sidebar);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:1000;overflow-y:auto;}
+    .sidebar-brand{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .brand-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent-light));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#000;}
+    .brand-name{font-size:16px;font-weight:700;color:var(--text-main);line-height:1.2;}
+    .brand-sub{font-size:11px;color:var(--text-muted);}
+    .nav-section-title{font-size:10px;font-weight:700;letter-spacing:1.5px;color:var(--text-muted);text-transform:uppercase;padding:20px 20px 8px;}
+    .sidebar-nav{list-style:none;padding:0 10px;}
+    .sidebar-nav li a{display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:8px;color:var(--text-muted);text-decoration:none;font-size:14px;font-weight:600;transition:all .2s;margin-bottom:2px;}
+    .sidebar-nav li a:hover{background:rgba(212,160,23,.08);color:var(--accent);}
+    .sidebar-nav li a.active{background:linear-gradient(90deg,rgba(212,160,23,.15),rgba(212,160,23,.05));color:var(--accent);border-right:3px solid var(--accent);}
+    .sidebar-nav li a i{width:18px;text-align:center;font-size:15px;}
+    .sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);text-align:center;}
+    .topbar{position:fixed;top:0;left:0;right:var(--sidebar-w);height:60px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:999;}
+    .topbar-title{font-size:18px;font-weight:700;}
+    .main-content{margin-right:var(--sidebar-w);margin-top:60px;padding:28px;min-height:calc(100vh - 60px);}
+    .section-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .section-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .section-title{font-size:15px;font-weight:700;}
+    .btn-gold{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#000;font-weight:700;border:none;border-radius:8px;padding:8px 18px;font-family:'Cairo',sans-serif;cursor:pointer;transition:opacity .2s;}
+    .btn-gold:hover{opacity:.85;}
+    .btn-danger-sm{background:rgba(248,81,73,.12);color:var(--danger);border:1px solid rgba(248,81,73,.3);border-radius:6px;padding:5px 12px;font-family:'Cairo',sans-serif;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s;}
+    .btn-danger-sm:hover{background:rgba(248,81,73,.25);}
+    .btn-edit-sm{background:rgba(88,166,255,.12);color:var(--info);border:1px solid rgba(88,166,255,.3);border-radius:6px;padding:5px 12px;font-family:'Cairo',sans-serif;cursor:pointer;font-size:12px;font-weight:600;transition:all .2s;}
+    .btn-edit-sm:hover{background:rgba(88,166,255,.25);}
+    .form-control-dark{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text-main);border-radius:8px;padding:10px 14px;font-family:'Cairo',sans-serif;font-size:14px;width:100%;}
+    .form-control-dark:focus{outline:none;border-color:var(--accent);background:rgba(255,255,255,.06);}
+    .cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:20px;}
+    .cat-card{background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;align-items:center;gap:10px;transition:all .2s;position:relative;}
+    .cat-card:hover{border-color:var(--accent);background:rgba(212,160,23,.05);}
+    .cat-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+    .cat-name{font-size:15px;font-weight:700;text-align:center;}
+    .cat-count{font-size:12px;color:var(--text-muted);}
+    .cat-actions{display:flex;gap:8px;margin-top:4px;}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;}
+    .modal-box{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:420px;padding:28px;}
+    .modal-title{font-size:17px;font-weight:700;margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+    .form-label-dark{display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px;}
+    .sidebar-toggle{display:none;background:none;border:none;color:var(--text-main);font-size:20px;cursor:pointer;}
+    @media(max-width:768px){.sidebar{transform:translateX(100%);transition:transform .3s;}.sidebar.open{transform:translateX(0);}.sidebar-toggle{display:block;}.main-content{margin-right:0;padding:16px;}.topbar{right:0;}}
+    .toast-container-custom{position:fixed;bottom:24px;left:24px;z-index:9000;}
+    .my-toast{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:13px;color:var(--text-main);box-shadow:0 4px 20px rgba(0,0,0,.5);margin-top:8px;animation:slideIn .3s ease;}
+    @keyframes slideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+    .empty-state{text-align:center;padding:60px 20px;color:var(--text-muted);}
+    .empty-state i{font-size:48px;margin-bottom:16px;display:block;color:var(--border);}
+
+    /* ألوان الأقسام */
+    .color-opt{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s;}
+    .color-opt.selected{border-color:#fff;transform:scale(1.15);}
+    .colors-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  </style>
+</head>
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon"><i class="fas fa-store"></i></div>
+    <div>
+      <div class="brand-name" id="storeName">نظام المبيعات</div>
+      <div class="brand-sub">POS & Inventory</div>
+    </div>
+  </div>
+  <p class="nav-section-title">القائمة الرئيسية</p>
+  <ul class="sidebar-nav">
+    <li><a href="index.html"><i class="fas fa-chart-pie"></i> لوحة التحكم</a></li>
+    <li><a href="sales.html"><i class="fas fa-cash-register"></i> البيع</a></li>
+    <li><a href="products.html"><i class="fas fa-boxes"></i> المنتجات</a></li>
+    <li><a href="inventory.html"><i class="fas fa-warehouse"></i> الجرد</a></li>
+    <li><a href="reports.html"><i class="fas fa-chart-bar"></i> التقارير</a></li>
+    <li><a href="categories.html" class="active"><i class="fas fa-tags"></i> الأقسام</a></li>
+    <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
+  </ul>
+  <div class="sidebar-footer"><i class="fas fa-shield-alt me-1"></i> النظام يعمل بشكل طبيعي</div>
+</nav>
+
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <span class="topbar-title"><i class="fas fa-tags me-2" style="color:var(--accent)"></i>إدارة الأقسام</span>
+  </div>
+  <button class="btn-gold" onclick="openAddModal()">
+    <i class="fas fa-plus me-1"></i> إضافة قسم
+  </button>
+</header>
+
+<main class="main-content">
+  <div class="section-card">
+    <div class="section-header">
+      <span class="section-title">جميع الأقسام</span>
+      <span id="catCount" style="color:var(--text-muted);font-size:13px;">0 قسم</span>
+    </div>
+    <div class="cat-grid" id="catGrid">
+      <div class="empty-state" style="grid-column:1/-1;">
+        <i class="fas fa-tags"></i>
+        لا توجد أقسام بعد. أضف قسماً الآن!
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Modal إضافة/تعديل -->
+<div class="modal-overlay" id="catModal" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title">
+      <i class="fas fa-tag" style="color:var(--accent)"></i>
+      <span id="modalTitle">إضافة قسم جديد</span>
+    </div>
+    <input type="hidden" id="editId"/>
+    <div style="margin-bottom:16px;">
+      <label class="form-label-dark">اسم القسم *</label>
+      <input type="text" class="form-control-dark" id="catName" placeholder="مثال: إنارة، شبكات، كاميرات..."/>
+    </div>
+    <div style="margin-bottom:16px;">
+      <label class="form-label-dark">أيقونة القسم</label>
+      <select class="form-control-dark" id="catIcon">
+        <option value="fas fa-tag">🏷️ عام</option>
+        <option value="fas fa-lightbulb">💡 إنارة</option>
+        <option value="fas fa-network-wired">🌐 شبكات</option>
+        <option value="fas fa-plug">🔌 أسلاك وقواطع</option>
+        <option value="fas fa-video">📹 كاميرات</option>
+        <option value="fas fa-mobile-alt">📱 إكسسوارات</option>
+        <option value="fas fa-tools">🔧 أدوات</option>
+        <option value="fas fa-box">📦 متنوع</option>
+        <option value="fas fa-wifi">📶 لاسلكي</option>
+        <option value="fas fa-hard-drive">💾 تخزين</option>
+        <option value="fas fa-tv">📺 شاشات</option>
+        <option value="fas fa-keyboard">⌨️ أجهزة</option>
+      </select>
+    </div>
+    <div style="margin-bottom:20px;">
+      <label class="form-label-dark">لون القسم</label>
+      <div class="colors-row" id="colorsRow"></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeModal()" style="background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;padding:9px 20px;font-family:'Cairo',sans-serif;cursor:pointer;">إلغاء</button>
+      <button class="btn-gold" onclick="saveCategory()">
+        <i class="fas fa-save me-1"></i> حفظ
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal تأكيد الحذف -->
+<div class="modal-overlay" id="deleteModal" style="display:none;">
+  <div class="modal-box" style="max-width:360px;">
+    <div class="modal-title">
+      <i class="fas fa-trash" style="color:var(--danger)"></i> تأكيد الحذف
+    </div>
+    <p style="color:var(--text-muted);font-size:14px;margin-bottom:20px;">
+      هل تريد حذف هذا القسم؟ لن يؤثر ذلك على المنتجات المرتبطة به.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button onclick="closeDeleteModal()" style="background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;padding:9px 20px;font-family:'Cairo',sans-serif;cursor:pointer;">إلغاء</button>
+      <button onclick="confirmDelete()" style="background:var(--danger);color:#fff;border:none;border-radius:8px;padding:9px 20px;font-family:'Cairo',sans-serif;cursor:pointer;font-weight:700;">
+        <i class="fas fa-trash me-1"></i> حذف
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container-custom" id="toastContainer"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, onValue, push, set, remove, get }
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7EVNCSl48CQgIC_a8wdC5UG2tKLtNKjQ",
+    authDomain: "garag-system.firebaseapp.com",
+    databaseURL: "https://garag-system-default-rtdb.firebaseio.com",
+    projectId: "garag-system",
+    storageBucket: "garag-system.firebasestorage.app",
+    messagingSenderId: "330947022055",
+    appId: "1:330947022055:web:d0c9d378e200c7de45a642"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  // ألوان متاحة
+  const COLORS = [
+    '#d4a017','#3fb950','#58a6ff','#f85149',
+    '#d29922','#bc8cff','#ff7b72','#39d353',
+    '#e8912d','#79c0ff'
+  ];
+  let selectedColor = COLORS[0];
+  let deleteTargetId = null;
+
+  // بناء خيارات الألوان
+  function buildColors() {
+    const row = document.getElementById('colorsRow');
+    row.innerHTML = COLORS.map(c => `
+      <div class="color-opt ${c === selectedColor ? 'selected' : ''}"
+           style="background:${c};"
+           onclick="selectColor('${c}', this)"></div>
+    `).join('');
+  }
+
+  window.selectColor = function(c, el) {
+    selectedColor = c;
+    document.querySelectorAll('.color-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+  };
+
+  // تحميل الأقسام
+  onValue(ref(db, 'categories'), snap => {
+    const data = snap.exists() ? snap.val() : {};
+    const list = Object.entries(data).map(([id, v]) => ({ id, ...v }));
+    renderGrid(list);
+    document.getElementById('catCount').textContent = list.length + ' قسم';
+  });
+
+  // إعداد اسم المتجر
+  get(ref(db, 'settings/storeName')).then(s => {
+    if (s.exists()) document.getElementById('storeName').textContent = s.val();
+  });
+
+  function renderGrid(list) {
+    const grid = document.getElementById('catGrid');
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+        <i class="fas fa-tags"></i> لا توجد أقسام بعد. أضف قسماً الآن!</div>`;
+      return;
+    }
+    grid.innerHTML = list.map(cat => `
+      <div class="cat-card">
+        <div class="cat-icon" style="background:${cat.color || '#d4a017'}22;color:${cat.color || '#d4a017'}">
+          <i class="${cat.icon || 'fas fa-tag'}"></i>
+        </div>
+        <div class="cat-name">${cat.name}</div>
+        <div class="cat-count" id="count-${cat.id}">جارٍ الحساب...</div>
+        <div class="cat-actions">
+          <button class="btn-edit-sm" onclick="openEditModal('${cat.id}')">
+            <i class="fas fa-edit me-1"></i> تعديل
+          </button>
+          <button class="btn-danger-sm" onclick="openDeleteModal('${cat.id}')">
+            <i class="fas fa-trash"></i>
+          </button>
+        </div>
+      </div>
+    `).join('');
+
+    // حساب عدد المنتجات لكل قسم
+    get(ref(db, 'products')).then(snap => {
+      const products = snap.exists() ? snap.val() : {};
+      list.forEach(cat => {
+        const count = Object.values(products).filter(p => p.category === cat.name).length;
+        const el = document.getElementById(`count-${cat.id}`);
+        if (el) el.textContent = count + ' منتج';
+      });
+    });
+  }
+
+  // فتح مودال الإضافة
+  window.openAddModal = function() {
+    document.getElementById('modalTitle').textContent = 'إضافة قسم جديد';
+    document.getElementById('editId').value = '';
+    document.getElementById('catName').value = '';
+    document.getElementById('catIcon').value = 'fas fa-tag';
+    selectedColor = COLORS[0];
+    buildColors();
+    document.getElementById('catModal').style.display = 'flex';
+  };
+
+  // فتح مودال التعديل
+  window.openEditModal = function(id) {
+    get(ref(db, `categories/${id}`)).then(snap => {
+      if (!snap.exists()) return;
+      const cat = snap.val();
+      document.getElementById('modalTitle').textContent = 'تعديل القسم';
+      document.getElementById('editId').value = id;
+      document.getElementById('catName').value = cat.name || '';
+      document.getElementById('catIcon').value = cat.icon || 'fas fa-tag';
+      selectedColor = cat.color || COLORS[0];
+      buildColors();
+      document.getElementById('catModal').style.display = 'flex';
+    });
+  };
+
+  // إغلاق المودال
+  window.closeModal = function() {
+    document.getElementById('catModal').style.display = 'none';
+  };
+
+  // حفظ القسم
+  window.saveCategory = async function() {
+    const name  = document.getElementById('catName').value.trim();
+    const icon  = document.getElementById('catIcon').value;
+    const id    = document.getElementById('editId').value;
+
+    if (!name) { showToast('⚠️ اسم القسم مطلوب', 'warn'); return; }
+
+    const data = { name, icon, color: selectedColor, updatedAt: Date.now() };
+
+    try {
+      if (id) {
+        await set(ref(db, `categories/${id}`), { ...data, createdAt: Date.now() });
+        showToast('✅ تم تعديل القسم بنجاح');
+      } else {
+        const newRef = push(ref(db, 'categories'));
+        await set(newRef, { ...data, createdAt: Date.now() });
+        showToast('✅ تم إضافة القسم بنجاح');
+      }
+      closeModal();
+    } catch (e) {
+      showToast('❌ خطأ: ' + e.message, 'error');
+    }
+  };
+
+  // حذف
+  window.openDeleteModal = function(id) {
+    deleteTargetId = id;
+    document.getElementById('deleteModal').style.display = 'flex';
+  };
+  window.closeDeleteModal = function() {
+    document.getElementById('deleteModal').style.display = 'none';
+    deleteTargetId = null;
+  };
+  window.confirmDelete = async function() {
+    if (!deleteTargetId) return;
+    try {
+      await remove(ref(db, `categories/${deleteTargetId}`));
+      showToast('🗑️ تم حذف القسم');
+      closeDeleteModal();
+    } catch (e) {
+      showToast('❌ خطأ: ' + e.message, 'error');
+    }
+  };
+
+  // إغلاق بالنقر خارج المودال
+  document.querySelectorAll('.modal-overlay').forEach(m => {
+    m.addEventListener('click', e => { if (e.target === m) { m.style.display = 'none'; deleteTargetId = null; } });
+  });
+
+  // Toast
+  function showToast(msg, type = 'success') {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'my-toast';
+    t.style.borderColor = type === 'error' ? 'var(--danger)' : type === 'warn' ? 'var(--warning)' : 'var(--success)';
+    t.textContent = msg;
+    c.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+
+  window.toggleSidebar = function() {
+    document.getElementById('sidebar').classList.toggle('open');
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
