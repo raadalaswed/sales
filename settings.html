@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>إعدادات النظام</title>
+
+  <!-- Bootstrap RTL -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css"/>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- Google Fonts Arabic -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --primary-dark: #1557b0;
+      --sidebar-bg: #1e2a3a;
+      --sidebar-hover: #2d3f52;
+      --sidebar-active: #1a73e8;
+      --body-bg: #f0f4f8;
+      --card-bg: #ffffff;
+      --text-main: #1e2a3a;
+      --text-muted: #6c757d;
+      --border-color: #dee2e6;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #fd7e14;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: var(--body-bg);
+      color: var(--text-main);
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: var(--sidebar-bg);
+      position: fixed;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      transition: transform .3s ease;
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .sidebar-brand h4 {
+      color: #fff;
+      font-weight: 900;
+      font-size: 1.15rem;
+      margin: 0;
+    }
+
+    .sidebar-brand small {
+      color: rgba(255,255,255,.45);
+      font-size: .78rem;
+    }
+
+    .sidebar-nav { flex: 1; padding: 1rem 0; }
+
+    .nav-section-title {
+      color: rgba(255,255,255,.35);
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: .75rem 1.25rem .35rem;
+    }
+
+    .nav-item a {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .72rem 1.25rem;
+      color: rgba(255,255,255,.7);
+      text-decoration: none;
+      border-radius: 0;
+      transition: background .2s, color .2s;
+      font-size: .9rem;
+      font-weight: 600;
+    }
+
+    .nav-item a:hover { background: var(--sidebar-hover); color: #fff; }
+    .nav-item a.active { background: var(--sidebar-active); color: #fff; }
+    .nav-item a i { width: 20px; text-align: center; font-size: 1rem; }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      margin-right: 260px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ===== TOPBAR ===== */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--border-color);
+      padding: .9rem 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 900;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+
+    .topbar h5 { font-weight: 900; font-size: 1.1rem; margin: 0; }
+    .topbar .breadcrumb { margin: 0; font-size: .8rem; }
+    .topbar .breadcrumb-item a { color: var(--primary); text-decoration: none; }
+
+    /* ===== PAGE BODY ===== */
+    .page-body { padding: 1.75rem; flex: 1; }
+
+    /* ===== CARDS ===== */
+    .settings-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+    }
+
+    .settings-card .card-header-custom {
+      background: linear-gradient(135deg, #1e2a3a 0%, #2d3f52 100%);
+      padding: 1.1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+    }
+
+    .settings-card .card-header-custom .header-icon {
+      width: 38px;
+      height: 38px;
+      background: rgba(255,255,255,.12);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1rem;
+    }
+
+    .settings-card .card-header-custom h6 {
+      color: #fff;
+      font-weight: 700;
+      font-size: .95rem;
+      margin: 0;
+    }
+
+    .settings-card .card-header-custom p {
+      color: rgba(255,255,255,.55);
+      font-size: .78rem;
+      margin: 0;
+    }
+
+    .settings-card .card-body-custom { padding: 1.5rem; }
+
+    /* ===== FORM ===== */
+    .form-label {
+      font-weight: 700;
+      font-size: .85rem;
+      color: var(--text-main);
+      margin-bottom: .4rem;
+    }
+
+    .form-label .label-hint {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: .78rem;
+    }
+
+    .form-control, .form-select {
+      font-family: 'Cairo', sans-serif;
+      font-size: .88rem;
+      border-radius: 10px;
+      border-color: var(--border-color);
+      padding: .6rem 1rem;
+      transition: border-color .2s, box-shadow .2s;
+      background: #f8fafc;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(26,115,232,.12);
+      background: #fff;
+    }
+
+    /* ===== SWITCH ===== */
+    .form-check-input {
+      width: 2.5em;
+      height: 1.3em;
+      cursor: pointer;
+    }
+
+    .form-check-input:checked { background-color: var(--primary); border-color: var(--primary); }
+
+    /* ===== COLOR PICKER ===== */
+    .color-picker-wrapper {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: .45rem .9rem;
+      transition: border-color .2s;
+    }
+
+    .color-picker-wrapper:focus-within { border-color: var(--primary); }
+
+    .color-picker-wrapper input[type="color"] {
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .color-picker-wrapper span {
+      font-size: .85rem;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      font-family: 'Cairo', sans-serif;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: .6rem 1.25rem;
+      font-size: .88rem;
+      transition: all .2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      border-color: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(26,115,232,.3);
+    }
+
+    .btn-outline-secondary { border-radius: 10px; }
+    .btn-success { border-radius: 10px; }
+
+    /* ===== INFO CARD ===== */
+    .info-box {
+      background: #e8f0fe;
+      border: 1px solid #c5d8fb;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      gap: .75rem;
+      align-items: flex-start;
+    }
+
+    .info-box i { color: var(--primary); margin-top: .1rem; }
+    .info-box p { font-size: .83rem; color: #1557b0; margin: 0; }
+
+    /* ===== ALERT SECTION ===== */
+    .alert-setting {
+      background: #fff8f0;
+      border: 1px solid #ffd8a8;
+      border-radius: 10px;
+      padding: 1.1rem 1.25rem;
+    }
+
+    /* ===== STATUS INDICATOR ===== */
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.online { background: var(--success); }
+
+    /* ===== LOADING ===== */
+    .page-loader {
+      position: fixed;
+      inset: 0;
+      background: #fff;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .page-loader p { color: var(--text-muted); font-size: .9rem; }
+
+    /* ===== TOAST ===== */
+    .toast-container { z-index: 9999; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 992px) {
+      .sidebar { transform: translateX(100%); }
+      .sidebar.show { transform: translateX(0); }
+      .main-content { margin-right: 0; }
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f0f4f8; }
+    ::-webkit-scrollbar-thumb { background: #c0ccd8; border-radius: 3px; }
+
+    /* Divider */
+    .field-divider {
+      border-top: 1px solid #f0f4f8;
+      margin: 1.25rem 0;
+    }
+
+    .fw-700 { font-weight: 700; }
+  </style>
+</head>
+<body>
+
+<!-- Page Loader -->
+<div class="page-loader" id="pageLoader">
+  <div class="spinner-border text-primary" role="status"></div>
+  <p>جاري تحميل الإعدادات...</p>
+</div>
+
+<!-- ===== SIDEBAR ===== -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="d-flex align-items-center gap-2">
+      <div style="width:38px;height:38px;background:var(--primary);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-store text-white" style="font-size:.95rem;"></i>
+      </div>
+      <div>
+        <h4 id="sidebarStoreName">نظام الجراج</h4>
+        <small>نظام نقاط البيع</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-section-title">القوائم الرئيسية</div>
+    <ul class="nav flex-column list-unstyled">
+      <li class="nav-item"><a href="index.html"><i class="fas fa-home"></i> لوحة التحكم</a></li>
+      <li class="nav-item"><a href="sales.html"><i class="fas fa-cash-register"></i> نقطة البيع</a></li>
+      <li class="nav-item"><a href="products.html"><i class="fas fa-boxes"></i> المنتجات</a></li>
+      <li class="nav-item"><a href="categories.html"><i class="fas fa-tags"></i> الأقسام</a></li>
+    </ul>
+
+    <div class="nav-section-title mt-2">التقارير والإدارة</div>
+    <ul class="nav flex-column list-unstyled">
+      <li class="nav-item"><a href="inventory.html"><i class="fas fa-warehouse"></i> حركة المخزون</a></li>
+      <li class="nav-item"><a href="reports.html"><i class="fas fa-chart-bar"></i> التقارير</a></li>
+      <li class="nav-item"><a href="settings.html" class="active"><i class="fas fa-cog"></i> الإعدادات</a></li>
+    </ul>
+  </div>
+
+  <!-- Sidebar Footer -->
+  <div style="padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,.08);">
+    <div class="d-flex align-items-center gap-2">
+      <span class="status-dot online"></span>
+      <small style="color:rgba(255,255,255,.45);font-size:.75rem;">متصل بـ Firebase</small>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="main-content">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-sm btn-light d-lg-none" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div>
+        <h5><i class="fas fa-cog text-primary me-2"></i>إعدادات النظام</h5>
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-0">
+            <li class="breadcrumb-item"><a href="index.html">الرئيسية</a></li>
+            <li class="breadcrumb-item active">الإعدادات</li>
+          </ol>
+        </nav>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-secondary" onclick="loadSettings()">
+        <i class="fas fa-sync-alt me-1"></i> تحديث
+      </button>
+      <button class="btn btn-sm btn-primary" onclick="saveSettings()">
+        <i class="fas fa-save me-1"></i> حفظ الإعدادات
+      </button>
+    </div>
+  </div>
+
+  <!-- PAGE BODY -->
+  <div class="page-body">
+    <div class="row g-4">
+
+      <!-- RIGHT COLUMN -->
+      <div class="col-12 col-xl-8">
+
+        <!-- معلومات المتجر -->
+        <div class="settings-card">
+          <div class="card-header-custom">
+            <div class="header-icon"><i class="fas fa-store"></i></div>
+            <div>
+              <h6>معلومات المتجر</h6>
+              <p>اسم المتجر والإعدادات الأساسية</p>
+            </div>
+          </div>
+          <div class="card-body-custom">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">
+                  اسم المتجر
+                  <span class="label-hint">— يظهر في جميع الصفحات</span>
+                </label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white"><i class="fas fa-store text-muted"></i></span>
+                  <input type="text" class="form-control" id="storeName" placeholder="مثال: متجر الجراج" maxlength="80"/>
+                </div>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label">
+                  العملة
+                  <span class="label-hint">— رمز العملة المستخدمة</span>
+                </label>
+                <select class="form-select" id="currency">
+                  <option value="ريال">ريال سعودي (ريال)</option>
+                  <option value="دينار">دينار كويتي (دينار)</option>
+                  <option value="درهم">درهم إماراتي (درهم)</option>
+                  <option value="دينار أردني">دينار أردني</option>
+                  <option value="دينار عراقي">دينار عراقي</option>
+                  <option value="جنيه">جنيه مصري (جنيه)</option>
+                  <option value="دولار">دولار أمريكي ($)</option>
+                  <option value="يورو">يورو (€)</option>
+                </select>
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="form-label">
+                  لون النظام
+                  <span class="label-hint">— اللون الرئيسي للواجهة</span>
+                </label>
+                <div class="color-picker-wrapper">
+                  <input type="color" id="uiColor" value="#1a73e8" title="اختر لوناً"/>
+                  <span id="colorHexLabel">#1a73e8</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- إعدادات المخزون -->
+        <div class="settings-card">
+          <div class="card-header-custom">
+            <div class="header-icon"><i class="fas fa-warehouse"></i></div>
+            <div>
+              <h6>إعدادات المخزون</h6>
+              <p>تنبيهات نفاد الكميات والحدود</p>
+            </div>
+          </div>
+          <div class="card-body-custom">
+
+            <div class="alert-setting mb-3">
+              <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                  <div class="fw-700 mb-1"><i class="fas fa-bell text-warning me-2"></i>تنبيه نفاد المخزون</div>
+                  <div class="text-muted" style="font-size:.83rem;">عرض تحذير عند وصول الكمية لحد معين</div>
+                </div>
+                <div class="form-check form-switch mb-0">
+                  <input class="form-check-input" type="checkbox" id="enableStockAlert" role="switch">
+                </div>
+              </div>
+            </div>
+
+            <div id="stockLimitWrapper">
+              <label class="form-label">
+                حد التنبيه
+                <span class="label-hint">— سيتم التحذير عند وصول الكمية لهذا الرقم أو أقل</span>
+              </label>
+              <div class="input-group" style="max-width:260px;">
+                <span class="input-group-text bg-white"><i class="fas fa-exclamation-triangle text-warning"></i></span>
+                <input type="number" class="form-control" id="lowStockLimit" min="0" max="9999" placeholder="مثال: 5"/>
+                <span class="input-group-text bg-white">وحدة</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ملاحظات عامة -->
+        <div class="settings-card">
+          <div class="card-header-custom">
+            <div class="header-icon"><i class="fas fa-sticky-note"></i></div>
+            <div>
+              <h6>ملاحظات عامة</h6>
+              <p>ملاحظات داخلية للإدارة</p>
+            </div>
+          </div>
+          <div class="card-body-custom">
+            <label class="form-label">ملاحظات <span class="label-hint">— اختياري</span></label>
+            <textarea class="form-control" id="notes" rows="4" placeholder="اكتب أي ملاحظات تريد حفظها..." maxlength="500" style="resize:vertical;"></textarea>
+            <div class="text-muted small text-start mt-1"><span id="notesCount">0</span>/500</div>
+          </div>
+        </div>
+
+      </div><!-- /right col -->
+
+      <!-- LEFT COLUMN -->
+      <div class="col-12 col-xl-4">
+
+        <!-- حالة النظام -->
+        <div class="settings-card mb-4">
+          <div class="card-header-custom">
+            <div class="header-icon"><i class="fas fa-info-circle"></i></div>
+            <div>
+              <h6>حالة النظام</h6>
+              <p>معلومات الاتصال والقاعدة</p>
+            </div>
+          </div>
+          <div class="card-body-custom">
+            <ul class="list-unstyled mb-0" style="font-size:.85rem;">
+              <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <span class="text-muted">حالة Firebase</span>
+                <span class="badge bg-success"><i class="fas fa-circle me-1" style="font-size:.5rem;"></i>متصل</span>
+              </li>
+              <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <span class="text-muted">المشروع</span>
+                <span class="fw-700 text-primary small">garag-system</span>
+              </li>
+              <li class="d-flex justify-content-between align-items-center py-2 border-bottom">
+                <span class="text-muted">آخر حفظ</span>
+                <span class="fw-700 small" id="lastSavedLabel">—</span>
+              </li>
+              <li class="d-flex justify-content-between align-items-center py-2">
+                <span class="text-muted">إصدار النظام</span>
+                <span class="badge bg-light text-dark">v1.0</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- معاينة -->
+        <div class="settings-card mb-4">
+          <div class="card-header-custom">
+            <div class="header-icon"><i class="fas fa-eye"></i></div>
+            <div>
+              <h6>معاينة الإعدادات</h6>
+              <p>الحالة الحالية المحفوظة</p>
+            </div>
+          </div>
+          <div class="card-body-custom">
+            <div class="d-flex flex-column gap-2" style="font-size:.85rem;">
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">اسم المتجر:</span>
+                <span class="fw-700" id="previewName">—</span>
+              </div>
+              <div class="field-divider my-1"></div>
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">العملة:</span>
+                <span class="fw-700" id="previewCurrency">—</span>
+              </div>
+              <div class="field-divider my-1"></div>
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">تنبيه المخزون:</span>
+                <span class="fw-700" id="previewAlert">—</span>
+              </div>
+              <div class="field-divider my-1"></div>
+              <div class="d-flex justify-content-between">
+                <span class="text-muted">حد التنبيه:</span>
+                <span class="fw-700" id="previewLimit">—</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- إجراءات -->
+        <div class="settings-card">
+          <div class="card-header-custom">
+            <div class="header-icon"><i class="fas fa-tools"></i></div>
+            <div>
+              <h6>الإجراءات</h6>
+            </div>
+          </div>
+          <div class="card-body-custom d-flex flex-column gap-2">
+            <button class="btn btn-primary w-100" onclick="saveSettings()">
+              <i class="fas fa-save me-2"></i>حفظ جميع الإعدادات
+            </button>
+            <button class="btn btn-outline-secondary w-100" onclick="loadSettings()">
+              <i class="fas fa-undo me-2"></i>إعادة تحميل الإعدادات
+            </button>
+            <button class="btn btn-outline-danger w-100" onclick="resetToDefault()">
+              <i class="fas fa-trash-restore me-2"></i>إعادة الإعدادات الافتراضية
+            </button>
+          </div>
+        </div>
+
+      </div><!-- /left col -->
+
+    </div><!-- /row -->
+  </div><!-- /page-body -->
+</div><!-- /main-content -->
+
+<!-- Toast -->
+<div class="toast-container position-fixed bottom-0 start-0 p-3">
+  <div id="toastMsg" class="toast align-items-center text-white border-0" role="alert">
+    <div class="d-flex">
+      <div class="toast-body" id="toastText">رسالة</div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SCRIPTS ===== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    doc,
+    setDoc,
+    addDoc,
+    Timestamp
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7EVNCSl48CQgIC_a8wdC5UG2tKLtNKjQ",
+    authDomain: "garag-system.firebaseapp.com",
+    databaseURL: "https://garag-system-default-rtdb.firebaseio.com",
+    projectId: "garag-system",
+    storageBucket: "garag-system.firebasestorage.app",
+    messagingSenderId: "330947022055",
+    appId: "1:330947022055:web:d0c9d378e200c7de45a642"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  let settingsDocId = null;
+
+  // ===== DEFAULT SETTINGS =====
+  const defaultSettings = {
+    storeName:        'نظام الجراج',
+    currency:         'ريال',
+    lowStockLimit:    5,
+    enableStockAlert: true,
+    uiColor:          '#1a73e8',
+    notes:            '',
+    updatedAt:        null
+  };
+
+  // ===== TOAST =====
+  function showToast(message, type = 'success') {
+    const toastEl = document.getElementById('toastMsg');
+    const toastText = document.getElementById('toastText');
+    toastEl.className = `toast align-items-center text-white border-0 bg-${type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'danger'}`;
+    toastText.textContent = message;
+    const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+    toast.show();
+  }
+
+  // ===== FILL FORM =====
+  function fillForm(data) {
+    document.getElementById('storeName').value       = data.storeName        || '';
+    document.getElementById('currency').value        = data.currency         || 'ريال';
+    document.getElementById('lowStockLimit').value   = data.lowStockLimit    ?? 5;
+    document.getElementById('enableStockAlert').checked = !!data.enableStockAlert;
+    document.getElementById('uiColor').value         = data.uiColor          || '#1a73e8';
+    document.getElementById('colorHexLabel').textContent = data.uiColor      || '#1a73e8';
+    document.getElementById('notes').value           = data.notes            || '';
+
+    // notes count
+    const notes = document.getElementById('notes').value;
+    document.getElementById('notesCount').textContent = notes.length;
+
+    // last saved
+    if (data.updatedAt?.seconds) {
+      const d = new Date(data.updatedAt.seconds * 1000);
+      document.getElementById('lastSavedLabel').textContent = d.toLocaleString('ar-SA');
+    }
+
+    // update preview
+    updatePreview();
+
+    // Sidebar name
+    document.getElementById('sidebarStoreName').textContent = data.storeName || 'نظام الجراج';
+  }
+
+  // ===== PREVIEW =====
+  function updatePreview() {
+    document.getElementById('previewName').textContent     = document.getElementById('storeName').value     || '—';
+    document.getElementById('previewCurrency').textContent = document.getElementById('currency').value      || '—';
+    document.getElementById('previewAlert').textContent    = document.getElementById('enableStockAlert').checked ? '✅ مفعّل' : '❌ معطّل';
+    document.getElementById('previewLimit').textContent    = document.getElementById('lowStockLimit').value + ' وحدة' || '—';
+  }
+
+  // ===== LOAD SETTINGS =====
+  window.loadSettings = async function () {
+    try {
+      const snap = await getDocs(collection(db, 'settings'));
+
+      if (snap.empty) {
+        // Create default
+        const docRef = await addDoc(collection(db, 'settings'), {
+          ...defaultSettings,
+          updatedAt: Timestamp.now()
+        });
+        settingsDocId = docRef.id;
+        fillForm(defaultSettings);
+        showToast('تم إنشاء الإعدادات الافتراضية', 'warning');
+      } else {
+        const docSnap = snap.docs[0];
+        settingsDocId = docSnap.id;
+        fillForm(docSnap.data());
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('فشل تحميل الإعدادات: ' + err.message, 'danger');
+    } finally {
+      document.getElementById('pageLoader').style.display = 'none';
+    }
+  };
+
+  // ===== SAVE SETTINGS =====
+  window.saveSettings = async function () {
+    const storeName        = document.getElementById('storeName').value.trim();
+    const currency         = document.getElementById('currency').value;
+    const lowStockLimit    = parseInt(document.getElementById('lowStockLimit').value) || 0;
+    const enableStockAlert = document.getElementById('enableStockAlert').checked;
+    const uiColor          = document.getElementById('uiColor').value;
+    const notes            = document.getElementById('notes').value.trim();
+
+    if (!storeName) {
+      showToast('⚠️ يرجى إدخال اسم المتجر', 'danger');
+      document.getElementById('storeName').focus();
+      return;
+    }
+
+    const saveBtn = document.querySelector('[onclick="saveSettings()"]');
+    const origText = saveBtn?.innerHTML;
+    if (saveBtn) {
+      saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>جاري الحفظ...';
+      saveBtn.disabled = true;
+    }
+
+    try {
+      const data = {
+        storeName,
+        currency,
+        lowStockLimit,
+        enableStockAlert,
+        uiColor,
+        notes,
+        updatedAt: Timestamp.now()
+      };
+
+      if (settingsDocId) {
+        await setDoc(doc(db, 'settings', settingsDocId), data);
+      } else {
+        const ref = await addDoc(collection(db, 'settings'), data);
+        settingsDocId = ref.id;
+      }
+
+      // Update sidebar name & last saved
+      document.getElementById('sidebarStoreName').textContent = storeName;
+      document.getElementById('lastSavedLabel').textContent = new Date().toLocaleString('ar-SA');
+      updatePreview();
+
+      showToast('✅ تم حفظ الإعدادات بنجاح', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('❌ فشل حفظ الإعدادات: ' + err.message, 'danger');
+    } finally {
+      if (saveBtn) {
+        saveBtn.innerHTML = origText;
+        saveBtn.disabled = false;
+      }
+    }
+  };
+
+  // ===== RESET TO DEFAULT =====
+  window.resetToDefault = async function () {
+    if (!confirm('هل أنت متأكد من إعادة الإعدادات الافتراضية؟ سيتم حذف البيانات الحالية.')) return;
+
+    try {
+      const data = { ...defaultSettings, updatedAt: Timestamp.now() };
+
+      if (settingsDocId) {
+        await setDoc(doc(db, 'settings', settingsDocId), data);
+      } else {
+        const ref = await addDoc(collection(db, 'settings'), data);
+        settingsDocId = ref.id;
+      }
+
+      fillForm(data);
+      showToast('✅ تمت إعادة الإعدادات الافتراضية', 'success');
+    } catch (err) {
+      showToast('❌ حدث خطأ: ' + err.message, 'danger');
+    }
+  };
+
+  // ===== EVENTS =====
+
+  // Color picker sync
+  document.getElementById('uiColor').addEventListener('input', e => {
+    document.getElementById('colorHexLabel').textContent = e.target.value;
+  });
+
+  // Notes counter
+  document.getElementById('notes').addEventListener('input', e => {
+    document.getElementById('notesCount').textContent = e.target.value.length;
+  });
+
+  // Live preview update
+  ['storeName','currency','lowStockLimit','enableStockAlert'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updatePreview);
+    document.getElementById(id)?.addEventListener('change', updatePreview);
+  });
+
+  // Stock alert toggle — show/hide limit field
+  document.getElementById('enableStockAlert').addEventListener('change', e => {
+    document.getElementById('stockLimitWrapper').style.opacity = e.target.checked ? '1' : '.4';
+    document.getElementById('lowStockLimit').disabled = !e.target.checked;
+  });
+
+  // Sidebar toggle (mobile)
+  document.getElementById('sidebarToggle')?.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('show');
+  });
+
+  // ===== INIT =====
+  loadSettings();
+</script>
+
+</body>
+</html>
