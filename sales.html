@@ -412,7 +412,11 @@
       transition: var(--transition);
     }
     .price-input:focus { outline: none; border-color: var(--accent); }
-    .price-input.invalid { border-color: var(--danger); background: rgba(248,81,73,.06); }
+    /* حالة تحذير فقط (أقل من الحد الأدنى) بدون منع الكتابة */
+    .price-input.below-min {
+      border-color: var(--warning);
+      background: rgba(210,153,34,.06);
+    }
     .item-subtotal { font-size: 13px; font-weight: 700; color: var(--accent); flex-shrink: 0; }
     .cart-item-note {
       font-size: 11px;
@@ -432,6 +436,22 @@
     .total-label { font-size: 13px; color: var(--text-muted); }
     .total-value { font-size: 13px; font-weight: 700; }
     .grand-total { font-size: 18px; font-weight: 900; color: var(--accent); }
+
+    /* ===== زر إظهار الربح ===== */
+    .btn-show-profit {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 11px;
+      font-family: 'Cairo', sans-serif;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: var(--transition);
+    }
+    .btn-show-profit:hover { color: var(--success); }
 
     .btn-checkout {
       width: 100%;
@@ -588,7 +608,6 @@
     @media (max-width: 768px) {
       :root { --sidebar-w: 260px; }
 
-      /* Sidebar slides off-screen on mobile */
       .sidebar {
         transform: translateX(100%);
         box-shadow: none;
@@ -598,10 +617,8 @@
         box-shadow: -8px 0 30px rgba(0,0,0,.4);
       }
 
-      /* Topbar spans full width */
       .topbar { right: 0 !important; }
 
-      /* Main content full width, single column */
       .main-content {
         margin-right: 0 !important;
         grid-template-columns: 1fr;
@@ -609,16 +626,14 @@
         overflow: hidden;
       }
 
-      /* Products: full height, scrollable */
       .products-area {
         overflow-y: auto;
         padding: 12px;
         border-left: none;
         height: 100%;
-        padding-bottom: 80px; /* space for FAB */
+        padding-bottom: 80px;
       }
 
-      /* Cart: hidden by default on mobile, shown as sheet */
       .cart-area {
         position: fixed;
         bottom: 0;
@@ -636,7 +651,6 @@
         height: 70vh;
       }
 
-      /* FAB shown on mobile */
       .cart-fab { display: flex; }
 
       .products-grid {
@@ -762,9 +776,16 @@
         <span class="total-label">الإجمالي</span>
         <span class="grand-total" id="grandTotal">0.00</span>
       </div>
-      <div class="total-row">
+      <!-- الربح المتوقع: مخفي بشكل افتراضي -->
+      <div class="total-row" id="profitRow" style="display:none;">
         <span class="total-label">الربح المتوقع</span>
         <span class="total-value" style="color:var(--success)" id="expectedProfit">0.00</span>
+      </div>
+      <div style="text-align:center;margin-bottom:2px;">
+        <button class="btn-show-profit" id="profitToggleBtn" onclick="toggleProfit()">
+          <i class="fas fa-eye" id="profitToggleIcon"></i>
+          <span id="profitToggleText">إظهار الربح المتوقع</span>
+        </button>
       </div>
       <button class="btn-checkout" id="checkoutBtn" onclick="checkout()" disabled>
         <i class="fas fa-check-circle me-2"></i>إتمام البيع
@@ -841,8 +862,9 @@
 
   let allProducts  = [];
   let cart         = [];
-  let currency     = 'د.ع';   // ← Iraqi Dinar
+  let currency     = 'د.ع';
   let currentCat   = '';
+  let profitVisible = false;
 
   // ===== CLOCK =====
   function tick() {
@@ -865,7 +887,6 @@
     icon.className = isLight ? 'fas fa-moon' : 'fas fa-sun';
   }
 
-  // Apply saved theme on load
   (function() {
     const saved = localStorage.getItem('theme');
     if (saved === 'light') {
@@ -903,7 +924,6 @@
     if (closeBtn) closeBtn.style.display = 'none';
   };
 
-  // Update FAB text
   function updateFab() {
     const el = document.getElementById('fabCartCount');
     const total = cart.reduce((s, c) => s + c.qty * c.price, 0);
@@ -911,12 +931,27 @@
     if (el) el.textContent = `السلة (${count}) - ${formatNum(total)} ${currency}`;
   }
 
+  // ===== TOGGLE PROFIT =====
+  window.toggleProfit = function() {
+    profitVisible = !profitVisible;
+    const row  = document.getElementById('profitRow');
+    const icon = document.getElementById('profitToggleIcon');
+    const text = document.getElementById('profitToggleText');
+    if (profitVisible) {
+      row.style.display = 'flex';
+      icon.className = 'fas fa-eye-slash';
+      text.textContent = 'إخفاء الربح المتوقع';
+    } else {
+      row.style.display = 'none';
+      icon.className = 'fas fa-eye';
+      text.textContent = 'إظهار الربح المتوقع';
+    }
+  };
+
   // ===== SETTINGS =====
   get(ref(db, 'settings')).then(s => {
     if (s.exists()) {
       const st = s.val();
-      // Keep currency as Iraqi Dinar regardless of settings
-      // currency = st.currency || 'د.ع';
       if (st.storeName) document.getElementById('storeName').textContent = st.storeName;
     }
   });
@@ -1008,7 +1043,6 @@
       });
     }
     renderCart();
-    // Auto-open cart on mobile when adding first item
     if (isMobile() && cart.length === 1) openMobileCart();
   };
 
@@ -1025,7 +1059,9 @@
       return;
     }
 
-    el.innerHTML = cart.map((item, i) => `
+    el.innerHTML = cart.map((item, i) => {
+      const isBelowMin = item.minPrice > 0 && item.price < item.minPrice && item.price !== '';
+      return `
       <div class="cart-item">
         <div class="cart-item-row">
           <span class="cart-item-name" title="${item.name}">${item.name}</span>
@@ -1037,18 +1073,19 @@
           <span class="qty-display">${item.qty}</span>
           <button class="qty-btn" onclick="changeQty(${i}, 1)"><i class="fas fa-plus"></i></button>
           <span style="font-size:11px;color:var(--text-muted);margin-right:2px;">× السعر:</span>
-          <input type="number" class="price-input" id="price-${i}" value="${item.price}"
+          <input type="number" class="price-input ${isBelowMin ? 'below-min' : ''}" id="price-${i}" value="${item.price}"
             oninput="updatePrice(${i}, this)" min="0"/>
         </div>
         <div class="cart-item-row">
           <span style="font-size:11px;color:var(--text-muted);">الحد الأدنى: ${formatNum(item.minPrice)} ${currency}</span>
-          <span class="item-subtotal">${formatNum(item.qty * item.price)} ${currency}</span>
+          <span class="item-subtotal">${formatNum(item.qty * (parseFloat(item.price) || 0))} ${currency}</span>
         </div>
-      </div>
-    `).join('');
+        ${isBelowMin ? `<div style="font-size:11px;color:var(--warning);background:rgba(210,153,34,.08);padding:2px 8px;border-radius:4px;">⚠️ السعر أقل من الحد الأدنى المسموح</div>` : ''}
+      </div>`;
+    }).join('');
 
-    const total  = cart.reduce((s, c) => s + c.qty * c.price, 0);
-    const profit = cart.reduce((s, c) => s + c.qty * (c.price - c.purchasePrice), 0);
+    const total  = cart.reduce((s, c) => s + c.qty * (parseFloat(c.price) || 0), 0);
+    const profit = cart.reduce((s, c) => s + c.qty * ((parseFloat(c.price) || 0) - c.purchasePrice), 0);
     const count  = cart.reduce((s, c) => s + c.qty, 0);
 
     document.getElementById('cartCount').textContent      = cart.length;
@@ -1072,19 +1109,40 @@
     renderCart();
   };
 
+  // ===== تعديل السعر: يسمح بالكتابة الحرة، يحفظ القيمة فقط إذا كانت صالحة =====
   window.updatePrice = function(i, el) {
-    const val = parseFloat(el.value);
-    const item = cart[i];
-    if (isNaN(val) || val < 0) { el.classList.add('invalid'); return; }
-    if (val < item.minPrice) {
-      el.classList.add('invalid');
-      showToast(`❌ لا يمكن بيع "${item.name}" بأقل من الحد الأدنى المسموح (${formatNum(item.minPrice)} ${currency})`, 'error');
-      el.value = item.price;
+    const raw = el.value;
+    // إذا كان الحقل فارغاً أو يبدأ بنقطة عشرية، لا تتدخل - اسمح بالكتابة
+    if (raw === '' || raw === '.' || raw === '-') {
       return;
     }
-    el.classList.remove('invalid');
-    item.price = val;
-    renderCart();
+    const val = parseFloat(raw);
+    if (isNaN(val) || val < 0) {
+      return; // اسمح بالكتابة، لا تمنع
+    }
+    // احفظ القيمة في الـ cart
+    cart[i].price = val;
+    // أظهر تحذير بصري فقط إذا كان أقل من الحد الأدنى
+    const item = cart[i];
+    if (item.minPrice > 0 && val < item.minPrice) {
+      el.classList.add('below-min');
+      el.classList.remove('invalid');
+    } else {
+      el.classList.remove('below-min');
+      el.classList.remove('invalid');
+    }
+    // أعد حساب الإجمالي بدون إعادة رسم الكارت كاملاً (لتجنب إعادة تركيز الحقل)
+    const total  = cart.reduce((s, c) => s + c.qty * (parseFloat(c.price) || 0), 0);
+    const profit = cart.reduce((s, c) => s + c.qty * ((parseFloat(c.price) || 0) - c.purchasePrice), 0);
+    const count  = cart.reduce((s, c) => s + c.qty, 0);
+    document.getElementById('cartCount').textContent      = cart.length;
+    document.getElementById('totalItems').textContent     = count;
+    document.getElementById('grandTotal').textContent     = formatNum(total) + ' ' + currency;
+    document.getElementById('expectedProfit').textContent = formatNum(profit) + ' ' + currency;
+    updateFab();
+    // تحديث الـ subtotal للعنصر فقط
+    const subtotalEl = el.closest('.cart-item').querySelector('.item-subtotal');
+    if (subtotalEl) subtotalEl.textContent = formatNum(cart[i].qty * val) + ' ' + currency;
   };
 
   window.clearCart = function() {
@@ -1093,20 +1151,35 @@
     if (isMobile()) closeMobileCart();
   };
 
-  // ===== CHECKOUT =====
+  // ===== CHECKOUT: التحقق من الحد الأدنى عند إتمام البيع فقط =====
   window.checkout = function() {
+    // تحديث أسعار الحقول قبل التحقق
+    const inputs = document.querySelectorAll('.price-input');
+    inputs.forEach((inp, i) => {
+      const val = parseFloat(inp.value);
+      if (!isNaN(val) && val >= 0) cart[i].price = val;
+    });
+
+    // التحقق من الحد الأدنى
     for (const item of cart) {
-      if (item.price < item.minPrice) {
-        showToast(`❌ سعر "${item.name}" أقل من الحد الأدنى!`, 'error'); return;
+      const price = parseFloat(item.price) || 0;
+      if (item.minPrice > 0 && price < item.minPrice) {
+        showToast(`❌ سعر "${item.name}" أقل من الحد الأدنى المسموح (${formatNum(item.minPrice)} ${currency})`, 'error');
+        return;
+      }
+      if (price <= 0) {
+        showToast(`❌ يرجى إدخال سعر صحيح لـ "${item.name}"`, 'error');
+        return;
       }
     }
-    const total  = cart.reduce((s, c) => s + c.qty * c.price, 0);
-    const profit = cart.reduce((s, c) => s + c.qty * (c.price - c.purchasePrice), 0);
+
+    const total  = cart.reduce((s, c) => s + c.qty * (parseFloat(c.price) || 0), 0);
+    const profit = cart.reduce((s, c) => s + c.qty * ((parseFloat(c.price) || 0) - c.purchasePrice), 0);
 
     document.getElementById('receiptItems').innerHTML = cart.map(item => `
       <div class="receipt-item">
         <span>${item.name} × ${item.qty}</span>
-        <span style="font-weight:700;">${formatNum(item.qty * item.price)} ${currency}</span>
+        <span style="font-weight:700;">${formatNum(item.qty * (parseFloat(item.price) || 0))} ${currency}</span>
       </div>`).join('');
     document.getElementById('receiptTotal').textContent  = formatNum(total) + ' ' + currency;
     document.getElementById('receiptProfit').textContent = formatNum(profit) + ' ' + currency;
@@ -1120,12 +1193,12 @@
 
   window.confirmSale = async function() {
     const note   = document.getElementById('saleNote').value.trim();
-    const total  = cart.reduce((s, c) => s + c.qty * c.price, 0);
-    const profit = cart.reduce((s, c) => s + c.qty * (c.price - c.purchasePrice), 0);
+    const total  = cart.reduce((s, c) => s + c.qty * (parseFloat(c.price) || 0), 0);
+    const profit = cart.reduce((s, c) => s + c.qty * ((parseFloat(c.price) || 0) - c.purchasePrice), 0);
     const ts     = Date.now();
 
     const saleData = {
-      items: cart.map(c => ({ id: c.id, name: c.name, qty: c.qty, price: c.price, subtotal: c.qty * c.price })),
+      items: cart.map(c => ({ id: c.id, name: c.name, qty: c.qty, price: parseFloat(c.price) || 0, subtotal: c.qty * (parseFloat(c.price) || 0) })),
       total, profit, note, timestamp: ts
     };
 
@@ -1149,7 +1222,7 @@
       }
 
       closeCheckout();
-      const total2 = cart.reduce((s, c) => s + c.qty * c.price, 0);
+      const total2 = cart.reduce((s, c) => s + c.qty * (parseFloat(c.price) || 0), 0);
       document.getElementById('successSummary').innerHTML =
         `إجمالي الفاتورة: <strong style="color:var(--accent)">${formatNum(total2)} ${currency}</strong><br>
          ربح: <strong style="color:var(--success)">${formatNum(profit)} ${currency}</strong>`;
@@ -1182,7 +1255,6 @@
     setTimeout(() => t.remove(), 4000);
   }
 
-  // Handle resize: restore cart visibility on desktop
   window.addEventListener('resize', () => {
     if (!isMobile()) {
       document.getElementById('cartArea').classList.remove('mobile-open');
@@ -1190,14 +1262,6 @@
       if (closeBtn) closeBtn.style.display = 'none';
     }
   });
-
-  // Handle mobile close button visibility
-  function updateCloseBtn() {
-    const closeBtn = document.getElementById('cartCloseBtn');
-    if (!closeBtn) return;
-    if (isMobile()) closeBtn.style.display = document.getElementById('cartArea').classList.contains('mobile-open') ? 'flex' : 'none';
-    else closeBtn.style.display = 'none';
-  }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
