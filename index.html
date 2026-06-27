@@ -458,7 +458,7 @@
 
   // ===== تحميل الإعدادات - get() لأنها لا تتغير لحظياً =====
   function loadSettings() {
-    return get(ref(db, 'coffeepos/settings')).then(snap => {
+    return get(ref(db, 'settings')).then(snap => {
       if (snap.exists()) {
         const s = snap.val();
         currency = s.currency || 'ر.س';
@@ -474,7 +474,7 @@
 
   // ===== تحميل الأقسام - get() لأنها لا تتغير لحظياً =====
   function loadCategories() {
-    return get(ref(db, 'coffeepos/categories')).then(snap => {
+    return get(ref(db, 'categories')).then(snap => {
       const count = snap.exists() ? Object.keys(snap.val()).length : 0;
       document.getElementById('totalCategories').textContent = count;
     }).catch(() => {});
@@ -482,7 +482,7 @@
 
   // ===== تحميل المنتجات - onValue لأنها تتغير مع كل بيع =====
   function loadProducts() {
-    onValue(ref(db, 'coffeepos/products'), snap => {
+    onValue(ref(db, 'products'), snap => {
       const products = snap.exists() ? snap.val() : {};
 
       // --- Single Pass: حساب كل شيء في حلقة واحدة ---
@@ -516,7 +516,7 @@
 
     // استخدام Firebase Query لجلب مبيعات آخر 7 أيام فقط
     const salesQuery = query(
-      ref(db, 'coffeepos/sales'),
+      ref(db, 'sales'),
       orderByChild('timestamp'),
       startAt(sevenDaysAgo)
     );
