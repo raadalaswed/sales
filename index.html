@@ -413,7 +413,7 @@
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { getDatabase, ref, onValue, get, query, orderByChild, limitToLast, startAt } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
   // ===== إعداد Firebase =====
   const firebaseConfig = {
@@ -434,7 +434,11 @@
   let lowStockThreshold = 5;
   let salesChart = null;
 
-  // ===== ساعة =====
+  // ===== Cache لمنع إعادة الحسابات =====
+  let _lastProductsHash = null;
+  let _lastSalesHash = null;
+
+  // ===== ساعة - تحديث كل دقيقة فقط =====
   function updateClock() {
     const now = new Date();
     document.getElementById('clockDisplay').textContent =
@@ -442,11 +446,19 @@
         hour:'2-digit', minute:'2-digit' });
   }
   updateClock();
-  setInterval(updateClock, 1000);
+  // تحديث كل دقيقة بدلاً من كل ثانية (60x أقل)
+  setInterval(updateClock, 60000);
 
-  // ===== تحميل الإعدادات =====
+  // ===== إخفاء شاشة التحميل =====
+  function hideLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.style.opacity = '0';
+    setTimeout(() => overlay.style.display = 'none', 400);
+  }
+
+  // ===== تحميل الإعدادات - get() لأنها لا تتغير لحظياً =====
   function loadSettings() {
-    get(ref(db, 'settings')).then(snap => {
+    return get(ref(db, 'coffeepos/settings')).then(snap => {
       if (snap.exists()) {
         const s = snap.val();
         currency = s.currency || 'ر.س';
@@ -454,67 +466,141 @@
         const nm = s.storeName || 'نظام المبيعات';
         document.getElementById('storeName').textContent = nm;
         document.getElementById('storeNameBadge').textContent = nm;
-        document.querySelectorAll('[id^="currencyLabel"]').forEach(el => el.textContent = currency);
+        document.getElementById('currencyLabel').textContent = currency;
+        document.getElementById('currencyLabel2').textContent = currency;
       }
-    });
+    }).catch(() => {});
   }
 
-  // ===== تحميل المنتجات =====
-  function loadProducts() {
-    onValue(ref(db, 'products'), snap => {
-      const products = snap.exists() ? snap.val() : {};
-      const list = Object.values(products);
-
-      // إحصائيات
-      document.getElementById('totalProducts').textContent = list.length;
-
-      const stockVal = list.reduce((s, p) => s + (p.purchasePrice || 0) * (p.quantity || 0), 0);
-      document.getElementById('stockValue').textContent = formatNum(stockVal);
-
-      const low = list.filter(p => (p.quantity || 0) <= lowStockThreshold);
-      document.getElementById('lowStockCount').textContent = low.length;
-
-      // منتجات قليلة الكمية
-      renderLowStock(low);
-    });
-  }
-
-  // ===== تحميل الأقسام =====
+  // ===== تحميل الأقسام - get() لأنها لا تتغير لحظياً =====
   function loadCategories() {
-    onValue(ref(db, 'categories'), snap => {
-      const cats = snap.exists() ? snap.val() : {};
-      document.getElementById('totalCategories').textContent = Object.keys(cats).length;
+    return get(ref(db, 'coffeepos/categories')).then(snap => {
+      const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+      document.getElementById('totalCategories').textContent = count;
+    }).catch(() => {});
+  }
+
+  // ===== تحميل المنتجات - onValue لأنها تتغير مع كل بيع =====
+  function loadProducts() {
+    onValue(ref(db, 'coffeepos/products'), snap => {
+      const products = snap.exists() ? snap.val() : {};
+
+      // --- Single Pass: حساب كل شيء في حلقة واحدة ---
+      let totalCount = 0;
+      let stockVal = 0;
+      const lowList = [];
+
+      for (const key in products) {
+        const p = products[key];
+        totalCount++;
+        stockVal += (p.purchasePrice || 0) * (p.quantity || 0);
+        if ((p.quantity || 0) <= lowStockThreshold) {
+          lowList.push(p);
+        }
+      }
+
+      // تحديث DOM دفعة واحدة
+      document.getElementById('totalProducts').textContent = totalCount;
+      document.getElementById('stockValue').textContent = formatNum(stockVal);
+      document.getElementById('lowStockCount').textContent = lowList.length;
+
+      // بناء قائمة المنتجات قليلة الكمية بعد ظهور الصفحة
+      requestAnimationFrame(() => renderLowStock(lowList));
     });
   }
 
-  // ===== تحميل المبيعات =====
+  // ===== تحميل المبيعات - آخر 7 أيام فقط عبر Query =====
   function loadSales() {
-    onValue(ref(db, 'sales'), snap => {
-      const sales = snap.exists() ? snap.val() : {};
-      const list  = Object.entries(sales).map(([id, v]) => ({ id, ...v }))
-                         .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    // حساب timestamp بداية آخر 7 أيام
+    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
 
-      // مبيعات اليوم
-      const today = new Date(); today.setHours(0,0,0,0);
-      const todayList = list.filter(s => new Date(s.timestamp) >= today);
-      document.getElementById('todaySales').textContent = todayList.length;
+    // استخدام Firebase Query لجلب مبيعات آخر 7 أيام فقط
+    const salesQuery = query(
+      ref(db, 'coffeepos/sales'),
+      orderByChild('timestamp'),
+      startAt(sevenDaysAgo)
+    );
 
-      const todayProfit = todayList.reduce((s, sale) => s + (sale.profit || 0), 0);
+    onValue(salesQuery, snap => {
+      // إخفاء overlay فوراً بمجرد وصول البيانات
+      hideLoading();
+
+      if (!snap.exists()) {
+        document.getElementById('todaySales').textContent = '0';
+        document.getElementById('todayProfit').textContent = '0';
+        renderLastSales([]);
+        renderSalesChart([]);
+        return;
+      }
+
+      const salesObj = snap.val();
+
+      // --- Single Pass: حساب كل شيء في حلقة واحدة ---
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayTs = todayStart.getTime();
+
+      // تجهيز buckets لآخر 7 أيام (Map يوم → إجمالي)
+      const dayTotals = new Map();
+      const now = Date.now();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now - i * 86400000);
+        d.setHours(0, 0, 0, 0);
+        dayTotals.set(d.getTime(), 0);
+      }
+      const dayKeys = Array.from(dayTotals.keys()).sort((a, b) => a - b);
+
+      let todayCount = 0;
+      let todayProfit = 0;
+      // مصفوفة للترتيب (آخر 5 فقط)
+      const allSales = [];
+
+      // مرور واحد فقط على البيانات
+      for (const id in salesObj) {
+        const s = salesObj[id];
+        const ts = s.timestamp || 0;
+
+        // مبيعات اليوم
+        if (ts >= todayTs) {
+          todayCount++;
+          todayProfit += s.profit || 0;
+        }
+
+        // حساب bucket اليوم للرسم البياني
+        const saleDate = new Date(ts);
+        saleDate.setHours(0, 0, 0, 0);
+        const sdTs = saleDate.getTime();
+        if (dayTotals.has(sdTs)) {
+          dayTotals.set(sdTs, dayTotals.get(sdTs) + (s.total || 0));
+        }
+
+        allSales.push({ id, ...s });
+      }
+
+      // تحديث الإحصائيات فوراً
+      document.getElementById('todaySales').textContent = todayCount;
       document.getElementById('todayProfit').textContent = formatNum(todayProfit);
 
-      // آخر 5 مبيعات
-      renderLastSales(list.slice(0, 5));
+      // بناء الجدول والرسم البياني بعد ظهور الصفحة (لا يُعيق العرض)
+      requestAnimationFrame(() => {
+        // ترتيب آخر 5 مبيعات (فقط ما يلزم)
+        allSales.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        renderLastSales(allSales.slice(0, 5));
 
-      // رسم بياني آخر 7 أيام
-      renderSalesChart(list);
-
-      // إخفاء التحميل
-      document.getElementById('loadingOverlay').style.opacity = '0';
-      setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 400);
+        // بناء بيانات الرسم البياني من الـ Map (لا مرور إضافي)
+        const chartLabels = [];
+        const chartData = [];
+        for (const ts of dayKeys) {
+          const d = new Date(ts);
+          chartLabels.push(d.toLocaleDateString('ar-SA', { weekday:'short', day:'numeric' }));
+          chartData.push(dayTotals.get(ts));
+        }
+        renderSalesChart(chartLabels, chartData);
+      });
     });
   }
 
-  // ===== رسم المنتجات قليلة الكمية =====
+  // ===== رسم المنتجات قليلة الكمية - innerHTML مرة واحدة =====
   function renderLowStock(list) {
     const el = document.getElementById('lowStockList');
     if (!list.length) {
@@ -522,51 +608,55 @@
         <i class="fas fa-check-circle" style="color:var(--success)"></i> لا توجد منتجات قليلة الكمية</p>`;
       return;
     }
-    el.innerHTML = list.slice(0, 6).map(p => `
-      <div class="low-stock-item">
+    let html = '';
+    const shown = list.slice(0, 6);
+    for (let i = 0; i < shown.length; i++) {
+      const p = shown[i];
+      html += `<div class="low-stock-item">
         <span style="font-size:13px;font-weight:600;">${p.name}</span>
         <span class="${p.quantity == 0 ? 'badge-low' : 'badge-warn'}">
           ${p.quantity == 0 ? 'نفذ' : p.quantity + ' قطعة'}
         </span>
-      </div>
-    `).join('');
+      </div>`;
+    }
+    el.innerHTML = html;
   }
 
-  // ===== آخر المبيعات =====
+  // ===== آخر المبيعات - innerHTML مرة واحدة =====
   function renderLastSales(list) {
     const tbody = document.getElementById('lastSalesBody');
     if (!list.length) {
       tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:30px;">لا توجد مبيعات بعد</td></tr>`;
       return;
     }
-    tbody.innerHTML = list.map((s, i) => `
-      <tr>
+    let html = '';
+    for (let i = 0; i < list.length; i++) {
+      const s = list[i];
+      const itemNames = (s.items || []).map(it => it.name).join('، ');
+      html += `<tr>
         <td style="color:var(--text-muted)">${i + 1}</td>
-        <td>${(s.items || []).map(it => it.name).join('، ')}</td>
+        <td>${itemNames}</td>
         <td style="color:var(--accent);font-weight:700;">${formatNum(s.total || 0)} ${currency}</td>
         <td style="color:var(--success);">${formatNum(s.profit || 0)} ${currency}</td>
         <td style="color:var(--text-muted);font-size:12px;">${formatDate(s.timestamp)}</td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }
+    tbody.innerHTML = html;
   }
 
-  // ===== رسم بياني =====
-  function renderSalesChart(list) {
-    const labels = [], data = [];
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      d.setHours(0,0,0,0);
-      const nextD = new Date(d); nextD.setDate(nextD.getDate() + 1);
-      const dayTotal = list
-        .filter(s => new Date(s.timestamp) >= d && new Date(s.timestamp) < nextD)
-        .reduce((sum, s) => sum + (s.total || 0), 0);
-      labels.push(d.toLocaleDateString('ar-SA', { weekday:'short', day:'numeric' }));
-      data.push(dayTotal);
+  // ===== رسم بياني - تحديث بدون destroy() =====
+  function renderSalesChart(labels, data) {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+
+    if (salesChart) {
+      // تحديث البيانات فقط بدون إعادة إنشاء كامل
+      salesChart.data.labels = labels;
+      salesChart.data.datasets[0].data = data;
+      salesChart.update('none'); // 'none' يتخطى الأنيميشن للتحديثات السريعة
+      return;
     }
 
-    const ctx = document.getElementById('salesChart').getContext('2d');
-    if (salesChart) salesChart.destroy();
+    // إنشاء أول مرة فقط
     salesChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -585,6 +675,7 @@
       },
       options: {
         responsive: true,
+        animation: { duration: 400 },
         plugins: {
           legend: { labels: { color: '#8b949e', font: { family: 'Cairo' } } },
           tooltip: { backgroundColor: '#161b22', titleColor: '#e6edf3', bodyColor: '#8b949e',
@@ -613,11 +704,11 @@
     document.getElementById('sidebar').classList.toggle('open');
   };
 
-  // ===== تشغيل =====
-  loadSettings();
-  loadProducts();
-  loadCategories();
-  loadSales();
+  // ===== تشغيل - Settings و Categories بالتوازي ثم المنتجات والمبيعات =====
+  Promise.all([loadSettings(), loadCategories()]).then(() => {
+    loadProducts();
+    loadSales();
+  });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
