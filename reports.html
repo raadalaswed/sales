@@ -222,6 +222,22 @@
         <div class="stat-label">منتجات قليلة</div>
       </div>
     </div>
+    <!-- بطاقة: قيمة المبيعات المتوقعة -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="stat-card gold">
+        <div class="stat-icon gold"><i class="fas fa-sack-dollar"></i></div>
+        <div class="stat-value" id="statExpectedSales">0</div>
+        <div class="stat-label">قيمة المبيعات المتوقعة</div>
+      </div>
+    </div>
+    <!-- بطاقة: الربح المتوقع من كامل المخزون -->
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="stat-card gold">
+        <div class="stat-icon gold"><i class="fas fa-money-bill-trend-up"></i></div>
+        <div class="stat-value" id="statExpectedProfit">0</div>
+        <div class="stat-label">الربح المتوقع من المخزون</div>
+      </div>
+    </div>
   </div>
 
   <!-- ===== الرسوم البيانية ===== -->
@@ -342,7 +358,7 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { getDatabase, ref, get, query, orderByChild, startAt } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
   const firebaseConfig = {
     apiKey:"AIzaSyC7EVNCSl48CQgIC_a8wdC5UG2tKLtNKjQ",
@@ -360,15 +376,18 @@
   // ===== متغيرات عامة =====
   let allSales    = [];
   let allProducts = [];
+  let productMap  = new Map(); // ← تحسين: Map بدلاً من find() في الحلقات
   let currency    = 'ر.س';
   let lowThr      = 5;
 
-  let periodStart = null;
-  let periodEnd   = null;
   let currentPeriod = 'month';
 
   let dailyChart = null;
   let catChart   = null;
+
+  // cache للبيانات الأخيرة لمنع إعادة رسم الرسوم إذا لم تتغير
+  let lastDailyChartKey = null;
+  let lastCatChartKey   = null;
 
   // ===== تحميل الإعدادات =====
   async function loadSettings() {
@@ -381,10 +400,14 @@
     }
   }
 
-  // ===== تحميل كل البيانات =====
+  // ===== تحميل البيانات مع Query محسّن =====
   async function loadAll() {
+    // احسب timestamp لآخر 30 يوم (الافتراضي) لتقليل البيانات المحملة
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+
+    // جلب المنتجات وآخر 30 يوم من المبيعات بالتوازي
     const [salesSnap, productsSnap] = await Promise.all([
-      get(ref(db, 'sales')),
+      get(query(ref(db, 'sales'), orderByChild('timestamp'), startAt(thirtyDaysAgo))),
       get(ref(db, 'products'))
     ]);
 
@@ -396,9 +419,26 @@
       ? Object.entries(productsSnap.val()).map(([id,v]) => ({ id, ...v }))
       : [];
 
-    // إخفاء التحميل
-    document.getElementById('loadingOverlay').style.opacity = '0';
-    setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 400);
+    // بناء productMap مرة واحدة بعد التحميل
+    productMap.clear();
+    allProducts.forEach(p => productMap.set(p.name, p));
+
+    // إخفاء شاشة التحميل فوراً بعد استلام البيانات
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.style.opacity = '0';
+    setTimeout(() => { overlay.style.display = 'none'; }, 400);
+  }
+
+  // ===== إعادة تحميل كل المبيعات عند الحاجة (فترة مخصصة قديمة) =====
+  async function ensureFullSalesLoaded() {
+    // إذا كان المستخدم يختار فترة قبل آخر 30 يوم نحتاج كل البيانات
+    // نضع علامة لمنع إعادة التحميل إذا سبق وحملنا الكل
+    if (allSales._fullLoaded) return;
+    const snap = await get(ref(db, 'sales'));
+    allSales = snap.exists()
+      ? Object.entries(snap.val()).map(([id,v]) => ({ id, ...v }))
+      : [];
+    allSales._fullLoaded = true;
   }
 
   // ===== تحديد الفترة الزمنية =====
@@ -410,11 +450,18 @@
     if (p !== 'custom') buildReport();
   };
 
-  window.applyCustomRange = function() {
+  window.applyCustomRange = async function() {
     const from = document.getElementById('dateFrom').value;
     const to   = document.getElementById('dateTo').value;
     if (!from || !to) { showToast('⚠️ اختر تاريخ البداية والنهاية', 'warn'); return; }
     if (from > to)    { showToast('❌ تاريخ البداية يجب أن يكون قبل تاريخ النهاية', 'error'); return; }
+
+    // إذا كانت الفترة المختارة قبل آخر 30 يوم نحمّل كل البيانات
+    const fromTs = new Date(from).getTime();
+    const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+    if (fromTs < thirtyDaysAgo) {
+      await ensureFullSalesLoaded();
+    }
     buildReport();
   };
 
@@ -442,84 +489,152 @@
     return { start: 0, end: Date.now(), label: 'كل الفترات' };
   }
 
-  // ===== بناء التقرير الكامل =====
+  // ===== بناء التقرير الكامل (Single Pass محسّن) =====
   function buildReport() {
     const { start, end, label } = getPeriodBounds();
     document.getElementById('reportPeriodLabel').textContent = label;
 
-    // فلترة المبيعات حسب الفترة
-    const sales = allSales.filter(s => {
-      const ts = s.timestamp || 0;
-      return ts >= start && ts <= end;
-    });
+    // ── مرور واحد على المبيعات يجمع كل الإحصائيات ──
+    let revenue    = 0;
+    let profit     = 0;
+    let salesCount = 0;
 
-    // --- إحصائيات أساسية ---
-    const revenue = sales.reduce((s, x) => s + (x.total  || 0), 0);
-    const profit  = sales.reduce((s, x) => s + (x.profit || 0), 0);
-    const margin  = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : 0;
+    const prodStats  = new Map(); // اسم المنتج → { qty, revenue, profit }
+    const catRevenue = new Map(); // اسم القسم  → إيرادات
+    const dailyMap   = new Map(); // timestamp بداية اليوم → { rev, profit }
 
-    // قيمة المخزون (لا تعتمد على الفترة)
-    const stockVal = allProducts.reduce((s, p) => s + (p.purchasePrice || 0) * (p.quantity || 0), 0);
-    const lowCount = allProducts.filter(p => (p.quantity || 0) <= lowThr).length;
+    // حدود الأيام
+    const days    = Math.min(Math.ceil((end - start) / 86400000), 30);
+    const dayKeys = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(end);
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      dayKeys.push(d.getTime());
+      dailyMap.set(d.getTime(), { rev: 0, profit: 0, label: d.toLocaleDateString('ar-SA', { month:'short', day:'numeric' }) });
+    }
+    // مساعد: إيجاد مفتاح اليوم لـ timestamp معين
+    function getDayKey(ts) {
+      const d = new Date(ts); d.setHours(0,0,0,0); return d.getTime();
+    }
 
-    document.getElementById('statSalesCount').textContent = sales.length;
-    document.getElementById('statRevenue').textContent    = formatNum(revenue);
-    document.getElementById('statProfit').textContent     = formatNum(profit);
-    document.getElementById('statMargin').textContent     = margin + '%';
-    document.getElementById('statStockValue').textContent = formatNum(stockVal);
-    document.getElementById('statLowStock').textContent   = lowCount;
+    for (let si = 0; si < allSales.length; si++) {
+      const sale = allSales[si];
+      const ts   = sale.timestamp || 0;
+      if (ts < start || ts > end) continue;
 
-    // --- تجميع إحصائيات المنتجات من المبيعات ---
-    const prodStats = {}; // { productName: { qty, revenue, profit } }
-    sales.forEach(sale => {
-      (sale.items || []).forEach(item => {
-        if (!prodStats[item.name]) prodStats[item.name] = { qty: 0, revenue: 0, profit: 0 };
-        prodStats[item.name].qty     += item.qty || 0;
-        prodStats[item.name].revenue += (item.qty || 0) * (item.price || 0);
-        // إيجاد سعر الشراء من بيانات المنتجات
-        const prod = allProducts.find(p => p.name === item.name);
+      salesCount++;
+      revenue += sale.total  || 0;
+      profit  += sale.profit || 0;
+
+      // تجميع يومي
+      const dk = getDayKey(ts);
+      if (dailyMap.has(dk)) {
+        const day = dailyMap.get(dk);
+        day.rev    += sale.total  || 0;
+        day.profit += sale.profit || 0;
+      }
+
+      // تجميع على مستوى المنتجات
+      const items = sale.items || [];
+      for (let ii = 0; ii < items.length; ii++) {
+        const item = items[ii];
+        const prod = productMap.get(item.name); // ← Map بدلاً من find()
         const cp   = prod ? (prod.purchasePrice || 0) : 0;
-        prodStats[item.name].profit  += (item.qty || 0) * ((item.price || 0) - cp);
-      });
-    });
+        const cat  = prod ? (prod.category || 'غير محدد') : 'غير محدد';
+        const qty  = item.qty   || 0;
+        const price= item.price || 0;
+        const rev  = qty * price;
+        const pft  = qty * (price - cp);
 
-    const prodList = Object.entries(prodStats).map(([name, d]) => ({ name, ...d }));
+        // إحصائيات المنتج
+        if (prodStats.has(item.name)) {
+          const ps = prodStats.get(item.name);
+          ps.qty     += qty;
+          ps.revenue += rev;
+          ps.profit  += pft;
+        } else {
+          prodStats.set(item.name, { qty, revenue: rev, profit: pft });
+        }
 
-    // --- أكثر مبيعاً ---
-    const topSales = [...prodList].sort((a,b) => b.qty - a.qty).slice(0, 8);
-    renderTopSales(topSales, prodList);
+        // إحصائيات القسم
+        catRevenue.set(cat, (catRevenue.get(cat) || 0) + rev);
+      }
+    }
 
-    // --- أعلى ربحية ---
-    const topProfit = [...prodList].sort((a,b) => b.profit - a.profit).slice(0, 8);
-    renderTopProfit(topProfit, prodList);
+    const margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : 0;
 
-    // --- أقل حركة ---
-    const soldNames = new Set(prodList.map(p => p.name));
-    const lowMove   = [...prodList].sort((a,b) => a.qty - b.qty).slice(0, 6);
-    renderLowMove(lowMove);
+    // ── إحصائيات المخزون (لا تعتمد على الفترة، مرور واحد) ──
+    let stockVal       = 0;
+    let lowCount       = 0;
+    let expectedSales  = 0;
+    let expectedProfit = 0;
 
-    // --- منتجات قليلة المخزون ---
-    renderLowStock();
+    for (let pi = 0; pi < allProducts.length; pi++) {
+      const p    = allProducts[pi];
+      const qty  = p.quantity      || 0;
+      const buy  = p.purchasePrice || 0;
+      const sell = p.price         || 0;
 
-    // --- منتجات غير متحركة ---
-    const dead = allProducts.filter(p => !soldNames.has(p.name) && (p.quantity || 0) > 0);
-    renderDeadStock(dead);
+      stockVal       += buy  * qty;
+      expectedSales  += sell * qty;
+      expectedProfit += (sell - buy) * qty;
+      if (qty <= lowThr) lowCount++;
+    }
 
-    // --- رسم بياني: مبيعات يومية ---
-    renderDailyChart(sales, start, end);
+    // ── تحديث الـ DOM (دفعة واحدة) ──
+    document.getElementById('statSalesCount').textContent    = salesCount;
+    document.getElementById('statRevenue').textContent       = formatNum(revenue);
+    document.getElementById('statProfit').textContent        = formatNum(profit);
+    document.getElementById('statMargin').textContent        = margin + '%';
+    document.getElementById('statStockValue').textContent    = formatNum(stockVal);
+    document.getElementById('statLowStock').textContent      = lowCount;
+    document.getElementById('statExpectedSales').textContent = formatNum(expectedSales);
+    document.getElementById('statExpectedProfit').textContent= formatNum(expectedProfit);
 
-    // --- رسم بياني: مبيعات حسب القسم ---
-    renderCatChart(sales);
+    // ── تحويل prodStats Map → مصفوفة ──
+    const prodList = [];
+    prodStats.forEach((d, name) => prodList.push({ name, ...d }));
+
+    // ── إرجاء رسم الجداول والرسوم لما بعد ظهور الصفحة ──
+    setTimeout(() => {
+      // أكثر مبيعاً
+      const topSales = prodList.slice().sort((a,b) => b.qty - a.qty).slice(0, 8);
+      renderTopSales(topSales);
+
+      // أعلى ربحية
+      const topProfit = prodList.slice().sort((a,b) => b.profit - a.profit).slice(0, 8);
+      renderTopProfit(topProfit);
+
+      // أقل حركة
+      const lowMove = prodList.slice().sort((a,b) => a.qty - b.qty).slice(0, 6);
+      renderLowMove(lowMove);
+
+      // منتجات قليلة المخزون
+      renderLowStock();
+
+      // منتجات غير متحركة
+      const soldNames = new Set(prodStats.keys());
+      const dead = allProducts.filter(p => !soldNames.has(p.name) && (p.quantity || 0) > 0);
+      renderDeadStock(dead);
+
+      // رسم الرسوم البيانية
+      renderDailyChart(dayKeys, dailyMap);
+      renderCatChart(catRevenue);
+    }, 0);
   }
 
   // ===== أكثر مبيعاً =====
-  function renderTopSales(list, all) {
+  function renderTopSales(list) {
     const tbody = document.getElementById('topSalesBody');
     if (!list.length) { tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">لا توجد مبيعات في هذه الفترة</td></tr>`; return; }
-    const maxQty = Math.max(...list.map(x => x.qty), 1);
-    tbody.innerHTML = list.map((p, i) => `
-      <tr>
-        <td><span class="${i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n'}">${i+1}</span></td>
+    const maxQty = list[0].qty || 1;
+    let html = '';
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i];
+      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
+      html += `<tr>
+        <td><span class="${rankClass}">${i+1}</span></td>
         <td style="font-weight:600;">${p.name}</td>
         <td><strong>${p.qty}</strong> وحدة</td>
         <td style="color:var(--accent);font-weight:700;">${formatNum(p.revenue)} ${currency}</td>
@@ -528,18 +643,23 @@
             <div class="progress-bar-fill" style="width:${(p.qty/maxQty*100).toFixed(0)}%;background:var(--accent);"></div>
           </div>
         </td>
-      </tr>`).join('');
+      </tr>`;
+    }
+    tbody.innerHTML = html;
   }
 
   // ===== أعلى ربحية =====
-  function renderTopProfit(list, all) {
+  function renderTopProfit(list) {
     const tbody = document.getElementById('topProfitBody');
     if (!list.length) { tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">لا توجد بيانات</td></tr>`; return; }
-    const maxP = Math.max(...list.map(x => x.profit), 1);
-    tbody.innerHTML = list.map((p, i) => {
+    const maxP = list[0].profit || 1;
+    let html = '';
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i];
       const avgPer = p.qty > 0 ? (p.profit / p.qty) : 0;
-      return `<tr>
-        <td><span class="${i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n'}">${i+1}</span></td>
+      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
+      html += `<tr>
+        <td><span class="${rankClass}">${i+1}</span></td>
         <td style="font-weight:600;">${p.name}</td>
         <td style="color:var(--success);font-weight:700;">${formatNum(p.profit)} ${currency}</td>
         <td style="color:var(--text-muted);">${formatNum(avgPer)} ${currency}</td>
@@ -549,43 +669,60 @@
           </div>
         </td>
       </tr>`;
-    }).join('');
+    }
+    tbody.innerHTML = html;
   }
 
   // ===== أقل حركة =====
   function renderLowMove(list) {
     const tbody = document.getElementById('lowMoveBody');
     if (!list.length) { tbody.innerHTML = `<tr><td colspan="4" class="empty-msg">لا توجد بيانات</td></tr>`; return; }
-    tbody.innerHTML = list.map(p => {
-      const prod = allProducts.find(x => x.name === p.name);
-      return `<tr>
+    let html = '';
+    for (let i = 0; i < list.length; i++) {
+      const p    = list[i];
+      const prod = productMap.get(p.name); // ← Map بدلاً من find()
+      const stockBadge = prod
+        ? (prod.quantity <= lowThr
+            ? `<span class="badge-low">${prod.quantity} قطعة</span>`
+            : `<span class="badge-ok">${prod.quantity} قطعة</span>`)
+        : '—';
+      html += `<tr>
         <td style="font-weight:600;">${p.name}</td>
         <td><span class="badge-cat">${prod?.category || '—'}</span></td>
         <td style="color:var(--warning);">${p.qty} وحدة</td>
-        <td>${prod ? (prod.quantity <= lowThr
-          ? `<span class="badge-low">${prod.quantity} قطعة</span>`
-          : `<span class="badge-ok">${prod.quantity} قطعة</span>`) : '—'}</td>
+        <td>${stockBadge}</td>
       </tr>`;
-    }).join('');
+    }
+    tbody.innerHTML = html;
   }
 
   // ===== منتجات قليلة المخزون =====
   function renderLowStock() {
     const tbody = document.getElementById('lowStockBody');
-    const list  = allProducts.filter(p => (p.quantity || 0) <= lowThr).sort((a,b) => a.quantity - b.quantity);
+    // فرز بدون filter منفصلة — مرور واحد
+    const list = [];
+    for (let i = 0; i < allProducts.length; i++) {
+      if ((allProducts[i].quantity || 0) <= lowThr) list.push(allProducts[i]);
+    }
+    list.sort((a,b) => a.quantity - b.quantity);
+
     if (!list.length) {
       tbody.innerHTML = `<tr><td colspan="4" class="empty-msg"><i class="fas fa-check-circle" style="color:var(--success)"></i> جميع المنتجات بكميات كافية</td></tr>`;
       return;
     }
-    tbody.innerHTML = list.map(p => `
-      <tr>
+    let html = '';
+    for (let i = 0; i < list.length; i++) {
+      const p = list[i];
+      html += `<tr>
         <td style="font-weight:600;">${p.name}</td>
         <td><span class="badge-cat">${p.category || '—'}</span></td>
         <td><strong>${p.quantity || 0}</strong></td>
         <td>${p.quantity === 0
           ? '<span class="badge-low">نفذ من المخزون</span>'
           : '<span class="badge-warn">كمية منخفضة</span>'}</td>
-      </tr>`).join('');
+      </tr>`;
+    }
+    tbody.innerHTML = html;
   }
 
   // ===== المنتجات غير المتحركة =====
@@ -596,36 +733,49 @@
       tbody.innerHTML = `<tr><td colspan="5" class="empty-msg"><i class="fas fa-check-circle" style="color:var(--success)"></i> لا توجد منتجات غير متحركة</td></tr>`;
       return;
     }
-    tbody.innerHTML = list.map(p => {
+    let html = '';
+    for (let i = 0; i < list.length; i++) {
+      const p   = list[i];
       const val = (p.purchasePrice || 0) * (p.quantity || 0);
-      return `<tr>
+      html += `<tr>
         <td style="font-weight:600;">${p.name}</td>
         <td><span class="badge-cat">${p.category || '—'}</span></td>
         <td>${p.quantity || 0} قطعة</td>
         <td style="color:var(--warning);font-weight:700;">${formatNum(val)} ${currency}</td>
         <td style="color:var(--text-muted);font-size:12px;">${formatDate(p.createdAt)}</td>
       </tr>`;
-    }).join('');
+    }
+    tbody.innerHTML = html;
   }
 
   // ===== رسم بياني: مبيعات يومية =====
-  function renderDailyChart(sales, start, end) {
-    // تحديد عدد الأيام
-    const days  = Math.min(Math.ceil((end - start) / 86400000), 30);
-    const labels = [], data = [], profitData = [];
+  function renderDailyChart(dayKeys, dailyMap) {
+    const labels     = [];
+    const data       = [];
+    const profitData = [];
 
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(end); d.setDate(d.getDate() - i); d.setHours(0,0,0,0);
-      const nd = new Date(d); nd.setDate(nd.getDate() + 1);
-      const dayRev    = sales.filter(s => s.timestamp >= d.getTime() && s.timestamp < nd.getTime()).reduce((sum, s) => sum + (s.total || 0), 0);
-      const dayProfit = sales.filter(s => s.timestamp >= d.getTime() && s.timestamp < nd.getTime()).reduce((sum, s) => sum + (s.profit || 0), 0);
-      labels.push(d.toLocaleDateString('ar-SA', { month:'short', day:'numeric' }));
-      data.push(dayRev);
-      profitData.push(dayProfit);
+    for (let i = 0; i < dayKeys.length; i++) {
+      const entry = dailyMap.get(dayKeys[i]);
+      labels.push(entry.label);
+      data.push(entry.rev);
+      profitData.push(entry.profit);
     }
 
+    // مفتاح cache لمنع إعادة رسم بدون تغيير
+    const cacheKey = labels.join(',') + '|' + data.join(',');
+    if (dailyChart && lastDailyChartKey === cacheKey) return;
+    lastDailyChartKey = cacheKey;
+
     const ctx = document.getElementById('dailySalesChart').getContext('2d');
-    if (dailyChart) dailyChart.destroy();
+    if (dailyChart) {
+      // تحديث البيانات بدلاً من إعادة إنشاء الرسم إذا أمكن
+      dailyChart.data.labels       = labels;
+      dailyChart.data.datasets[0].data = data;
+      dailyChart.data.datasets[1].data = profitData;
+      dailyChart.update('none');
+      return;
+    }
+
     dailyChart = new Chart(ctx, {
       type: 'bar',
       data: {
@@ -656,6 +806,7 @@
       },
       options: {
         responsive: true,
+        animation: false,
         plugins: {
           legend: { labels: { color:'#8b949e', font:{ family:'Cairo', size:11 } } },
           tooltip: {
@@ -673,33 +824,38 @@
   }
 
   // ===== رسم بياني: حسب القسم =====
-  function renderCatChart(sales) {
-    // تجميع إيرادات حسب القسم
-    const catRevenue = {};
-    sales.forEach(sale => {
-      (sale.items || []).forEach(item => {
-        const prod = allProducts.find(p => p.name === item.name);
-        const cat  = prod?.category || 'غير محدد';
-        if (!catRevenue[cat]) catRevenue[cat] = 0;
-        catRevenue[cat] += (item.qty || 0) * (item.price || 0);
-      });
-    });
+  function renderCatChart(catRevenue) {
+    const cats = [];
+    const vals = [];
+    catRevenue.forEach((v, k) => { cats.push(k); vals.push(v); });
 
-    const cats   = Object.keys(catRevenue);
-    const vals   = cats.map(c => catRevenue[c]);
-    const COLORS  = ['#d4a017','#3fb950','#58a6ff','#f85149','#d29922','#bc8cff','#ff7b72','#79c0ff'];
+    const cacheKey = cats.join(',') + '|' + vals.join(',');
+    const ctx      = document.getElementById('catChart').getContext('2d');
 
-    const ctx = document.getElementById('catChart').getContext('2d');
-    if (catChart) catChart.destroy();
+    if (catChart && lastCatChartKey === cacheKey) return;
+    lastCatChartKey = cacheKey;
+
+    if (catChart) {
+      if (!cats.length) {
+        catChart.destroy(); catChart = null;
+      } else {
+        catChart.data.labels          = cats;
+        catChart.data.datasets[0].data = vals;
+        catChart.update('none');
+        return;
+      }
+    }
 
     if (!cats.length) {
       ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.fillStyle = '#8b949e';
-      ctx.font = '14px Cairo';
-      ctx.textAlign = 'center';
+      ctx.fillStyle  = '#8b949e';
+      ctx.font       = '14px Cairo';
+      ctx.textAlign  = 'center';
       ctx.fillText('لا توجد بيانات في هذه الفترة', ctx.canvas.width / 2, ctx.canvas.height / 2);
       return;
     }
+
+    const COLORS = ['#d4a017','#3fb950','#58a6ff','#f85149','#d29922','#bc8cff','#ff7b72','#79c0ff'];
 
     catChart = new Chart(ctx, {
       type: 'doughnut',
@@ -714,6 +870,7 @@
       },
       options: {
         responsive: true,
+        animation: false,
         plugins: {
           legend: { position:'bottom', labels:{ color:'#8b949e', font:{ family:'Cairo', size:11 }, padding:12, boxWidth:12 } },
           tooltip: {
