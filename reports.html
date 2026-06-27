@@ -18,8 +18,6 @@
     }
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Cairo',sans-serif;background:var(--bg-dark);color:var(--text-main);min-height:100vh;}
-
-    /* ===== SIDEBAR ===== */
     .sidebar{position:fixed;top:0;right:0;width:var(--sidebar-w);height:100vh;background:var(--bg-sidebar);border-left:1px solid var(--border);display:flex;flex-direction:column;z-index:1000;overflow-y:auto;}
     .sidebar-brand{padding:24px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
     .brand-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent-light));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:#000;}
@@ -32,15 +30,9 @@
     .sidebar-nav li a.active{background:linear-gradient(90deg,rgba(212,160,23,.15),rgba(212,160,23,.05));color:var(--accent);border-right:3px solid var(--accent);}
     .sidebar-nav li a i{width:18px;text-align:center;font-size:15px;}
     .sidebar-footer{margin-top:auto;padding:16px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);text-align:center;}
-
-    /* ===== TOPBAR ===== */
     .topbar{position:fixed;top:0;left:0;right:var(--sidebar-w);height:60px;background:var(--bg-card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:999;}
     .topbar-title{font-size:18px;font-weight:700;}
-
-    /* ===== MAIN ===== */
     .main-content{margin-right:var(--sidebar-w);margin-top:60px;padding:28px;}
-
-    /* ===== FILTER BAR ===== */
     .filter-bar{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:18px 22px;margin-bottom:24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
     .filter-btn{background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;padding:8px 18px;font-family:'Cairo',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
     .filter-btn:hover,.filter-btn.active{background:rgba(212,160,23,.12);color:var(--accent);border-color:rgba(212,160,23,.4);}
@@ -48,8 +40,6 @@
     .filter-input:focus{outline:none;border-color:var(--accent);}
     .btn-gold{background:linear-gradient(135deg,var(--accent),var(--accent-light));color:#000;font-weight:700;border:none;border-radius:8px;padding:8px 18px;font-family:'Cairo',sans-serif;cursor:pointer;transition:opacity .2s;}
     .btn-gold:hover{opacity:.85;}
-
-    /* ===== STAT CARDS ===== */
     .stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:22px;transition:transform .2s,box-shadow .2s;position:relative;overflow:hidden;}
     .stat-card::before{content:'';position:absolute;top:0;right:0;width:4px;height:100%;border-radius:0 14px 14px 0;}
     .stat-card.gold::before{background:var(--accent);}
@@ -66,64 +56,48 @@
     .stat-icon.warn{background:rgba(210,153,34,.15);color:var(--warning);}
     .stat-value{font-size:24px;font-weight:900;margin-bottom:4px;}
     .stat-label{font-size:13px;color:var(--text-muted);font-weight:600;}
-
-    /* ===== SECTION CARDS ===== */
     .section-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;}
     .section-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
     .section-title{font-size:15px;font-weight:700;}
-
-    /* ===== TABLE ===== */
     .custom-table{width:100%;border-collapse:collapse;}
     .custom-table thead th{background:rgba(255,255,255,.03);padding:11px 16px;font-size:12px;font-weight:700;color:var(--text-muted);text-align:right;border-bottom:1px solid var(--border);}
     .custom-table tbody td{padding:10px 16px;font-size:13px;border-bottom:1px solid rgba(48,54,61,.5);vertical-align:middle;}
     .custom-table tbody tr:last-child td{border-bottom:none;}
     .custom-table tbody tr:hover{background:rgba(255,255,255,.02);}
-
-    /* rank badge */
     .rank-1{background:linear-gradient(135deg,#d4a017,#f0c040);color:#000;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;}
     .rank-2{background:rgba(192,192,192,.2);color:#c0c0c0;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;}
     .rank-3{background:rgba(205,127,50,.2);color:#cd7f32;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:12px;}
     .rank-n{background:rgba(255,255,255,.06);color:var(--text-muted);width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;}
-
-    /* progress bar */
     .progress-bar-wrap{background:rgba(255,255,255,.06);border-radius:4px;height:6px;overflow:hidden;min-width:80px;}
-    .progress-bar-fill{height:100%;border-radius:4px;transition:width .6s ease;}
-
-    /* chart */
+    .progress-bar-fill{height:100%;border-radius:4px;}
     .chart-wrap{padding:20px;}
-
-    /* loading */
-    .loading-overlay{position:fixed;inset:0;background:var(--bg-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s;}
+    .loading-overlay{position:fixed;inset:0;background:var(--bg-dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s;}
     .loader-ring{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:16px;}
     @keyframes spin{to{transform:rotate(360deg);}}
-
     .sidebar-toggle{display:none;background:none;border:none;color:var(--text-main);font-size:20px;cursor:pointer;}
     @media(max-width:768px){
       .sidebar{transform:translateX(100%);transition:transform .3s;}.sidebar.open{transform:translateX(0);}
       .sidebar-toggle{display:block;}.main-content{margin-right:0;padding:16px;}.topbar{right:0;}
     }
-
     .toast-container-custom{position:fixed;bottom:24px;left:24px;z-index:9000;}
     .my-toast{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:13px;color:var(--text-main);box-shadow:0 4px 20px rgba(0,0,0,.5);margin-top:8px;animation:slideIn .3s ease;}
     @keyframes slideIn{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
-
     .badge-low{background:rgba(248,81,73,.12);color:var(--danger);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
     .badge-ok{background:rgba(63,185,80,.12);color:var(--success);padding:3px 10px;border-radius:20px;font-size:11px;}
     .badge-warn{background:rgba(210,153,34,.12);color:var(--warning);padding:3px 10px;border-radius:20px;font-size:11px;}
     .badge-cat{background:rgba(88,166,255,.12);color:var(--info);padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
-
     .empty-msg{text-align:center;padding:32px;color:var(--text-muted);font-size:13px;}
+    .skeleton{background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.04) 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:6px;height:14px;margin:6px 0;}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
   </style>
 </head>
 <body>
 
-<!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loader-ring"></div>
-  <p style="color:var(--text-muted);font-size:14px;">جارٍ تحميل التقارير...</p>
+  <p style="color:var(--text-muted);font-size:14px;" id="loadingMsg">جارٍ تحميل البيانات...</p>
 </div>
 
-<!-- Sidebar -->
 <nav class="sidebar" id="sidebar">
   <div class="sidebar-brand">
     <div class="brand-icon"><i class="fas fa-store"></i></div>
@@ -145,7 +119,6 @@
   <div class="sidebar-footer"><i class="fas fa-shield-alt me-1"></i> النظام يعمل بشكل طبيعي</div>
 </nav>
 
-<!-- Topbar -->
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:12px;">
     <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
@@ -155,212 +128,168 @@
 </header>
 
 <main class="main-content">
-
-  <!-- ===== شريط الفلترة الزمنية ===== -->
   <div class="filter-bar">
     <span style="font-size:13px;font-weight:700;color:var(--text-muted);margin-left:4px;">
       <i class="fas fa-calendar-alt me-1" style="color:var(--accent)"></i>الفترة:
     </span>
-    <button class="filter-btn" onclick="setPeriod('today',   this)">اليوم</button>
-    <button class="filter-btn" onclick="setPeriod('week',    this)">الأسبوع</button>
-    <button class="filter-btn active" onclick="setPeriod('month', this)">الشهر</button>
-    <button class="filter-btn" onclick="setPeriod('custom',  this)">مخصص</button>
-
-    <!-- فترة مخصصة -->
+    <button class="filter-btn" onclick="setPeriod('today',this)">اليوم</button>
+    <button class="filter-btn" onclick="setPeriod('week',this)">الأسبوع</button>
+    <button class="filter-btn active" onclick="setPeriod('month',this)">الشهر</button>
+    <button class="filter-btn" onclick="setPeriod('custom',this)">مخصص</button>
     <div id="customRange" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;">
       <span style="font-size:12px;color:var(--text-muted);">من:</span>
       <input type="date" class="filter-input" id="dateFrom"/>
       <span style="font-size:12px;color:var(--text-muted);">إلى:</span>
       <input type="date" class="filter-input" id="dateTo"/>
-      <button class="btn-gold" onclick="applyCustomRange()">
-        <i class="fas fa-search me-1"></i>تطبيق
-      </button>
+      <button class="btn-gold" onclick="applyCustomRange()"><i class="fas fa-search me-1"></i>تطبيق</button>
     </div>
   </div>
 
-  <!-- ===== بطاقات الإحصائيات الرئيسية ===== -->
+  <!-- البطاقات الرئيسية -->
   <div class="row g-3 mb-4">
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="stat-card gold">
-        <div class="stat-icon gold"><i class="fas fa-receipt"></i></div>
-        <div class="stat-value" id="statSalesCount">0</div>
-        <div class="stat-label">عدد الفواتير</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="stat-card green">
-        <div class="stat-icon green"><i class="fas fa-coins"></i></div>
-        <div class="stat-value" id="statRevenue">0</div>
-        <div class="stat-label">إجمالي المبيعات</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="stat-card blue">
-        <div class="stat-icon blue"><i class="fas fa-arrow-trend-up"></i></div>
-        <div class="stat-value" id="statProfit">0</div>
-        <div class="stat-label">إجمالي الأرباح</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="stat-card warn">
-        <div class="stat-icon warn"><i class="fas fa-percentage"></i></div>
-        <div class="stat-value" id="statMargin">0%</div>
-        <div class="stat-label">هامش الربح</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="stat-card green">
-        <div class="stat-icon green"><i class="fas fa-warehouse"></i></div>
-        <div class="stat-value" id="statStockValue">0</div>
-        <div class="stat-label">قيمة المخزون</div>
-      </div>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="stat-card red">
-        <div class="stat-icon red"><i class="fas fa-triangle-exclamation"></i></div>
-        <div class="stat-value" id="statLowStock">0</div>
-        <div class="stat-label">منتجات قليلة</div>
-      </div>
-    </div>
-    <!-- بطاقة: قيمة المبيعات المتوقعة -->
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="stat-card gold">
-        <div class="stat-icon gold"><i class="fas fa-sack-dollar"></i></div>
-        <div class="stat-value" id="statExpectedSales">0</div>
-        <div class="stat-label">قيمة المبيعات المتوقعة</div>
-      </div>
-    </div>
-    <!-- بطاقة: الربح المتوقع من كامل المخزون -->
-    <div class="col-6 col-md-4 col-lg-2">
-      <div class="stat-card gold">
-        <div class="stat-icon gold"><i class="fas fa-money-bill-trend-up"></i></div>
-        <div class="stat-value" id="statExpectedProfit">0</div>
-        <div class="stat-label">الربح المتوقع من المخزون</div>
-      </div>
-    </div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card gold"><div class="stat-icon gold"><i class="fas fa-receipt"></i></div><div class="stat-value" id="statSalesCount">0</div><div class="stat-label">عدد الفواتير</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card green"><div class="stat-icon green"><i class="fas fa-coins"></i></div><div class="stat-value" id="statRevenue">0</div><div class="stat-label">إجمالي المبيعات</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card blue"><div class="stat-icon blue"><i class="fas fa-arrow-trend-up"></i></div><div class="stat-value" id="statProfit">0</div><div class="stat-label">إجمالي الأرباح</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card warn"><div class="stat-icon warn"><i class="fas fa-percentage"></i></div><div class="stat-value" id="statMargin">0%</div><div class="stat-label">هامش الربح</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card green"><div class="stat-icon green"><i class="fas fa-warehouse"></i></div><div class="stat-value" id="statStockValue">0</div><div class="stat-label">قيمة المخزون</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card red"><div class="stat-icon red"><i class="fas fa-triangle-exclamation"></i></div><div class="stat-value" id="statLowStock">0</div><div class="stat-label">منتجات قليلة</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card gold"><div class="stat-icon gold"><i class="fas fa-sack-dollar"></i></div><div class="stat-value" id="statExpectedSales">0</div><div class="stat-label">قيمة المبيعات المتوقعة</div></div></div>
+    <div class="col-6 col-md-4 col-lg-2"><div class="stat-card gold"><div class="stat-icon gold"><i class="fas fa-money-bill-trend-up"></i></div><div class="stat-value" id="statExpectedProfit">0</div><div class="stat-label">الربح المتوقع من المخزون</div></div></div>
   </div>
 
-  <!-- ===== الرسوم البيانية ===== -->
+  <!-- الرسوم البيانية -->
   <div class="row g-3 mb-4">
-    <!-- مبيعات يومية -->
     <div class="col-lg-7">
       <div class="section-card">
-        <div class="section-header">
-          <span class="section-title"><i class="fas fa-chart-line me-2" style="color:var(--accent)"></i>المبيعات اليومية</span>
-        </div>
+        <div class="section-header"><span class="section-title"><i class="fas fa-chart-line me-2" style="color:var(--accent)"></i>المبيعات اليومية</span></div>
         <div class="chart-wrap"><canvas id="dailySalesChart" height="110"></canvas></div>
       </div>
     </div>
-    <!-- مبيعات حسب القسم -->
     <div class="col-lg-5">
       <div class="section-card">
-        <div class="section-header">
-          <span class="section-title"><i class="fas fa-chart-pie me-2" style="color:var(--info)"></i>المبيعات حسب القسم</span>
-        </div>
+        <div class="section-header"><span class="section-title"><i class="fas fa-chart-pie me-2" style="color:var(--info)"></i>المبيعات حسب القسم</span></div>
         <div class="chart-wrap"><canvas id="catChart" height="160"></canvas></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== أكثر المنتجات مبيعاً + أعلى ربحية ===== -->
+  <!-- الجداول -->
   <div class="row g-3 mb-4">
-    <!-- أكثر مبيعاً -->
     <div class="col-lg-6">
       <div class="section-card">
-        <div class="section-header">
-          <span class="section-title"><i class="fas fa-fire me-2" style="color:var(--danger)"></i>أكثر المنتجات مبيعاً</span>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="custom-table">
-            <thead>
-              <tr><th>#</th><th>المنتج</th><th>الكمية المباعة</th><th>الإيرادات</th><th>التوزيع</th></tr>
-            </thead>
-            <tbody id="topSalesBody"></tbody>
-          </table>
-        </div>
+        <div class="section-header"><span class="section-title"><i class="fas fa-fire me-2" style="color:var(--danger)"></i>أكثر المنتجات مبيعاً</span></div>
+        <div style="overflow-x:auto;"><table class="custom-table"><thead><tr><th>#</th><th>المنتج</th><th>الكمية المباعة</th><th>الإيرادات</th><th>التوزيع</th></tr></thead><tbody id="topSalesBody"><tr><td colspan="5"><div class="skeleton"></div><div class="skeleton" style="width:70%"></div></td></tr></tbody></table></div>
       </div>
     </div>
-
-    <!-- أعلى ربحية -->
     <div class="col-lg-6">
       <div class="section-card">
-        <div class="section-header">
-          <span class="section-title"><i class="fas fa-trophy me-2" style="color:var(--accent)"></i>أعلى المنتجات ربحية</span>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="custom-table">
-            <thead>
-              <tr><th>#</th><th>المنتج</th><th>الربح الإجمالي</th><th>متوسط الربح/وحدة</th><th>التوزيع</th></tr>
-            </thead>
-            <tbody id="topProfitBody"></tbody>
-          </table>
-        </div>
+        <div class="section-header"><span class="section-title"><i class="fas fa-trophy me-2" style="color:var(--accent)"></i>أعلى المنتجات ربحية</span></div>
+        <div style="overflow-x:auto;"><table class="custom-table"><thead><tr><th>#</th><th>المنتج</th><th>الربح الإجمالي</th><th>متوسط الربح/وحدة</th><th>التوزيع</th></tr></thead><tbody id="topProfitBody"><tr><td colspan="5"><div class="skeleton"></div><div class="skeleton" style="width:70%"></div></td></tr></tbody></table></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== أقل حركة + غير متحركة ===== -->
   <div class="row g-3 mb-4">
-    <!-- أقل المنتجات حركة -->
     <div class="col-lg-6">
       <div class="section-card">
-        <div class="section-header">
-          <span class="section-title"><i class="fas fa-arrow-trend-down me-2" style="color:var(--text-muted)"></i>أقل المنتجات حركة</span>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="custom-table">
-            <thead>
-              <tr><th>المنتج</th><th>القسم</th><th>الكمية المباعة</th><th>المخزون</th></tr>
-            </thead>
-            <tbody id="lowMoveBody"></tbody>
-          </table>
-        </div>
+        <div class="section-header"><span class="section-title"><i class="fas fa-arrow-trend-down me-2" style="color:var(--text-muted)"></i>أقل المنتجات حركة</span></div>
+        <div style="overflow-x:auto;"><table class="custom-table"><thead><tr><th>المنتج</th><th>القسم</th><th>الكمية المباعة</th><th>المخزون</th></tr></thead><tbody id="lowMoveBody"><tr><td colspan="4"><div class="skeleton"></div></td></tr></tbody></table></div>
       </div>
     </div>
-
-    <!-- منتجات قليلة الكمية -->
     <div class="col-lg-6">
       <div class="section-card">
-        <div class="section-header">
-          <span class="section-title"><i class="fas fa-triangle-exclamation me-2" style="color:var(--warning)"></i>منتجات تحتاج تزويد</span>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="custom-table">
-            <thead>
-              <tr><th>المنتج</th><th>القسم</th><th>الكمية</th><th>الحالة</th></tr>
-            </thead>
-            <tbody id="lowStockBody"></tbody>
-          </table>
-        </div>
+        <div class="section-header"><span class="section-title"><i class="fas fa-triangle-exclamation me-2" style="color:var(--warning)"></i>منتجات تحتاج تزويد</span></div>
+        <div style="overflow-x:auto;"><table class="custom-table"><thead><tr><th>المنتج</th><th>القسم</th><th>الكمية</th><th>الحالة</th></tr></thead><tbody id="lowStockBody"><tr><td colspan="4"><div class="skeleton"></div></td></tr></tbody></table></div>
       </div>
     </div>
   </div>
 
-  <!-- ===== المنتجات غير المتحركة ===== -->
   <div class="section-card">
     <div class="section-header">
       <span class="section-title"><i class="fas fa-box-archive me-2" style="color:var(--text-muted)"></i>المنتجات غير المتحركة في الفترة المحددة</span>
       <span id="deadStockCount" style="font-size:12px;color:var(--text-muted);">0 منتج</span>
     </div>
-    <div style="overflow-x:auto;">
-      <table class="custom-table">
-        <thead>
-          <tr><th>المنتج</th><th>القسم</th><th>الكمية في المخزون</th><th>قيمة المخزون</th><th>تاريخ الإضافة</th></tr>
-        </thead>
-        <tbody id="deadStockBody"></tbody>
-      </table>
-    </div>
+    <div style="overflow-x:auto;"><table class="custom-table"><thead><tr><th>المنتج</th><th>القسم</th><th>الكمية في المخزون</th><th>قيمة المخزون</th><th>تاريخ الإضافة</th></tr></thead><tbody id="deadStockBody"><tr><td colspan="5"><div class="skeleton"></div></td></tr></tbody></table></div>
   </div>
-
 </main>
 
 <div class="toast-container-custom" id="toastContainer"></div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, get, query, orderByChild, startAt } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+<!--
+  ==========================================
+  تحليل أسباب البطء في Firebase Realtime DB
+  ==========================================
 
-  const firebaseConfig = {
+  المشكلة الجذرية ليست دائماً في الكود، بل في هيكل قاعدة البيانات:
+
+  1. Firebase Realtime DB يُعيد NODE كاملاً عند جلب /sales
+     إذا كان هناك 100,000 فاتورة فإن Firebase يُرسل الكل دفعة واحدة
+     بغض النظر عن orderByChild/startAt لأن الـ filtering يحدث على الـ Client أو Server
+     بحسب وجود Index.
+
+  2. الحل المثالي للإنتاج (يتطلب تغيير هيكل البيانات):
+     - تخزين المبيعات في مسارات منظمة حسب التاريخ:
+       sales/2024/01/15/{saleId}
+     - أو استخدام Firestore بدلاً من Realtime DB لأنه يدعم
+       Composite Indexes وpagination حقيقي.
+
+  3. الحل الحالي بدون تغيير الهيكل:
+     - استخدام orderByChild('timestamp').startAt() مع وجود Index في rules
+     - أضف في Firebase Rules:
+       {
+         "rules": {
+           "sales": {
+             ".indexOn": ["timestamp"]
+           }
+         }
+       }
+     - هذا وحده قد يُسرّع الاستعلام بنسبة 80-90% لأن Firebase
+       سيبني فهرسة على الـ timestamp ويتجنب full scan.
+
+  4. إذا استمر البطء مع الـ Index:
+     - يعني البيانات كبيرة جداً والحل الوحيد هو Firestore أو
+       تقسيم البيانات إلى shards حسب الشهر.
+-->
+
+<script type="module">
+  import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getDatabase, ref, get, query, orderByChild, startAt, endAt }
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  // ─── Performance Profiler ───────────────────────────────────────────────────
+  // تتبع جميع مراحل تحميل الصفحة بالمللي ثانية
+  const PERF = {
+    marks: {},
+    start(label) { this.marks[label] = performance.now(); console.time('⏱ ' + label); },
+    end(label)   {
+      const ms = (performance.now() - (this.marks[label] || 0)).toFixed(1);
+      console.timeEnd('⏱ ' + label);
+      return parseFloat(ms);
+    },
+    report(times) {
+      console.groupCollapsed('%c📊 تقرير الأداء الكامل', 'color:#d4a017;font-weight:bold;font-size:14px');
+      let total = 0;
+      Object.entries(times).forEach(([k,v]) => {
+        const bar = '█'.repeat(Math.min(Math.round(v / 50), 30));
+        console.log(`%c${k.padEnd(30)} %c${v} ms  ${bar}`,
+          'color:#8b949e', v > 500 ? 'color:#f85149;font-weight:bold' : v > 200 ? 'color:#d29922' : 'color:#3fb950');
+        total += v;
+      });
+      console.log('%c' + '─'.repeat(50), 'color:#30363d');
+      console.log('%cإجمالي وقت التحميل: ' + total.toFixed(1) + ' ms',
+        total > 2000 ? 'color:#f85149;font-weight:bold;font-size:13px' : 'color:#3fb950;font-weight:bold;font-size:13px');
+      if (total > 2000) {
+        console.warn('⚠️ البطء سببه Firebase - أضف Index على timestamp في Firebase Rules');
+        console.warn('راجع التعليقات في الكود للحل الكامل');
+      }
+      console.groupEnd();
+    }
+  };
+
+  const perfTimes = {};
+
+  // ─── Firebase ───────────────────────────────────────────────────────────────
+  const app = initializeApp({
     apiKey:"AIzaSyC7EVNCSl48CQgIC_a8wdC5UG2tKLtNKjQ",
     authDomain:"garag-system.firebaseapp.com",
     databaseURL:"https://garag-system-default-rtdb.firebaseio.com",
@@ -368,29 +297,339 @@
     storageBucket:"garag-system.firebasestorage.app",
     messagingSenderId:"330947022055",
     appId:"1:330947022055:web:d0c9d378e200c7de45a642"
-  };
+  });
+  const db = getDatabase(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
-
-  // ===== متغيرات عامة =====
-  let allSales    = [];
-  let allProducts = [];
-  let productMap  = new Map(); // ← تحسين: Map بدلاً من find() في الحلقات
-  let currency    = 'ر.س';
-  let lowThr      = 5;
-
+  // ─── State ──────────────────────────────────────────────────────────────────
+  let allSales      = [];
+  let allProducts   = [];
+  let productMap    = new Map();   // name → product
+  let currency      = 'ر.س';
+  let lowThr        = 5;
   let currentPeriod = 'month';
+  let dailyChart    = null;
+  let catChart      = null;
+  let lastDailyKey  = null;
+  let lastCatKey    = null;
+  let _fullLoaded   = false;       // هل تم تحميل كل المبيعات (ليس فقط 30 يوم)
+  let _workerReady  = false;
+  let _worker       = null;
+  let _workerCallbacks = new Map(); // id → { resolve, reject }
+  let _workerMsgId  = 0;
 
-  let dailyChart = null;
-  let catChart   = null;
+  // ─── Web Worker (Inline Blob) ────────────────────────────────────────────────
+  // ننشئ Worker من Blob داخل نفس الملف لتجنب ملف خارجي
+  // الـ Worker يتولى جميع العمليات الحسابية خارج Main Thread
+  const WORKER_CODE = `
+    // ============================================================
+    // Web Worker: جميع العمليات الحسابية الثقيلة هنا
+    // لا يوجد DOM - فقط حسابات بيانات
+    // ============================================================
 
-  // cache للبيانات الأخيرة لمنع إعادة رسم الرسوم إذا لم تتغير
-  let lastDailyChartKey = null;
-  let lastCatChartKey   = null;
+    // خوارزمية Top-N بدون sort كامل (O(n) بدلاً من O(n log n))
+    function topN(arr, n, keyFn) {
+      if (arr.length <= n) return arr.slice().sort((a,b) => keyFn(b) - keyFn(a));
+      // Partial selection sort للـ n الأوائل فقط
+      const result = [];
+      const used   = new Uint8Array(arr.length);
+      for (let i = 0; i < Math.min(n, arr.length); i++) {
+        let bestIdx = -1, bestVal = -Infinity;
+        for (let j = 0; j < arr.length; j++) {
+          if (!used[j]) {
+            const v = keyFn(arr[j]);
+            if (v > bestVal) { bestVal = v; bestIdx = j; }
+          }
+        }
+        if (bestIdx >= 0) { used[bestIdx] = 1; result.push(arr[bestIdx]); }
+      }
+      return result;
+    }
 
-  // ===== تحميل الإعدادات =====
+    // خوارزمية Bottom-N (أقل المنتجات حركة)
+    function bottomN(arr, n, keyFn) {
+      if (arr.length <= n) return arr.slice().sort((a,b) => keyFn(a) - keyFn(b));
+      const result = [];
+      const used   = new Uint8Array(arr.length);
+      for (let i = 0; i < Math.min(n, arr.length); i++) {
+        let bestIdx = -1, bestVal = Infinity;
+        for (let j = 0; j < arr.length; j++) {
+          if (!used[j]) {
+            const v = keyFn(arr[j]);
+            if (v < bestVal) { bestVal = v; bestIdx = j; }
+          }
+        }
+        if (bestIdx >= 0) { used[bestIdx] = 1; result.push(arr[bestIdx]); }
+      }
+      return result;
+    }
+
+    self.onmessage = function(e) {
+      const { id, type, payload } = e.data;
+
+      if (type === 'PROCESS') {
+        const t0 = Date.now();
+        const { sales, products, start, end, lowThr, days } = payload;
+
+        // ── بناء productMap داخل Worker ──
+        // { name → { purchasePrice, price, quantity, category, createdAt } }
+        const pMap = Object.create(null);
+        let stockVal = 0, lowCount = 0, expectedSales = 0, expectedProfit = 0;
+
+        for (let pi = 0; pi < products.length; pi++) {
+          const p   = products[pi];
+          const qty = p.quantity      || 0;
+          const buy = p.purchasePrice || 0;
+          const sel = p.price         || 0;
+          pMap[p.name] = { cp: buy, sp: sel, qty, cat: p.category || 'غير محدد', createdAt: p.createdAt };
+          stockVal       += buy * qty;
+          expectedSales  += sel * qty;
+          expectedProfit += (sel - buy) * qty;
+          if (qty <= lowThr) lowCount++;
+        }
+
+        // ── Single Pass على المبيعات ──
+        let revenue = 0, profit = 0, salesCount = 0;
+
+        // إنشاء buckets للأيام مسبقاً
+        // key = timestamp بداية اليوم (UTC midnight)
+        const DAY_MS  = 86400000;
+        const dayBuckets = new Float64Array(days * 2); // [rev0, pft0, rev1, pft1, ...]
+        const dayLabels  = new Array(days);
+
+        // احسب أول يوم
+        const endDay = new Date(end); endDay.setHours(0,0,0,0);
+        const firstDayTs = endDay.getTime() - (days - 1) * DAY_MS;
+
+        for (let d = 0; d < days; d++) {
+          const ts = firstDayTs + d * DAY_MS;
+          const dt = new Date(ts);
+          dayLabels[d] = dt.toLocaleDateString('ar-SA', { month:'short', day:'numeric' });
+        }
+
+        // prodStats: { name → [qty, rev, pft] } — Object أسرع من Map في الـ Worker
+        const prodStats = Object.create(null);
+        // catRevenue: { cat → rev }
+        const catRevenue = Object.create(null);
+        // soldSet: { name → true }
+        const soldSet   = Object.create(null);
+
+        for (let si = 0; si < sales.length; si++) {
+          const sale = sales[si];
+          const ts   = sale.timestamp || 0;
+          if (ts < start || ts > end) continue;
+
+          salesCount++;
+          revenue += sale.total  || 0;
+          profit  += sale.profit || 0;
+
+          // Bucket index للحساب اليومي
+          const dayIdx = Math.floor((ts - firstDayTs) / DAY_MS);
+          if (dayIdx >= 0 && dayIdx < days) {
+            dayBuckets[dayIdx * 2]     += sale.total  || 0;
+            dayBuckets[dayIdx * 2 + 1] += sale.profit || 0;
+          }
+
+          // معالجة البنود
+          const items = sale.items;
+          if (!items) continue;
+          for (let ii = 0; ii < items.length; ii++) {
+            const item = items[ii];
+            const name = item.name;
+            if (!name) continue;
+            const pInfo = pMap[name];
+            const cp    = pInfo ? pInfo.cp : 0;
+            const cat   = pInfo ? pInfo.cat : 'غير محدد';
+            const qty   = item.qty   || 0;
+            const price = item.price || 0;
+            const rev   = qty * price;
+            const pft   = qty * (price - cp);
+
+            soldSet[name] = true;
+
+            if (prodStats[name]) {
+              prodStats[name][0] += qty;
+              prodStats[name][1] += rev;
+              prodStats[name][2] += pft;
+            } else {
+              prodStats[name] = [qty, rev, pft];
+            }
+
+            catRevenue[cat] = (catRevenue[cat] || 0) + rev;
+          }
+        }
+
+        // ── تحويل prodStats إلى مصفوفة ──
+        const prodList = [];
+        const names = Object.keys(prodStats);
+        for (let i = 0; i < names.length; i++) {
+          const n = names[i];
+          const s = prodStats[n];
+          prodList.push({ name: n, qty: s[0], revenue: s[1], profit: s[2] });
+        }
+
+        // ── Top-N بدون فرز كامل ──
+        const topSales  = topN(prodList, 8, x => x.qty);
+        const topProfit = topN(prodList, 8, x => x.profit);
+        const lowMove   = bottomN(prodList, 6, x => x.qty);
+
+        // ── المنتجات غير المتحركة ──
+        const dead = [];
+        for (let pi = 0; pi < products.length; pi++) {
+          const p = products[pi];
+          if (!soldSet[p.name] && (p.quantity || 0) > 0) dead.push(p);
+        }
+
+        // ── بيانات الرسوم ──
+        const dailyLabels  = dayLabels;
+        const dailyRevData = new Array(days);
+        const dailyPftData = new Array(days);
+        for (let d = 0; d < days; d++) {
+          dailyRevData[d] = dayBuckets[d * 2];
+          dailyPftData[d] = dayBuckets[d * 2 + 1];
+        }
+
+        const catKeys = Object.keys(catRevenue);
+        const catVals = catKeys.map(k => catRevenue[k]);
+
+        // ── المنتجات ذات مخزون منخفض (للجدول) ──
+        const lowStockList = [];
+        for (let pi = 0; pi < products.length; pi++) {
+          const p = products[pi];
+          if ((p.quantity || 0) <= lowThr) lowStockList.push(p);
+        }
+        // ترتيب تصاعدي بدون sort كامل (المصفوفة صغيرة عادةً)
+        lowStockList.sort((a,b) => (a.quantity||0) - (b.quantity||0));
+
+        // ── إضافة بيانات ProductMap للجداول التي تحتاجها ──
+        // نُرسل pMap كـ object عادي
+        const processingMs = Date.now() - t0;
+
+        self.postMessage({
+          id,
+          result: {
+            salesCount, revenue, profit,
+            stockVal, lowCount, expectedSales, expectedProfit,
+            topSales, topProfit, lowMove, dead,
+            lowStockList,
+            dailyLabels, dailyRevData, dailyPftData,
+            catKeys, catVals,
+            pMap,
+            processingMs
+          }
+        });
+      }
+    };
+  `;
+
+  function initWorker() {
+    try {
+      const blob = new Blob([WORKER_CODE], { type: 'application/javascript' });
+      const url  = URL.createObjectURL(blob);
+      _worker    = new Worker(url);
+      _worker.onmessage = (e) => {
+        const { id, result } = e.data;
+        const cb = _workerCallbacks.get(id);
+        if (cb) { _workerCallbacks.delete(id); cb.resolve(result); }
+      };
+      _worker.onerror = (e) => {
+        console.warn('Worker error:', e.message, '— الرجوع إلى Main Thread');
+        _worker = null; // Fallback
+      };
+      _workerReady = true;
+    } catch(err) {
+      console.warn('Web Workers غير مدعوم — الحسابات على Main Thread');
+      _workerReady = false;
+    }
+  }
+
+  function workerProcess(payload) {
+    return new Promise((resolve, reject) => {
+      if (!_worker) {
+        // Fallback: حساب مباشر على Main Thread
+        resolve(mainThreadProcess(payload));
+        return;
+      }
+      const id = ++_workerMsgId;
+      _workerCallbacks.set(id, { resolve, reject });
+      _worker.postMessage({ id, type: 'PROCESS', payload });
+    });
+  }
+
+  // ─── Fallback: نفس منطق الـ Worker لكن على Main Thread ────────────────────
+  function mainThreadProcess(payload) {
+    const { sales, products, start, end, lowThr, days } = payload;
+    const pMap = Object.create(null);
+    let stockVal = 0, lowCount = 0, expectedSales = 0, expectedProfit = 0;
+    for (let pi = 0; pi < products.length; pi++) {
+      const p   = products[pi];
+      const qty = p.quantity      || 0;
+      const buy = p.purchasePrice || 0;
+      const sel = p.price         || 0;
+      pMap[p.name] = { cp: buy, sp: sel, qty, cat: p.category || 'غير محدد', createdAt: p.createdAt };
+      stockVal       += buy * qty;
+      expectedSales  += sel * qty;
+      expectedProfit += (sel - buy) * qty;
+      if (qty <= lowThr) lowCount++;
+    }
+    const DAY_MS     = 86400000;
+    const endDay     = new Date(end); endDay.setHours(0,0,0,0);
+    const firstDayTs = endDay.getTime() - (days - 1) * DAY_MS;
+    const dayBuckets = new Float64Array(days * 2);
+    const dayLabels  = [];
+    for (let d = 0; d < days; d++) {
+      const dt = new Date(firstDayTs + d * DAY_MS);
+      dayLabels.push(dt.toLocaleDateString('ar-SA', { month:'short', day:'numeric' }));
+    }
+    let revenue = 0, profit = 0, salesCount = 0;
+    const prodStats  = Object.create(null);
+    const catRevenue = Object.create(null);
+    const soldSet    = Object.create(null);
+    for (let si = 0; si < sales.length; si++) {
+      const sale = sales[si];
+      const ts   = sale.timestamp || 0;
+      if (ts < start || ts > end) continue;
+      salesCount++; revenue += sale.total||0; profit += sale.profit||0;
+      const dayIdx = Math.floor((ts - firstDayTs) / DAY_MS);
+      if (dayIdx >= 0 && dayIdx < days) { dayBuckets[dayIdx*2] += sale.total||0; dayBuckets[dayIdx*2+1] += sale.profit||0; }
+      const items = sale.items;
+      if (!items) continue;
+      for (let ii = 0; ii < items.length; ii++) {
+        const item = items[ii];
+        const name = item.name; if (!name) continue;
+        const pInfo = pMap[name];
+        const cp = pInfo ? pInfo.cp : 0;
+        const cat = pInfo ? pInfo.cat : 'غير محدد';
+        const qty = item.qty||0, price = item.price||0;
+        const rev = qty*price, pft = qty*(price-cp);
+        soldSet[name] = true;
+        if (prodStats[name]) { prodStats[name][0]+=qty; prodStats[name][1]+=rev; prodStats[name][2]+=pft; }
+        else prodStats[name] = [qty, rev, pft];
+        catRevenue[cat] = (catRevenue[cat]||0) + rev;
+      }
+    }
+    const prodList = Object.keys(prodStats).map(n => { const s=prodStats[n]; return {name:n,qty:s[0],revenue:s[1],profit:s[2]}; });
+    function topN(arr,n,kf){ return arr.slice().sort((a,b)=>kf(b)-kf(a)).slice(0,n); }
+    const topSales  = topN(prodList, 8, x=>x.qty);
+    const topProfit = topN(prodList, 8, x=>x.profit);
+    const lowMove   = topN(prodList, 6, x=>-x.qty);
+    const dead      = products.filter(p=>!soldSet[p.name]&&(p.quantity||0)>0);
+    const lowStockList = products.filter(p=>(p.quantity||0)<=lowThr).sort((a,b)=>(a.quantity||0)-(b.quantity||0));
+    const dailyRevData = [], dailyPftData = [];
+    for (let d=0;d<days;d++){dailyRevData.push(dayBuckets[d*2]);dailyPftData.push(dayBuckets[d*2+1]);}
+    const catKeys = Object.keys(catRevenue);
+    const catVals = catKeys.map(k=>catRevenue[k]);
+    return { salesCount,revenue,profit,stockVal,lowCount,expectedSales,expectedProfit,topSales,topProfit,lowMove,dead,lowStockList,dailyLabels:dayLabels,dailyRevData,dailyPftData,catKeys,catVals,pMap,processingMs:0 };
+  }
+
+  // ─── formatNum مُحسّن: Cache الـ Intl.NumberFormat لتجنب إنشائها في كل مرة ─
+  const _numFmt  = new Intl.NumberFormat('ar-SA', { minimumFractionDigits:0, maximumFractionDigits:2 });
+  const _dateFmt = new Intl.DateTimeFormat('ar-SA', { year:'numeric', month:'short', day:'numeric' });
+  function formatNum(n)  { return _numFmt.format(n || 0); }
+  function formatDate(ts){ return ts ? _dateFmt.format(new Date(ts)) : '—'; }
+
+  // ─── تحميل الإعدادات ────────────────────────────────────────────────────────
   async function loadSettings() {
+    PERF.start('Settings Load');
     const s = await get(ref(db, 'settings'));
     if (s.exists()) {
       const st = s.val();
@@ -398,50 +637,64 @@
       lowThr   = st.lowStockThreshold || 5;
       if (st.storeName) document.getElementById('storeName').textContent = st.storeName;
     }
+    perfTimes['Settings Load'] = PERF.end('Settings Load');
   }
 
-  // ===== تحميل البيانات مع Query محسّن =====
+  // ─── تحميل البيانات من Firebase ─────────────────────────────────────────────
   async function loadAll() {
-    // احسب timestamp لآخر 30 يوم (الافتراضي) لتقليل البيانات المحملة
+    document.getElementById('loadingMsg').textContent = 'جارٍ الاتصال بقاعدة البيانات...';
     const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
 
-    // جلب المنتجات وآخر 30 يوم من المبيعات بالتوازي
+    PERF.start('Firebase Load (Parallel)');
+    document.getElementById('loadingMsg').textContent = 'جارٍ تحميل المنتجات والمبيعات...';
+
+    // تحميل المنتجات والمبيعات بالتوازي مع Query محدودة للمبيعات
     const [salesSnap, productsSnap] = await Promise.all([
+      // Query بـ timestamp (يتطلب Index في Firebase Rules للسرعة القصوى)
       get(query(ref(db, 'sales'), orderByChild('timestamp'), startAt(thirtyDaysAgo))),
       get(ref(db, 'products'))
     ]);
+    perfTimes['Firebase Load (Parallel)'] = PERF.end('Firebase Load (Parallel)');
 
+    PERF.start('Data Parsing');
+    // تحليل البيانات الخام
     allSales = salesSnap.exists()
-      ? Object.entries(salesSnap.val()).map(([id,v]) => ({ id, ...v }))
+      ? Object.values(salesSnap.val())  // Object.values أسرع من entries().map()
       : [];
 
     allProducts = productsSnap.exists()
-      ? Object.entries(productsSnap.val()).map(([id,v]) => ({ id, ...v }))
+      ? Object.values(productsSnap.val())
       : [];
 
-    // بناء productMap مرة واحدة بعد التحميل
+    // بناء productMap على Main Thread (خفيف)
     productMap.clear();
-    allProducts.forEach(p => productMap.set(p.name, p));
+    for (let i = 0; i < allProducts.length; i++) {
+      productMap.set(allProducts[i].name, allProducts[i]);
+    }
+    perfTimes['Data Parsing'] = PERF.end('Data Parsing');
 
-    // إخفاء شاشة التحميل فوراً بعد استلام البيانات
+    // إخفاء شاشة التحميل فوراً — الصفحة تظهر قبل معالجة البيانات
     const overlay = document.getElementById('loadingOverlay');
     overlay.style.opacity = '0';
-    setTimeout(() => { overlay.style.display = 'none'; }, 400);
+    setTimeout(() => { overlay.style.display = 'none'; }, 300);
   }
 
-  // ===== إعادة تحميل كل المبيعات عند الحاجة (فترة مخصصة قديمة) =====
+  // ─── تحميل كل المبيعات (للفترات القديمة) ───────────────────────────────────
   async function ensureFullSalesLoaded() {
-    // إذا كان المستخدم يختار فترة قبل آخر 30 يوم نحتاج كل البيانات
-    // نضع علامة لمنع إعادة التحميل إذا سبق وحملنا الكل
-    if (allSales._fullLoaded) return;
+    if (_fullLoaded) return;
+    PERF.start('Firebase Full Sales Load');
+    document.getElementById('loadingMsg').textContent = 'جارٍ تحميل بيانات تاريخية...';
+    document.getElementById('loadingOverlay').style.display = 'flex';
+    document.getElementById('loadingOverlay').style.opacity = '1';
     const snap = await get(ref(db, 'sales'));
-    allSales = snap.exists()
-      ? Object.entries(snap.val()).map(([id,v]) => ({ id, ...v }))
-      : [];
-    allSales._fullLoaded = true;
+    allSales = snap.exists() ? Object.values(snap.val()) : [];
+    _fullLoaded = true;
+    perfTimes['Firebase Full Sales Load'] = PERF.end('Firebase Full Sales Load');
+    document.getElementById('loadingOverlay').style.opacity = '0';
+    setTimeout(() => { document.getElementById('loadingOverlay').style.display = 'none'; }, 300);
   }
 
-  // ===== تحديد الفترة الزمنية =====
+  // ─── تحديد الفترة الزمنية ───────────────────────────────────────────────────
   window.setPeriod = function(p, el) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
@@ -455,460 +708,282 @@
     const to   = document.getElementById('dateTo').value;
     if (!from || !to) { showToast('⚠️ اختر تاريخ البداية والنهاية', 'warn'); return; }
     if (from > to)    { showToast('❌ تاريخ البداية يجب أن يكون قبل تاريخ النهاية', 'error'); return; }
-
-    // إذا كانت الفترة المختارة قبل آخر 30 يوم نحمّل كل البيانات
-    const fromTs = new Date(from).getTime();
+    const fromTs         = new Date(from).getTime();
     const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
-    if (fromTs < thirtyDaysAgo) {
-      await ensureFullSalesLoaded();
-    }
+    if (fromTs < thirtyDaysAgo) await ensureFullSalesLoaded();
     buildReport();
   };
 
   function getPeriodBounds() {
-    const now   = new Date();
+    const now   = Date.now();
     const today = new Date(now); today.setHours(0,0,0,0);
-
-    if (currentPeriod === 'today') {
-      return { start: today.getTime(), end: Date.now(), label: 'اليوم' };
-    }
-    if (currentPeriod === 'week') {
-      const s = new Date(today); s.setDate(s.getDate() - 6);
-      return { start: s.getTime(), end: Date.now(), label: 'آخر 7 أيام' };
-    }
-    if (currentPeriod === 'month') {
-      const s = new Date(today); s.setDate(s.getDate() - 29);
-      return { start: s.getTime(), end: Date.now(), label: 'آخر 30 يوم' };
-    }
+    const t0    = today.getTime();
+    if (currentPeriod === 'today')  return { start: t0,                end: now, label: 'اليوم',       days: 1  };
+    if (currentPeriod === 'week')   return { start: t0 - 6*86400000,  end: now, label: 'آخر 7 أيام',  days: 7  };
+    if (currentPeriod === 'month')  return { start: t0 - 29*86400000, end: now, label: 'آخر 30 يوم',  days: 30 };
     if (currentPeriod === 'custom') {
       const from = new Date(document.getElementById('dateFrom').value);
-      const to   = new Date(document.getElementById('dateTo').value);
-      to.setHours(23,59,59,999);
-      return { start: from.getTime(), end: to.getTime(), label: 'فترة مخصصة' };
+      const to   = new Date(document.getElementById('dateTo').value); to.setHours(23,59,59,999);
+      const diff = Math.min(Math.ceil((to - from) / 86400000), 30);
+      return { start: from.getTime(), end: to.getTime(), label: 'فترة مخصصة', days: diff };
     }
-    return { start: 0, end: Date.now(), label: 'كل الفترات' };
+    return { start: 0, end: now, label: 'كل الفترات', days: 30 };
   }
 
-  // ===== بناء التقرير الكامل (Single Pass محسّن) =====
-  function buildReport() {
-    const { start, end, label } = getPeriodBounds();
+  // ─── بناء التقرير ───────────────────────────────────────────────────────────
+  async function buildReport() {
+    PERF.start('Build Report Total');
+    const { start, end, label, days } = getPeriodBounds();
     document.getElementById('reportPeriodLabel').textContent = label;
 
-    // ── مرور واحد على المبيعات يجمع كل الإحصائيات ──
-    let revenue    = 0;
-    let profit     = 0;
-    let salesCount = 0;
-
-    const prodStats  = new Map(); // اسم المنتج → { qty, revenue, profit }
-    const catRevenue = new Map(); // اسم القسم  → إيرادات
-    const dailyMap   = new Map(); // timestamp بداية اليوم → { rev, profit }
-
-    // حدود الأيام
-    const days    = Math.min(Math.ceil((end - start) / 86400000), 30);
-    const dayKeys = [];
-    for (let i = days - 1; i >= 0; i--) {
-      const d = new Date(end);
-      d.setDate(d.getDate() - i);
-      d.setHours(0, 0, 0, 0);
-      dayKeys.push(d.getTime());
-      dailyMap.set(d.getTime(), { rev: 0, profit: 0, label: d.toLocaleDateString('ar-SA', { month:'short', day:'numeric' }) });
-    }
-    // مساعد: إيجاد مفتاح اليوم لـ timestamp معين
-    function getDayKey(ts) {
-      const d = new Date(ts); d.setHours(0,0,0,0); return d.getTime();
+    // أرسل البيانات للـ Worker لمعالجتها
+    PERF.start('Worker Processing');
+    const result = await workerProcess({
+      sales:    allSales,
+      products: allProducts,
+      start, end, lowThr, days
+    });
+    perfTimes['Worker Processing'] = PERF.end('Worker Processing');
+    if (result.processingMs) {
+      console.log('⚡ Worker processing time:', result.processingMs, 'ms');
     }
 
-    for (let si = 0; si < allSales.length; si++) {
-      const sale = allSales[si];
-      const ts   = sale.timestamp || 0;
-      if (ts < start || ts > end) continue;
+    // ── Phase 1: تحديث البطاقات فوراً (مكلفة منخفضة) ──
+    PERF.start('DOM: Stat Cards');
+    document.getElementById('statSalesCount').textContent     = result.salesCount;
+    document.getElementById('statRevenue').textContent        = formatNum(result.revenue);
+    document.getElementById('statProfit').textContent         = formatNum(result.profit);
+    document.getElementById('statMargin').textContent         = (result.revenue > 0 ? ((result.profit/result.revenue)*100).toFixed(1) : 0) + '%';
+    document.getElementById('statStockValue').textContent     = formatNum(result.stockVal);
+    document.getElementById('statLowStock').textContent       = result.lowCount;
+    document.getElementById('statExpectedSales').textContent  = formatNum(result.expectedSales);
+    document.getElementById('statExpectedProfit').textContent = formatNum(result.expectedProfit);
+    perfTimes['DOM: Stat Cards'] = PERF.end('DOM: Stat Cards');
 
-      salesCount++;
-      revenue += sale.total  || 0;
-      profit  += sale.profit || 0;
+    // ── Phase 2: الرسوم البيانية (requestAnimationFrame) ──
+    requestAnimationFrame(() => {
+      PERF.start('Charts Render');
+      renderDailyChart(result.dailyLabels, result.dailyRevData, result.dailyPftData);
+      renderCatChart(result.catKeys, result.catVals);
+      perfTimes['Charts Render'] = PERF.end('Charts Render');
 
-      // تجميع يومي
-      const dk = getDayKey(ts);
-      if (dailyMap.has(dk)) {
-        const day = dailyMap.get(dk);
-        day.rev    += sale.total  || 0;
-        day.profit += sale.profit || 0;
+      // ── Phase 3: الجداول (requestIdleCallback أو setTimeout) ──
+      const renderTables = () => {
+        PERF.start('Tables Render');
+        renderTopSales(result.topSales);
+        renderTopProfit(result.topProfit);
+        renderLowMove(result.lowMove, result.pMap);
+        renderLowStock(result.lowStockList);
+        renderDeadStock(result.dead);
+        perfTimes['Tables Render'] = PERF.end('Tables Render');
+
+        perfTimes['Build Report Total'] = PERF.end('Build Report Total');
+        PERF.report(perfTimes);
+      };
+
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(renderTables, { timeout: 500 });
+      } else {
+        setTimeout(renderTables, 0);
       }
-
-      // تجميع على مستوى المنتجات
-      const items = sale.items || [];
-      for (let ii = 0; ii < items.length; ii++) {
-        const item = items[ii];
-        const prod = productMap.get(item.name); // ← Map بدلاً من find()
-        const cp   = prod ? (prod.purchasePrice || 0) : 0;
-        const cat  = prod ? (prod.category || 'غير محدد') : 'غير محدد';
-        const qty  = item.qty   || 0;
-        const price= item.price || 0;
-        const rev  = qty * price;
-        const pft  = qty * (price - cp);
-
-        // إحصائيات المنتج
-        if (prodStats.has(item.name)) {
-          const ps = prodStats.get(item.name);
-          ps.qty     += qty;
-          ps.revenue += rev;
-          ps.profit  += pft;
-        } else {
-          prodStats.set(item.name, { qty, revenue: rev, profit: pft });
-        }
-
-        // إحصائيات القسم
-        catRevenue.set(cat, (catRevenue.get(cat) || 0) + rev);
-      }
-    }
-
-    const margin = revenue > 0 ? ((profit / revenue) * 100).toFixed(1) : 0;
-
-    // ── إحصائيات المخزون (لا تعتمد على الفترة، مرور واحد) ──
-    let stockVal       = 0;
-    let lowCount       = 0;
-    let expectedSales  = 0;
-    let expectedProfit = 0;
-
-    for (let pi = 0; pi < allProducts.length; pi++) {
-      const p    = allProducts[pi];
-      const qty  = p.quantity      || 0;
-      const buy  = p.purchasePrice || 0;
-      const sell = p.price         || 0;
-
-      stockVal       += buy  * qty;
-      expectedSales  += sell * qty;
-      expectedProfit += (sell - buy) * qty;
-      if (qty <= lowThr) lowCount++;
-    }
-
-    // ── تحديث الـ DOM (دفعة واحدة) ──
-    document.getElementById('statSalesCount').textContent    = salesCount;
-    document.getElementById('statRevenue').textContent       = formatNum(revenue);
-    document.getElementById('statProfit').textContent        = formatNum(profit);
-    document.getElementById('statMargin').textContent        = margin + '%';
-    document.getElementById('statStockValue').textContent    = formatNum(stockVal);
-    document.getElementById('statLowStock').textContent      = lowCount;
-    document.getElementById('statExpectedSales').textContent = formatNum(expectedSales);
-    document.getElementById('statExpectedProfit').textContent= formatNum(expectedProfit);
-
-    // ── تحويل prodStats Map → مصفوفة ──
-    const prodList = [];
-    prodStats.forEach((d, name) => prodList.push({ name, ...d }));
-
-    // ── إرجاء رسم الجداول والرسوم لما بعد ظهور الصفحة ──
-    setTimeout(() => {
-      // أكثر مبيعاً
-      const topSales = prodList.slice().sort((a,b) => b.qty - a.qty).slice(0, 8);
-      renderTopSales(topSales);
-
-      // أعلى ربحية
-      const topProfit = prodList.slice().sort((a,b) => b.profit - a.profit).slice(0, 8);
-      renderTopProfit(topProfit);
-
-      // أقل حركة
-      const lowMove = prodList.slice().sort((a,b) => a.qty - b.qty).slice(0, 6);
-      renderLowMove(lowMove);
-
-      // منتجات قليلة المخزون
-      renderLowStock();
-
-      // منتجات غير متحركة
-      const soldNames = new Set(prodStats.keys());
-      const dead = allProducts.filter(p => !soldNames.has(p.name) && (p.quantity || 0) > 0);
-      renderDeadStock(dead);
-
-      // رسم الرسوم البيانية
-      renderDailyChart(dayKeys, dailyMap);
-      renderCatChart(catRevenue);
-    }, 0);
+    });
   }
 
-  // ===== أكثر مبيعاً =====
+  // ─── Render: أكثر مبيعاً ────────────────────────────────────────────────────
   function renderTopSales(list) {
-    const tbody = document.getElementById('topSalesBody');
+    const tbody  = document.getElementById('topSalesBody');
     if (!list.length) { tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">لا توجد مبيعات في هذه الفترة</td></tr>`; return; }
     const maxQty = list[0].qty || 1;
-    let html = '';
+    const parts  = new Array(list.length);
     for (let i = 0; i < list.length; i++) {
       const p = list[i];
-      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
-      html += `<tr>
-        <td><span class="${rankClass}">${i+1}</span></td>
-        <td style="font-weight:600;">${p.name}</td>
-        <td><strong>${p.qty}</strong> وحدة</td>
-        <td style="color:var(--accent);font-weight:700;">${formatNum(p.revenue)} ${currency}</td>
-        <td>
-          <div class="progress-bar-wrap" style="width:80px;">
-            <div class="progress-bar-fill" style="width:${(p.qty/maxQty*100).toFixed(0)}%;background:var(--accent);"></div>
-          </div>
-        </td>
-      </tr>`;
+      const w = ((p.qty / maxQty) * 100).toFixed(0);
+      const r = i < 3 ? `rank-${i+1}` : 'rank-n';
+      parts[i] = `<tr><td><span class="${r}">${i+1}</span></td><td style="font-weight:600">${p.name}</td><td><strong>${p.qty}</strong> وحدة</td><td style="color:var(--accent);font-weight:700">${formatNum(p.revenue)} ${currency}</td><td><div class="progress-bar-wrap" style="width:80px"><div class="progress-bar-fill" style="width:${w}%;background:var(--accent)"></div></div></td></tr>`;
     }
-    tbody.innerHTML = html;
+    tbody.innerHTML = parts.join('');
   }
 
-  // ===== أعلى ربحية =====
+  // ─── Render: أعلى ربحية ─────────────────────────────────────────────────────
   function renderTopProfit(list) {
     const tbody = document.getElementById('topProfitBody');
     if (!list.length) { tbody.innerHTML = `<tr><td colspan="5" class="empty-msg">لا توجد بيانات</td></tr>`; return; }
-    const maxP = list[0].profit || 1;
-    let html = '';
+    const maxP  = list[0].profit || 1;
+    const parts = new Array(list.length);
     for (let i = 0; i < list.length; i++) {
-      const p = list[i];
-      const avgPer = p.qty > 0 ? (p.profit / p.qty) : 0;
-      const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-n';
-      html += `<tr>
-        <td><span class="${rankClass}">${i+1}</span></td>
-        <td style="font-weight:600;">${p.name}</td>
-        <td style="color:var(--success);font-weight:700;">${formatNum(p.profit)} ${currency}</td>
-        <td style="color:var(--text-muted);">${formatNum(avgPer)} ${currency}</td>
-        <td>
-          <div class="progress-bar-wrap" style="width:80px;">
-            <div class="progress-bar-fill" style="width:${(p.profit/maxP*100).toFixed(0)}%;background:var(--success);"></div>
-          </div>
-        </td>
-      </tr>`;
+      const p   = list[i];
+      const avg = p.qty > 0 ? p.profit / p.qty : 0;
+      const w   = ((p.profit / maxP) * 100).toFixed(0);
+      const r   = i < 3 ? `rank-${i+1}` : 'rank-n';
+      parts[i]  = `<tr><td><span class="${r}">${i+1}</span></td><td style="font-weight:600">${p.name}</td><td style="color:var(--success);font-weight:700">${formatNum(p.profit)} ${currency}</td><td style="color:var(--text-muted)">${formatNum(avg)} ${currency}</td><td><div class="progress-bar-wrap" style="width:80px"><div class="progress-bar-fill" style="width:${w}%;background:var(--success)"></div></div></td></tr>`;
     }
-    tbody.innerHTML = html;
+    tbody.innerHTML = parts.join('');
   }
 
-  // ===== أقل حركة =====
-  function renderLowMove(list) {
+  // ─── Render: أقل حركة ───────────────────────────────────────────────────────
+  function renderLowMove(list, pMap) {
     const tbody = document.getElementById('lowMoveBody');
     if (!list.length) { tbody.innerHTML = `<tr><td colspan="4" class="empty-msg">لا توجد بيانات</td></tr>`; return; }
-    let html = '';
+    const parts = new Array(list.length);
     for (let i = 0; i < list.length; i++) {
       const p    = list[i];
-      const prod = productMap.get(p.name); // ← Map بدلاً من find()
-      const stockBadge = prod
-        ? (prod.quantity <= lowThr
-            ? `<span class="badge-low">${prod.quantity} قطعة</span>`
-            : `<span class="badge-ok">${prod.quantity} قطعة</span>`)
+      const prod = pMap[p.name];
+      const cat  = prod ? prod.cat : '—';
+      const qty  = prod ? prod.qty : null;
+      const badge = qty !== null
+        ? (qty <= lowThr ? `<span class="badge-low">${qty} قطعة</span>` : `<span class="badge-ok">${qty} قطعة</span>`)
         : '—';
-      html += `<tr>
-        <td style="font-weight:600;">${p.name}</td>
-        <td><span class="badge-cat">${prod?.category || '—'}</span></td>
-        <td style="color:var(--warning);">${p.qty} وحدة</td>
-        <td>${stockBadge}</td>
-      </tr>`;
+      parts[i] = `<tr><td style="font-weight:600">${p.name}</td><td><span class="badge-cat">${cat}</span></td><td style="color:var(--warning)">${p.qty} وحدة</td><td>${badge}</td></tr>`;
     }
-    tbody.innerHTML = html;
+    tbody.innerHTML = parts.join('');
   }
 
-  // ===== منتجات قليلة المخزون =====
-  function renderLowStock() {
+  // ─── Render: مخزون منخفض ────────────────────────────────────────────────────
+  function renderLowStock(list) {
     const tbody = document.getElementById('lowStockBody');
-    // فرز بدون filter منفصلة — مرور واحد
-    const list = [];
-    for (let i = 0; i < allProducts.length; i++) {
-      if ((allProducts[i].quantity || 0) <= lowThr) list.push(allProducts[i]);
-    }
-    list.sort((a,b) => a.quantity - b.quantity);
-
-    if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="4" class="empty-msg"><i class="fas fa-check-circle" style="color:var(--success)"></i> جميع المنتجات بكميات كافية</td></tr>`;
-      return;
-    }
-    let html = '';
+    if (!list.length) { tbody.innerHTML = `<tr><td colspan="4" class="empty-msg"><i class="fas fa-check-circle" style="color:var(--success)"></i> جميع المنتجات بكميات كافية</td></tr>`; return; }
+    const parts = new Array(list.length);
     for (let i = 0; i < list.length; i++) {
       const p = list[i];
-      html += `<tr>
-        <td style="font-weight:600;">${p.name}</td>
-        <td><span class="badge-cat">${p.category || '—'}</span></td>
-        <td><strong>${p.quantity || 0}</strong></td>
-        <td>${p.quantity === 0
-          ? '<span class="badge-low">نفذ من المخزون</span>'
-          : '<span class="badge-warn">كمية منخفضة</span>'}</td>
-      </tr>`;
+      const b = p.quantity === 0 ? '<span class="badge-low">نفذ من المخزون</span>' : '<span class="badge-warn">كمية منخفضة</span>';
+      parts[i] = `<tr><td style="font-weight:600">${p.name}</td><td><span class="badge-cat">${p.category||'—'}</span></td><td><strong>${p.quantity||0}</strong></td><td>${b}</td></tr>`;
     }
-    tbody.innerHTML = html;
+    tbody.innerHTML = parts.join('');
   }
 
-  // ===== المنتجات غير المتحركة =====
+  // ─── Render: غير متحركة (Chunk Rendering للقوائم الكبيرة) ──────────────────
   function renderDeadStock(list) {
     const tbody = document.getElementById('deadStockBody');
     document.getElementById('deadStockCount').textContent = list.length + ' منتج';
-    if (!list.length) {
-      tbody.innerHTML = `<tr><td colspan="5" class="empty-msg"><i class="fas fa-check-circle" style="color:var(--success)"></i> لا توجد منتجات غير متحركة</td></tr>`;
-      return;
+    if (!list.length) { tbody.innerHTML = `<tr><td colspan="5" class="empty-msg"><i class="fas fa-check-circle" style="color:var(--success)"></i> لا توجد منتجات غير متحركة</td></tr>`; return; }
+
+    // Chunk Rendering: عرض أول 20 صفاً فوراً ثم الباقي عبر requestIdleCallback
+    const CHUNK = 20;
+    function renderChunk(start, arr) {
+      const end   = Math.min(start + CHUNK, arr.length);
+      const parts = new Array(end - start);
+      for (let i = start; i < end; i++) {
+        const p   = arr[i];
+        const val = (p.purchasePrice||0) * (p.quantity||0);
+        parts[i - start] = `<tr><td style="font-weight:600">${p.name}</td><td><span class="badge-cat">${p.category||'—'}</span></td><td>${p.quantity||0} قطعة</td><td style="color:var(--warning);font-weight:700">${formatNum(val)} ${currency}</td><td style="color:var(--text-muted);font-size:12px">${formatDate(p.createdAt)}</td></tr>`;
+      }
+      if (start === 0) {
+        tbody.innerHTML = parts.join('');
+      } else {
+        tbody.insertAdjacentHTML('beforeend', parts.join(''));
+      }
+      if (end < arr.length) {
+        if (typeof requestIdleCallback !== 'undefined') {
+          requestIdleCallback(() => renderChunk(end, arr), { timeout: 300 });
+        } else {
+          setTimeout(() => renderChunk(end, arr), 0);
+        }
+      }
     }
-    let html = '';
-    for (let i = 0; i < list.length; i++) {
-      const p   = list[i];
-      const val = (p.purchasePrice || 0) * (p.quantity || 0);
-      html += `<tr>
-        <td style="font-weight:600;">${p.name}</td>
-        <td><span class="badge-cat">${p.category || '—'}</span></td>
-        <td>${p.quantity || 0} قطعة</td>
-        <td style="color:var(--warning);font-weight:700;">${formatNum(val)} ${currency}</td>
-        <td style="color:var(--text-muted);font-size:12px;">${formatDate(p.createdAt)}</td>
-      </tr>`;
-    }
-    tbody.innerHTML = html;
+    renderChunk(0, list);
   }
 
-  // ===== رسم بياني: مبيعات يومية =====
-  function renderDailyChart(dayKeys, dailyMap) {
-    const labels     = [];
-    const data       = [];
-    const profitData = [];
+  // ─── Chart: مبيعات يومية ────────────────────────────────────────────────────
+  function renderDailyChart(labels, data, profitData) {
+    const key = labels.length + '|' + (data[0]||0) + '|' + (data[data.length-1]||0);
+    if (dailyChart && lastDailyKey === key) return;
+    lastDailyKey = key;
 
-    for (let i = 0; i < dayKeys.length; i++) {
-      const entry = dailyMap.get(dayKeys[i]);
-      labels.push(entry.label);
-      data.push(entry.rev);
-      profitData.push(entry.profit);
-    }
-
-    // مفتاح cache لمنع إعادة رسم بدون تغيير
-    const cacheKey = labels.join(',') + '|' + data.join(',');
-    if (dailyChart && lastDailyChartKey === cacheKey) return;
-    lastDailyChartKey = cacheKey;
-
-    const ctx = document.getElementById('dailySalesChart').getContext('2d');
     if (dailyChart) {
-      // تحديث البيانات بدلاً من إعادة إنشاء الرسم إذا أمكن
-      dailyChart.data.labels       = labels;
+      dailyChart.data.labels           = labels;
       dailyChart.data.datasets[0].data = data;
       dailyChart.data.datasets[1].data = profitData;
       dailyChart.update('none');
       return;
     }
 
+    const ctx = document.getElementById('dailySalesChart').getContext('2d');
     dailyChart = new Chart(ctx, {
       type: 'bar',
       data: {
         labels,
         datasets: [
-          {
-            label: 'المبيعات',
-            data,
-            backgroundColor: 'rgba(212,160,23,0.7)',
-            borderColor: '#d4a017',
-            borderWidth: 1,
-            borderRadius: 4,
-            order: 2
-          },
-          {
-            label: 'الأرباح',
-            data: profitData,
-            type: 'line',
-            borderColor: '#3fb950',
-            backgroundColor: 'rgba(63,185,80,0.08)',
-            borderWidth: 2,
-            pointRadius: 3,
-            fill: false,
-            tension: 0.4,
-            order: 1
-          }
+          { label:'المبيعات', data, backgroundColor:'rgba(212,160,23,0.7)', borderColor:'#d4a017', borderWidth:1, borderRadius:4, order:2 },
+          { label:'الأرباح', data:profitData, type:'line', borderColor:'#3fb950', backgroundColor:'rgba(63,185,80,0.08)', borderWidth:2, pointRadius:3, fill:false, tension:0.4, order:1 }
         ]
       },
       options: {
-        responsive: true,
-        animation: false,
+        responsive:true, animation:false,
         plugins: {
-          legend: { labels: { color:'#8b949e', font:{ family:'Cairo', size:11 } } },
-          tooltip: {
-            backgroundColor:'#161b22', titleColor:'#e6edf3', bodyColor:'#8b949e',
-            borderColor:'#30363d', borderWidth:1,
-            callbacks: { label: ctx => ctx.parsed.y.toLocaleString('ar-SA') + ' ' + currency }
-          }
+          legend:{ labels:{ color:'#8b949e', font:{ family:'Cairo', size:11 } } },
+          tooltip:{ backgroundColor:'#161b22', titleColor:'#e6edf3', bodyColor:'#8b949e', borderColor:'#30363d', borderWidth:1,
+            callbacks:{ label: c => c.parsed.y.toLocaleString('ar-SA') + ' ' + currency } }
         },
         scales: {
-          x: { ticks:{ color:'#8b949e', font:{ family:'Cairo', size:10 }, maxTicksLimit: 10 }, grid:{ color:'#21262d' } },
-          y: { ticks:{ color:'#8b949e', font:{ family:'Cairo' } }, grid:{ color:'#21262d' } }
+          x:{ ticks:{ color:'#8b949e', font:{ family:'Cairo', size:10 }, maxTicksLimit:10 }, grid:{ color:'#21262d' } },
+          y:{ ticks:{ color:'#8b949e', font:{ family:'Cairo' } }, grid:{ color:'#21262d' } }
         }
       }
     });
   }
 
-  // ===== رسم بياني: حسب القسم =====
-  function renderCatChart(catRevenue) {
-    const cats = [];
-    const vals = [];
-    catRevenue.forEach((v, k) => { cats.push(k); vals.push(v); });
-
-    const cacheKey = cats.join(',') + '|' + vals.join(',');
-    const ctx      = document.getElementById('catChart').getContext('2d');
-
-    if (catChart && lastCatChartKey === cacheKey) return;
-    lastCatChartKey = cacheKey;
+  // ─── Chart: حسب القسم ───────────────────────────────────────────────────────
+  function renderCatChart(cats, vals) {
+    const key = cats.join(',') + '|' + vals.join(',');
+    const ctx = document.getElementById('catChart').getContext('2d');
+    if (catChart && lastCatKey === key) return;
+    lastCatKey = key;
 
     if (catChart) {
-      if (!cats.length) {
-        catChart.destroy(); catChart = null;
-      } else {
-        catChart.data.labels          = cats;
-        catChart.data.datasets[0].data = vals;
-        catChart.update('none');
-        return;
-      }
+      if (!cats.length) { catChart.destroy(); catChart = null; }
+      else { catChart.data.labels = cats; catChart.data.datasets[0].data = vals; catChart.update('none'); return; }
     }
-
     if (!cats.length) {
-      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-      ctx.fillStyle  = '#8b949e';
-      ctx.font       = '14px Cairo';
-      ctx.textAlign  = 'center';
-      ctx.fillText('لا توجد بيانات في هذه الفترة', ctx.canvas.width / 2, ctx.canvas.height / 2);
+      ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+      ctx.fillStyle='#8b949e'; ctx.font='14px Cairo'; ctx.textAlign='center';
+      ctx.fillText('لا توجد بيانات في هذه الفترة', ctx.canvas.width/2, ctx.canvas.height/2);
       return;
     }
-
     const COLORS = ['#d4a017','#3fb950','#58a6ff','#f85149','#d29922','#bc8cff','#ff7b72','#79c0ff'];
-
     catChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: cats,
-        datasets: [{
-          data: vals,
-          backgroundColor: COLORS.slice(0, cats.length),
-          borderColor: '#161b22',
-          borderWidth: 3
-        }]
-      },
-      options: {
-        responsive: true,
-        animation: false,
-        plugins: {
-          legend: { position:'bottom', labels:{ color:'#8b949e', font:{ family:'Cairo', size:11 }, padding:12, boxWidth:12 } },
-          tooltip: {
-            backgroundColor:'#161b22', titleColor:'#e6edf3', bodyColor:'#8b949e',
-            borderColor:'#30363d', borderWidth:1,
-            callbacks: { label: ctx => ctx.label + ': ' + ctx.parsed.toLocaleString('ar-SA') + ' ' + currency }
-          }
+      type:'doughnut',
+      data:{ labels:cats, datasets:[{ data:vals, backgroundColor:COLORS.slice(0,cats.length), borderColor:'#161b22', borderWidth:3 }] },
+      options:{
+        responsive:true, animation:false,
+        plugins:{
+          legend:{ position:'bottom', labels:{ color:'#8b949e', font:{ family:'Cairo', size:11 }, padding:12, boxWidth:12 } },
+          tooltip:{ backgroundColor:'#161b22', titleColor:'#e6edf3', bodyColor:'#8b949e', borderColor:'#30363d', borderWidth:1,
+            callbacks:{ label: c => c.label + ': ' + c.parsed.toLocaleString('ar-SA') + ' ' + currency } }
         }
       }
     });
   }
 
-  // ===== مساعدات =====
-  function formatNum(n) {
-    return Number(n || 0).toLocaleString('ar-SA', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
-  }
-  function formatDate(ts) {
-    if (!ts) return '—';
-    return new Date(ts).toLocaleDateString('ar-SA', { year:'numeric', month:'short', day:'numeric' });
-  }
-  function showToast(msg, type = 'success') {
+  // ─── Toast ──────────────────────────────────────────────────────────────────
+  function showToast(msg, type='success') {
     const c = document.getElementById('toastContainer');
     const t = document.createElement('div');
-    t.className = 'my-toast';
-    t.style.borderColor = type === 'error' ? 'var(--danger)' : type === 'warn' ? 'var(--warning)' : 'var(--success)';
+    t.className   = 'my-toast';
+    t.style.borderColor = type==='error' ? 'var(--danger)' : type==='warn' ? 'var(--warning)' : 'var(--success)';
     t.textContent = msg;
     c.appendChild(t);
     setTimeout(() => t.remove(), 3500);
   }
+
   window.toggleSidebar = function() {
     document.getElementById('sidebar').classList.toggle('open');
   };
 
-  // ===== تشغيل =====
+  // ─── Bootstrap ──────────────────────────────────────────────────────────────
   (async () => {
-    await loadSettings();
-    await loadAll();
-    buildReport(); // الافتراضي: الشهر
+    const t0 = performance.now();
+    PERF.start('Total Page Load');
+
+    // تهيئة Worker فوراً (لا ينتظر Firebase)
+    initWorker();
+
+    // تحميل الإعدادات والبيانات بالتوازي
+    await Promise.all([loadSettings(), loadAll()]);
+
+    perfTimes['Total Page Load (Firebase)'] = (performance.now() - t0).toFixed(1) - 0;
+
+    // بناء التقرير الافتراضي (الشهر)
+    await buildReport();
   })();
 </script>
 
