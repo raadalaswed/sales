@@ -224,6 +224,24 @@
     </div>
   </div>
 
+  <!-- ===== بطاقات المبيعات والربح المتوقعان ===== -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-6">
+      <div class="stat-card blue">
+        <div class="stat-icon blue"><i class="fas fa-bag-shopping"></i></div>
+        <div class="stat-value" id="statExpectedRevenue">0</div>
+        <div class="stat-label">إجمالي المبيعات المتوقعة</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-6">
+      <div class="stat-card green">
+        <div class="stat-icon green"><i class="fas fa-sack-dollar"></i></div>
+        <div class="stat-value" id="statExpectedProfit">0</div>
+        <div class="stat-label">إجمالي الربح المتوقع</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== الرسوم البيانية ===== -->
   <div class="row g-3 mb-4">
     <!-- مبيعات يومية -->
@@ -468,6 +486,14 @@
     document.getElementById('statMargin').textContent     = margin + '%';
     document.getElementById('statStockValue').textContent = formatNum(stockVal);
     document.getElementById('statLowStock').textContent   = lowCount;
+
+    // --- إجمالي المبيعات المتوقعة (salePrice × quantity لكل المنتجات) ---
+    const expectedRevenue = allProducts.reduce((s, p) => s + (p.salePrice || 0) * (p.quantity || 0), 0);
+    // --- إجمالي الربح المتوقع ((salePrice - purchasePrice) × quantity لكل المنتجات) ---
+    const expectedProfit  = allProducts.reduce((s, p) => s + ((p.salePrice || 0) - (p.purchasePrice || 0)) * (p.quantity || 0), 0);
+
+    document.getElementById('statExpectedRevenue').textContent = formatNum(expectedRevenue);
+    document.getElementById('statExpectedProfit').textContent  = formatNum(expectedProfit);
 
     // --- تجميع إحصائيات المنتجات من المبيعات ---
     const prodStats = {}; // { productName: { qty, revenue, profit } }
