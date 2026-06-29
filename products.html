@@ -159,7 +159,6 @@
     <span class="topbar-title"><i class="fas fa-boxes me-2" style="color:var(--accent)"></i>إدارة المنتجات</span>
   </div>
   <div style="display:flex;align-items:center;gap:10px;">
-    <!-- زر الوضع الليلي/النهاري -->
     <button class="theme-toggle-btn" id="themeToggleBtn" onclick="toggleTheme()" title="تبديل الوضع">
       <span id="themeIcon">🌙</span>
       <span id="themeLabel" style="font-size:12px;">ليلي</span>
@@ -254,7 +253,6 @@
       <div class="img-source-panel" id="panel-local">
         <select class="form-control-dark" id="localImgSelect" onchange="onLocalSelect(this.value)">
           <option value="">— اختر صورة من المشروع —</option>
-          <!-- يمكنك إضافة ملفاتك هنا -->
           <option value="images/product1.jpg">product1.jpg</option>
           <option value="images/product2.jpg">product2.jpg</option>
           <option value="images/product3.png">product3.png</option>
@@ -268,7 +266,7 @@
         </div>
       </div>
 
-      <!-- لوحة 3: رفع صورة -->
+      <!-- لوحة 3: رفع صورة إلى Supabase -->
       <div class="img-source-panel" id="panel-upload">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <label class="img-upload-btn" for="imgInput">
@@ -285,7 +283,6 @@
     <!-- الحقل المخفي الذي يحمل القيمة النهائية للصورة -->
     <input type="hidden" id="imageUrl"/>
 
-    <!-- بقية الحقول (بدون تغيير) -->
     <div class="form-row" style="margin-bottom:14px;">
       <div>
         <label class="form-label-dark">اسم المنتج *</label>
@@ -352,20 +349,16 @@
 
 <div class="toast-container-custom" id="toastContainer"></div>
 
-<!-- ===== Dark/Light Mode Script (يجب أن يكون قبل Firebase) ===== -->
+<!-- ===== Dark/Light Mode Script ===== -->
 <script>
-  // ===== تطبيق الوضع المحفوظ فور تحميل الصفحة =====
   (function() {
     const saved = localStorage.getItem('theme') || 'dark';
-    if (saved === 'light') {
-      document.body.classList.add('light-mode');
-    }
+    if (saved === 'light') document.body.classList.add('light-mode');
   })();
 
   function toggleTheme() {
     const isLight = document.body.classList.toggle('light-mode');
-    const mode = isLight ? 'light' : 'dark';
-    localStorage.setItem('theme', mode);
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
     updateThemeBtn(isLight);
   }
 
@@ -374,10 +367,8 @@
     document.getElementById('themeLabel').textContent = isLight ? 'نهاري' : 'ليلي';
   }
 
-  // تحديث الزر حسب الوضع الحالي عند التحميل
   window.addEventListener('DOMContentLoaded', () => {
-    const isLight = document.body.classList.contains('light-mode');
-    updateThemeBtn(isLight);
+    updateThemeBtn(document.body.classList.contains('light-mode'));
   });
 
   // ===== نظام اختيار الصورة =====
@@ -389,7 +380,7 @@
   }
 
   function setImagePreview(url) {
-    const preview = document.getElementById('imgPreview');
+    const preview     = document.getElementById('imgPreview');
     const placeholder = document.getElementById('imgPlaceholder');
     document.getElementById('imageUrl').value = url || '';
     if (url) {
@@ -403,13 +394,8 @@
   }
 
   function onUrlInput(val) {
-    // معاينة فورية عند كتابة الرابط
     const trimmed = val.trim();
-    if (trimmed) {
-      setImagePreview(trimmed);
-    } else {
-      setImagePreview('');
-    }
+    setImagePreview(trimmed || '');
   }
 
   function onLocalSelect(val) {
@@ -418,9 +404,9 @@
 
   function clearImage() {
     setImagePreview('');
-    document.getElementById('imgUrlInput').value = '';
+    document.getElementById('imgUrlInput').value    = '';
     document.getElementById('localImgSelect').value = '';
-    document.getElementById('imgInput').value = '';
+    document.getElementById('imgInput').value       = '';
   }
 
   window.toggleSidebar = function() {
@@ -428,14 +414,28 @@
   };
 </script>
 
-<!-- ===== Firebase Script ===== -->
+<!-- ===== Supabase CDN ===== -->
+<!--
+  [تعديل 1] استبدال Firebase Storage بـ Supabase Storage.
+  تم إضافة Supabase JS Client عبر CDN.
+  ملاحظة: SUPABASE_KEY أدناه هو مفتاح سري مؤقت للبيئة المحلية فقط.
+  يجب استبداله بـ anon key قبل النشر للإنتاج.
+-->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- ===== Firebase + منطق الصفحة ===== -->
 <script type="module">
-  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getDatabase, ref, onValue, push, set, remove, get }
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-  import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
-    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+  // [تعديل 2] حذف جميع imports المتعلقة بـ Firebase Storage:
+  //   getStorage, ref as sRef, uploadBytes, getDownloadURL
+  // لم يعد لها أي استخدام بعد الانتقال إلى Supabase.
+
+  // ─────────────────────────────────────────────
+  // إعداد Firebase (Database فقط)
+  // ─────────────────────────────────────────────
   const firebaseConfig = {
     apiKey:"AIzaSyC7EVNCSl48CQgIC_a8wdC5UG2tKLtNKjQ",
     authDomain:"garag-system.firebaseapp.com",
@@ -446,46 +446,66 @@
     appId:"1:330947022055:web:d0c9d378e200c7de45a642"
   };
 
-  const app     = initializeApp(firebaseConfig);
-  const db      = getDatabase(app);
-  const storage = getStorage(app);
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
 
-  let allProducts   = [];
-  let allCategories = [];
+  // ─────────────────────────────────────────────
+  // [تعديل 3] إعداد Supabase Client
+  //   - حذف: const storage = getStorage(app)
+  //   - إضافة: supabase client يتصل بـ Supabase Storage
+  // ملاحظة: المفتاح أدناه مؤقت للبيئة المحلية فقط.
+  // ─────────────────────────────────────────────
+  const SUPABASE_URL    = 'https://djdfuekxzzvgmbmcqyks.supabase.co';
+  const SUPABASE_KEY    = 'sb_secret_nHPk2Drx6uLV6_DF1uJ-5g_L0sox_iP'; // مؤقت — استبدله بـ anon key للإنتاج
+  const SUPABASE_BUCKET = 'products';
+
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // ─────────────────────────────────────────────
+  // متغيرات الصفحة
+  // ─────────────────────────────────────────────
+  let allProducts    = [];
+  let allCategories  = [];
   let deleteTargetId = null;
+  let currency       = 'د.ع';
 
-  // ===== العملة: دينار عراقي =====
-  let currency = 'د.ع';
-
+  // ─────────────────────────────────────────────
   // تحميل الإعدادات
+  // ─────────────────────────────────────────────
   get(ref(db, 'settings')).then(s => {
     if (s.exists()) {
       const st = s.val();
-      // نتجاهل عملة الإعدادات ونفرض الدينار العراقي
-      // currency = st.currency || 'د.ع';
       if (st.storeName) document.getElementById('storeName').textContent = st.storeName;
     }
   });
 
+  // ─────────────────────────────────────────────
   // تحميل الأقسام
+  // ─────────────────────────────────────────────
   onValue(ref(db, 'categories'), snap => {
     allCategories = snap.exists()
-      ? Object.entries(snap.val()).map(([id,v]) => ({ id, ...v }))
+      ? Object.entries(snap.val()).map(([id, v]) => ({ id, ...v }))
       : [];
     buildCategoryFilters();
     buildCategorySelect();
   });
 
+  // ─────────────────────────────────────────────
   // تحميل المنتجات
+  // ─────────────────────────────────────────────
   onValue(ref(db, 'products'), snap => {
     allProducts = snap.exists()
-      ? Object.entries(snap.val()).map(([id,v]) => ({ id, ...v }))
-          .sort((a,b) => (b.createdAt||0) - (a.createdAt||0))
+      ? Object.entries(snap.val())
+          .map(([id, v]) => ({ id, ...v }))
+          .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
       : [];
     document.getElementById('prodCount').textContent = '(' + allProducts.length + ' منتج)';
     renderTable(allProducts);
   });
 
+  // ─────────────────────────────────────────────
+  // بناء قوائم الأقسام
+  // ─────────────────────────────────────────────
   function buildCategoryFilters() {
     const sel = document.getElementById('catFilter');
     const val = sel.value;
@@ -502,6 +522,9 @@
     sel.value = val;
   }
 
+  // ─────────────────────────────────────────────
+  // رسم الجدول — يقرأ imageUrl فقط (لا Base64)
+  // ─────────────────────────────────────────────
   function renderTable(list) {
     const tbody = document.getElementById('productsBody');
     if (!list.length) {
@@ -515,19 +538,23 @@
         : p.quantity <= lowThr
           ? `<span class="badge-warn">${p.quantity}</span>`
           : `<span class="badge-ok">${p.quantity}</span>`;
+
+      // [تعديل 4] قراءة imageUrl فقط — لا يوجد fallback لـ Base64
       const imgEl = p.imageUrl
         ? `<img src="${p.imageUrl}" class="prod-img" alt="${p.name}" onerror="this.style.display='none'"/>`
         : `<div class="prod-img-placeholder"><i class="fas fa-image"></i></div>`;
+
       const noteBadge = p.note
         ? `<span class="note-badge">⚠️ ${p.note}</span>`
         : '<span style="color:var(--text-muted);font-size:12px;">—</span>';
+
       return `<tr>
         <td>${imgEl}</td>
         <td>
           <div style="font-weight:600;">${p.name}</div>
           ${p.description ? `<div style="font-size:11px;color:var(--text-muted);">${p.description}</div>` : ''}
         </td>
-        <td><span class="badge-cat">${p.category||'—'}</span></td>
+        <td><span class="badge-cat">${p.category || '—'}</span></td>
         <td>${qtyBadge}</td>
         <td style="color:var(--text-muted);">${formatNum(p.purchasePrice)} ${currency}</td>
         <td style="color:var(--accent);font-weight:700;">${formatNum(p.salePrice)} ${currency}</td>
@@ -542,72 +569,142 @@
     }).join('');
   }
 
+  // ─────────────────────────────────────────────
   // فلترة
+  // ─────────────────────────────────────────────
   window.filterProducts = function() {
     const q   = document.getElementById('searchInput').value.trim().toLowerCase();
     const cat = document.getElementById('catFilter').value;
-    let list = allProducts;
-    if (q)   list = list.filter(p => p.name.toLowerCase().includes(q) || (p.description||'').toLowerCase().includes(q));
+    let list  = allProducts;
+    if (q)   list = list.filter(p => p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q));
     if (cat) list = list.filter(p => p.category === cat);
     renderTable(list);
   };
 
-  // ===== رفع الصورة (اللوحة الثالثة) =====
+  // ─────────────────────────────────────────────
+  // [تعديل 5] رفع الصورة إلى Supabase Storage
+  //   قبل: كان يستخدم Firebase Storage (uploadBytes / getDownloadURL)
+  //   بعد: يستخدم supabase.storage.from(BUCKET).upload() و getPublicUrl()
+  //   لا يُخزَّن أي Base64 — يُرفع الملف مباشرة والـ Public URL يُحفظ في Firebase
+  // ─────────────────────────────────────────────
   window.handleImageUpload = async function(e) {
     const file = e.target.files[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) { showToast('❌ يُسمح بالصور فقط', 'error'); return; }
-    if (file.size > 5 * 1024 * 1024)    { showToast('❌ حجم الصورة يجب أن يكون أقل من 5 ميجابايت', 'error'); return; }
 
-    // معاينة فورية
-    const reader = new FileReader();
-    reader.onload = ev => setImagePreview(ev.target.result);
-    reader.readAsDataURL(file);
+    if (!file.type.startsWith('image/')) {
+      showToast('❌ يُسمح بالصور فقط', 'error');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('❌ حجم الصورة يجب أن يكون أقل من 5 ميجابايت', 'error');
+      return;
+    }
 
-    // رفع إلى Firebase Storage
+    // معاينة محلية فورية (blob URL مؤقت للعرض فقط — لا يُخزَّن)
+    const blobUrl = URL.createObjectURL(file);
+    setImagePreview(blobUrl);
+
     const progress = document.getElementById('uploadProgress');
     progress.style.display = 'block';
-    progress.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>جارٍ رفع الصورة...';
+    progress.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>جارٍ رفع الصورة إلى Supabase...';
+
     try {
-      const storageRef = sRef(storage, `products/${Date.now()}_${file.name}`);
-      await uploadBytes(storageRef, file);
-      const url = await getDownloadURL(storageRef);
-      document.getElementById('imageUrl').value = url;
-      document.getElementById('imgPreview').src = url; // تحديث src بالرابط الفعلي
-      progress.textContent = '✅ تم رفع الصورة بنجاح';
+      // اسم فريد: timestamp + اسم الملف الأصلي
+      const ext      = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const filePath = `products/${fileName}`;
+
+      // رفع الملف إلى Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from(SUPABASE_BUCKET)
+        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+
+      if (uploadError) throw uploadError;
+
+      // الحصول على Public URL
+      const { data: urlData } = supabase.storage
+        .from(SUPABASE_BUCKET)
+        .getPublicUrl(filePath);
+
+      const publicUrl = urlData.publicUrl;
+
+      // تحديث الحقل المخفي والمعاينة بالرابط الدائم
+      document.getElementById('imageUrl').value = publicUrl;
+      document.getElementById('imgPreview').src = publicUrl;
+      URL.revokeObjectURL(blobUrl); // تحرير الـ blob URL المؤقت
+
+      progress.innerHTML = '✅ تم رفع الصورة بنجاح';
       setTimeout(() => { progress.style.display = 'none'; }, 2500);
+
     } catch (err) {
-      progress.textContent = '⚠️ فشل رفع الصورة';
-      setTimeout(() => { progress.style.display = 'none'; }, 2500);
+      console.error('Supabase upload error:', err);
+      progress.innerHTML = '⚠️ فشل رفع الصورة: ' + (err.message || '');
+      setTimeout(() => { progress.style.display = 'none'; }, 3000);
+      setImagePreview('');
     }
   };
 
-  // ===== فتح مودال الإضافة =====
+  // ─────────────────────────────────────────────
+  // [تعديل 6] حذف صورة المنتج من Supabase
+  //   دالة مستقلة قابلة لإعادة الاستخدام.
+  //   تستخرج مسار الملف من الـ Public URL وتحذفه.
+  //   الفشل لا يوقف عملية الحذف من Firebase — يسجَّل فقط.
+  // ─────────────────────────────────────────────
+  async function deleteImageFromSupabase(imageUrl) {
+    if (!imageUrl) return;
+
+    // استخراج مسار الملف من الـ Public URL
+    // صيغة الرابط: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
+    try {
+      const url      = new URL(imageUrl);
+      const marker   = `/object/public/${SUPABASE_BUCKET}/`;
+      const markerIdx = url.pathname.indexOf(marker);
+      if (markerIdx === -1) return; // الرابط ليس من Supabase — تجاهل
+
+      const filePath = url.pathname.slice(markerIdx + marker.length);
+
+      const { error } = await supabase.storage
+        .from(SUPABASE_BUCKET)
+        .remove([filePath]);
+
+      if (error) {
+        console.warn('تحذير: لم يتم حذف الصورة من Supabase:', error.message);
+      }
+    } catch (err) {
+      console.warn('خطأ في حذف الصورة من Supabase:', err);
+    }
+  }
+
+  // ─────────────────────────────────────────────
+  // فتح مودال الإضافة
+  // ─────────────────────────────────────────────
   window.openAddModal = function() {
     resetForm();
     document.getElementById('modalTitle').textContent = 'إضافة منتج جديد';
     document.getElementById('productModal').style.display = 'flex';
   };
 
-  // ===== فتح مودال التعديل =====
+  // ─────────────────────────────────────────────
+  // فتح مودال التعديل
+  // ─────────────────────────────────────────────
   window.openEditModal = function(id) {
     const p = allProducts.find(x => x.id === id);
     if (!p) return;
     resetForm();
-    document.getElementById('modalTitle').textContent = 'تعديل المنتج';
-    document.getElementById('editId').value            = id;
-    document.getElementById('prodName').value          = p.name || '';
-    document.getElementById('prodCategory').value      = p.category || '';
-    document.getElementById('prodDesc').value          = p.description || '';
-    document.getElementById('prodNote').value          = p.note || '';
-    document.getElementById('prodPurchasePrice').value = p.purchasePrice || 0;
-    document.getElementById('prodSalePrice').value     = p.salePrice || 0;
-    document.getElementById('prodMinPrice').value      = p.minPrice || 0;
-    document.getElementById('prodQty').value           = p.quantity || 0;
+    document.getElementById('modalTitle').textContent      = 'تعديل المنتج';
+    document.getElementById('editId').value                = id;
+    document.getElementById('prodName').value              = p.name          || '';
+    document.getElementById('prodCategory').value          = p.category      || '';
+    document.getElementById('prodDesc').value              = p.description   || '';
+    document.getElementById('prodNote').value              = p.note          || '';
+    document.getElementById('prodPurchasePrice').value     = p.purchasePrice || 0;
+    document.getElementById('prodSalePrice').value         = p.salePrice     || 0;
+    document.getElementById('prodMinPrice').value          = p.minPrice      || 0;
+    document.getElementById('prodQty').value               = p.quantity      || 0;
 
+    // [تعديل 7] عرض الصورة الحالية من imageUrl فقط
     if (p.imageUrl) {
       setImagePreview(p.imageUrl);
-      // تخمين المصدر ووضع القيمة في الحقل المناسب
       if (p.imageUrl.startsWith('http')) {
         document.getElementById('imgUrlInput').value = p.imageUrl;
         switchImgTab('url');
@@ -616,24 +713,19 @@
         switchImgTab('local');
       }
     }
+
     document.getElementById('productModal').style.display = 'flex';
   };
 
   function resetForm() {
-    document.getElementById('editId').value = '';
-    document.getElementById('prodName').value = '';
-    document.getElementById('prodCategory').value = '';
-    document.getElementById('prodDesc').value = '';
-    document.getElementById('prodNote').value = '';
-    document.getElementById('prodPurchasePrice').value = '';
-    document.getElementById('prodSalePrice').value = '';
-    document.getElementById('prodMinPrice').value = '';
-    document.getElementById('prodQty').value = '';
-    document.getElementById('imageUrl').value = '';
-    document.getElementById('imgUrlInput').value = '';
-    document.getElementById('localImgSelect').value = '';
-    document.getElementById('imgInput').value = '';
-    document.getElementById('imgPreview').style.display = 'none';
+    ['editId','prodName','prodDesc','prodNote','prodPurchasePrice',
+     'prodSalePrice','prodMinPrice','prodQty','imageUrl','imgUrlInput'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('prodCategory').value     = '';
+    document.getElementById('localImgSelect').value   = '';
+    document.getElementById('imgInput').value         = '';
+    document.getElementById('imgPreview').style.display    = 'none';
     document.getElementById('imgPlaceholder').style.display = 'flex';
     document.getElementById('uploadProgress').style.display = 'none';
     switchImgTab('url');
@@ -643,7 +735,11 @@
     document.getElementById('productModal').style.display = 'none';
   };
 
-  // ===== حفظ المنتج =====
+  // ─────────────────────────────────────────────
+  // حفظ المنتج (إضافة أو تعديل)
+  // [تعديل 8] imageUrl يأتي دائماً من Supabase Public URL أو رابط خارجي
+  //   — لا Base64 يصل إلى هنا أبداً
+  // ─────────────────────────────────────────────
   window.saveProduct = async function() {
     const name          = document.getElementById('prodName').value.trim();
     const category      = document.getElementById('prodCategory').value;
@@ -656,35 +752,48 @@
     const imageUrl      = document.getElementById('imageUrl').value;
     const editId        = document.getElementById('editId').value;
 
-    if (!name)                                         { showToast('❌ اسم المنتج مطلوب', 'error'); return; }
-    if (!category)                                     { showToast('❌ القسم مطلوب', 'error'); return; }
-    if (isNaN(purchasePrice) || purchasePrice < 0)     { showToast('❌ سعر الشراء غير صحيح', 'error'); return; }
-    if (isNaN(salePrice)     || salePrice < 0)         { showToast('❌ سعر البيع غير صحيح', 'error'); return; }
-    if (isNaN(minPrice)      || minPrice < 0)          { showToast('❌ الحد الأدنى غير صحيح', 'error'); return; }
-    if (isNaN(quantity)      || quantity < 0)          { showToast('❌ الكمية غير صحيحة', 'error'); return; }
-    if (minPrice > salePrice)                          { showToast('⚠️ الحد الأدنى لا يمكن أن يكون أعلى من سعر البيع', 'warn'); return; }
-    if (minPrice < purchasePrice)                      { showToast('⚠️ تحذير: الحد الأدنى للبيع أقل من سعر الشراء!', 'warn'); }
+    if (!name)                                     { showToast('❌ اسم المنتج مطلوب', 'error'); return; }
+    if (!category)                                 { showToast('❌ القسم مطلوب', 'error'); return; }
+    if (isNaN(purchasePrice) || purchasePrice < 0) { showToast('❌ سعر الشراء غير صحيح', 'error'); return; }
+    if (isNaN(salePrice)     || salePrice < 0)     { showToast('❌ سعر البيع غير صحيح', 'error'); return; }
+    if (isNaN(minPrice)      || minPrice < 0)      { showToast('❌ الحد الأدنى غير صحيح', 'error'); return; }
+    if (isNaN(quantity)      || quantity < 0)      { showToast('❌ الكمية غير صحيحة', 'error'); return; }
+    if (minPrice > salePrice)                      { showToast('⚠️ الحد الأدنى لا يمكن أن يكون أعلى من سعر البيع', 'warn'); return; }
+    if (minPrice < purchasePrice)                  { showToast('⚠️ تحذير: الحد الأدنى للبيع أقل من سعر الشراء!', 'warn'); }
 
     const data = {
       name, category, description, note,
-      purchasePrice, salePrice, minPrice, quantity, imageUrl,
+      purchasePrice, salePrice, minPrice, quantity,
+      imageUrl,      // دائماً Public URL أو فارغ — لا Base64
       updatedAt: Date.now()
     };
 
     try {
       if (editId) {
+        // [تعديل 9] عند التعديل: إذا تغيرت الصورة وكانت القديمة من Supabase، احذفها
+        const oldProduct  = allProducts.find(p => p.id === editId);
+        const oldImageUrl = oldProduct?.imageUrl || '';
+
+        if (oldImageUrl && oldImageUrl !== imageUrl && oldImageUrl.includes('supabase.co')) {
+          // حذف الصورة القديمة من Supabase بشكل غير متزامن
+          deleteImageFromSupabase(oldImageUrl);
+        }
+
         await set(ref(db, `products/${editId}`), {
           ...data,
-          createdAt: allProducts.find(p => p.id === editId)?.createdAt || Date.now()
+          createdAt: oldProduct?.createdAt || Date.now()
         });
         showToast('✅ تم تعديل المنتج بنجاح');
       } else {
         const newRef = push(ref(db, 'products'));
         await set(newRef, { ...data, createdAt: Date.now() });
         await push(ref(db, 'inventory'), {
-          productId: newRef.key, productName: name,
-          type: 'إضافة بضاعة', quantity, note: 'إضافة منتج جديد',
-          timestamp: Date.now()
+          productId:   newRef.key,
+          productName: name,
+          type:        'إضافة بضاعة',
+          quantity,
+          note:        'إضافة منتج جديد',
+          timestamp:   Date.now()
         });
         showToast('✅ تم إضافة المنتج بنجاح');
       }
@@ -694,18 +803,31 @@
     }
   };
 
-  // ===== حذف =====
+  // ─────────────────────────────────────────────
+  // حذف المنتج
+  // [تعديل 10] عند الحذف: حذف الصورة من Supabase أولاً ثم السجل من Firebase
+  // ─────────────────────────────────────────────
   window.openDeleteModal = function(id) {
     deleteTargetId = id;
     document.getElementById('deleteModal').style.display = 'flex';
   };
+
   window.closeDeleteModal = function() {
     document.getElementById('deleteModal').style.display = 'none';
     deleteTargetId = null;
   };
+
   window.confirmDelete = async function() {
     if (!deleteTargetId) return;
     try {
+      const product = allProducts.find(p => p.id === deleteTargetId);
+
+      // حذف الصورة من Supabase إذا كانت مخزنة هناك
+      if (product?.imageUrl && product.imageUrl.includes('supabase.co')) {
+        await deleteImageFromSupabase(product.imageUrl);
+      }
+
+      // حذف السجل من Firebase
       await remove(ref(db, `products/${deleteTargetId}`));
       showToast('🗑️ تم حذف المنتج');
       closeDeleteModal();
@@ -721,19 +843,23 @@
     });
   });
 
+  // ─────────────────────────────────────────────
+  // مساعدات
+  // ─────────────────────────────────────────────
   function formatNum(n) {
-    return Number(n||0).toLocaleString('ar-IQ', { minimumFractionDigits:0, maximumFractionDigits:0 });
-  }
-  function formatDate(ts) {
-    if (!ts) return '—';
-    return new Date(ts).toLocaleDateString('ar-SA', { year:'numeric', month:'short', day:'numeric' });
+    return Number(n || 0).toLocaleString('ar-IQ', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
 
-  function showToast(msg, type='success') {
+  function formatDate(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function showToast(msg, type = 'success') {
     const c = document.getElementById('toastContainer');
     const t = document.createElement('div');
     t.className = 'my-toast';
-    t.style.borderColor = type==='error' ? 'var(--danger)' : type==='warn' ? 'var(--warning)' : 'var(--success)';
+    t.style.borderColor = type === 'error' ? 'var(--danger)' : type === 'warn' ? 'var(--warning)' : 'var(--success)';
     t.textContent = msg;
     c.appendChild(t);
     setTimeout(() => t.remove(), 3500);
