@@ -4,6 +4,11 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>البيع - نظام المبيعات</title>
+  <meta name="description" content="نقطة بيع سريعة — بحث فوري، سلة ذكية، وفواتير بضغطة واحدة."/>
+  <meta name="theme-color" content="#0d1117"/>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d1117'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle'%3E%F0%9F%9B%92%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
@@ -55,6 +60,11 @@
       color: var(--text-main);
       min-height: 100vh;
       transition: background .3s, color .3s;
+    }
+
+    a:focus-visible, button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
     }
 
     /* ===== SIDEBAR ===== */
@@ -169,6 +179,46 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    /* ===== شارة وشريط وضع التجربة ===== */
+    .demo-badge {
+      background: rgba(88,166,255,.12);
+      color: var(--info);
+      border: 1px dashed rgba(88,166,255,.4);
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+      display: none; white-space: nowrap;
+    }
+    body.demo-mode .demo-badge { display: inline-block; }
+
+    .demo-bar {
+      display: none;
+      position: fixed; bottom: 16px; right: 50%;
+      transform: translateX(50%);
+      background: var(--bg-card);
+      border: 1px solid rgba(88,166,255,.45);
+      border-radius: 30px;
+      padding: 9px 18px;
+      z-index: 8000;
+      font-size: 13px; font-weight: 600;
+      color: var(--info);
+      box-shadow: var(--shadow);
+      align-items: center; gap: 14px;
+      max-width: calc(100vw - 32px);
+      flex-wrap: wrap; justify-content: center;
+    }
+    body.demo-mode .demo-bar { display: flex; }
+    .demo-bar a, .demo-bar button {
+      color: var(--accent); text-decoration: none;
+      background: none; border: none; cursor: pointer;
+      font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700;
+      padding: 2px 6px; border-radius: 6px;
+    }
+    .demo-bar a:hover, .demo-bar button:hover { background: rgba(212,160,23,.12); }
+    /* في الموبايل يرتفع الشريط فوق زر السلة العائم */
+    @media (max-width: 768px) {
+      body.demo-mode .demo-bar { bottom: 76px; font-size: 11.5px; padding: 7px 14px; }
     }
 
     /* ===== THEME TOGGLE BUTTON ===== */
@@ -531,6 +581,7 @@
       cursor: pointer;
       font-size: 14px;
     }
+    .btn-gold:disabled { opacity: .5; cursor: not-allowed; }
 
     /* ===== CLOCK ===== */
     #clockDisplay { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
@@ -681,6 +732,14 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+    /* تقليل الحركة لمن يفضّل ذلك */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -688,40 +747,41 @@
 <!-- Sidebar Overlay (mobile) -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
   <div class="sidebar-brand">
-    <div class="brand-icon"><i class="fas fa-store"></i></div>
+    <div class="brand-icon"><i class="fas fa-store" aria-hidden="true"></i></div>
     <div>
       <div class="brand-name" id="storeName">نظام المبيعات</div>
-      <div class="brand-sub">POS & Inventory</div>
+      <div class="brand-sub">POS &amp; Inventory</div>
     </div>
   </div>
   <p class="nav-section-title">القائمة الرئيسية</p>
   <ul class="sidebar-nav">
-    <li><a href="index.html" onclick="closeSidebar()"><i class="fas fa-chart-pie"></i> لوحة التحكم</a></li>
-    <li><a href="sales.html" class="active" onclick="closeSidebar()"><i class="fas fa-cash-register"></i> البيع</a></li>
-    <li><a href="products.html" onclick="closeSidebar()"><i class="fas fa-boxes"></i> المنتجات</a></li>
-    <li><a href="inventory.html" onclick="closeSidebar()"><i class="fas fa-warehouse"></i> الجرد</a></li>
-    <li><a href="reports.html" onclick="closeSidebar()"><i class="fas fa-chart-bar"></i> التقارير</a></li>
-    <li><a href="categories.html" onclick="closeSidebar()"><i class="fas fa-tags"></i> الأقسام</a></li>
-    <li><a href="settings.html" onclick="closeSidebar()"><i class="fas fa-cog"></i> الإعدادات</a></li>
+    <li><a href="index.html" onclick="closeSidebar()"><i class="fas fa-chart-pie" aria-hidden="true"></i> لوحة التحكم</a></li>
+    <li><a href="sales.html" class="active" onclick="closeSidebar()"><i class="fas fa-cash-register" aria-hidden="true"></i> البيع</a></li>
+    <li><a href="products.html" onclick="closeSidebar()"><i class="fas fa-boxes" aria-hidden="true"></i> المنتجات</a></li>
+    <li><a href="inventory.html" onclick="closeSidebar()"><i class="fas fa-warehouse" aria-hidden="true"></i> الجرد</a></li>
+    <li><a href="reports.html" onclick="closeSidebar()"><i class="fas fa-chart-bar" aria-hidden="true"></i> التقارير</a></li>
+    <li><a href="categories.html" onclick="closeSidebar()"><i class="fas fa-tags" aria-hidden="true"></i> الأقسام</a></li>
+    <li><a href="settings.html" onclick="closeSidebar()"><i class="fas fa-cog" aria-hidden="true"></i> الإعدادات</a></li>
   </ul>
-  <div class="sidebar-footer"><i class="fas fa-shield-alt me-1"></i> النظام يعمل بشكل طبيعي</div>
+  <div class="sidebar-footer"><i class="fas fa-shield-alt me-1" aria-hidden="true"></i> النظام يعمل بشكل طبيعي</div>
 </nav>
 
 <header class="topbar">
   <div class="topbar-left">
     <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="قائمة">
-      <i class="fas fa-bars"></i>
+      <i class="fas fa-bars" aria-hidden="true"></i>
     </button>
     <span class="topbar-title">
-      <i class="fas fa-cash-register me-2" style="color:var(--accent)"></i>نقطة البيع
+      <i class="fas fa-cash-register me-2" style="color:var(--accent)" aria-hidden="true"></i>نقطة البيع
     </span>
   </div>
   <div class="topbar-right">
+    <span class="demo-badge"><i class="fas fa-flask me-1" aria-hidden="true"></i> DEMO</span>
     <span id="clockDisplay"></span>
-    <button class="btn-theme-toggle" onclick="toggleTheme()" id="themeToggleBtn" title="تبديل الوضع">
-      <i class="fas fa-sun" id="themeIcon"></i>
+    <button class="btn-theme-toggle" onclick="toggleTheme()" id="themeToggleBtn" title="تبديل الوضع" aria-label="تبديل الوضع الليلي والنهاري">
+      <i class="fas fa-sun" id="themeIcon" aria-hidden="true"></i>
     </button>
   </div>
 </header>
@@ -731,8 +791,8 @@
   <div class="products-area" id="productsArea">
     <div class="search-filters">
       <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="بحث سريع عن منتج..." oninput="filterProducts()"/>
-        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="بحث سريع عن منتج..." oninput="filterProducts()" aria-label="بحث عن منتج"/>
+        <i class="fas fa-search" aria-hidden="true"></i>
       </div>
     </div>
     <div class="cat-tabs" id="catTabs">
@@ -740,7 +800,7 @@
     </div>
     <div class="products-grid" id="productsGrid">
       <div style="color:var(--text-muted);font-size:13px;padding:20px;grid-column:1/-1;text-align:center;">
-        <i class="fas fa-spinner fa-spin me-2"></i>جارٍ التحميل...
+        <i class="fas fa-spinner fa-spin me-2" aria-hidden="true"></i>جارٍ التحميل...
       </div>
     </div>
   </div>
@@ -749,20 +809,20 @@
   <div class="cart-area" id="cartArea">
     <div class="cart-header">
       <span>
-        <i class="fas fa-shopping-cart me-2" style="color:var(--accent)"></i>الفاتورة
+        <i class="fas fa-shopping-cart me-2" style="color:var(--accent)" aria-hidden="true"></i>الفاتورة
         <span id="cartCount" style="background:rgba(212,160,23,.15);color:var(--accent);border-radius:10px;padding:1px 8px;font-size:12px;margin-right:6px;">0</span>
       </span>
       <div style="display:flex;gap:6px;align-items:center;">
-        <button class="btn-clear-cart" onclick="clearCart()"><i class="fas fa-trash me-1"></i>إفراغ</button>
+        <button class="btn-clear-cart" onclick="clearCart()"><i class="fas fa-trash me-1" aria-hidden="true"></i>إفراغ</button>
         <!-- Close button for mobile cart -->
-        <button id="cartCloseBtn" onclick="closeMobileCart()" style="display:none;background:var(--bg-input);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">
-          <i class="fas fa-chevron-down"></i>
+        <button id="cartCloseBtn" onclick="closeMobileCart()" aria-label="إغلاق السلة" style="display:none;background:var(--bg-input);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;">
+          <i class="fas fa-chevron-down" aria-hidden="true"></i>
         </button>
       </div>
     </div>
     <div class="cart-items" id="cartItems">
       <div class="cart-empty">
-        <i class="fas fa-shopping-cart"></i>
+        <i class="fas fa-shopping-cart" aria-hidden="true"></i>
         <span>لم يتم إضافة منتجات بعد</span>
         <span style="font-size:12px;">انقر على المنتج لإضافته</span>
       </div>
@@ -783,12 +843,12 @@
       </div>
       <div style="text-align:center;margin-bottom:2px;">
         <button class="btn-show-profit" id="profitToggleBtn" onclick="toggleProfit()">
-          <i class="fas fa-eye" id="profitToggleIcon"></i>
+          <i class="fas fa-eye" id="profitToggleIcon" aria-hidden="true"></i>
           <span id="profitToggleText">إظهار الربح المتوقع</span>
         </button>
       </div>
       <button class="btn-checkout" id="checkoutBtn" onclick="checkout()" disabled>
-        <i class="fas fa-check-circle me-2"></i>إتمام البيع
+        <i class="fas fa-check-circle me-2" aria-hidden="true"></i>إتمام البيع
       </button>
     </div>
   </div>
@@ -796,14 +856,14 @@
 
 <!-- Mobile Cart FAB -->
 <button class="cart-fab" id="cartFab" onclick="openMobileCart()">
-  <i class="fas fa-shopping-cart"></i>
+  <i class="fas fa-shopping-cart" aria-hidden="true"></i>
   <span id="fabCartCount">السلة (0)</span>
 </button>
 
 <!-- Modal تأكيد البيع -->
-<div class="modal-overlay" id="checkoutModal" style="display:none;">
+<div class="modal-overlay" id="checkoutModal" style="display:none;" role="dialog" aria-modal="true" aria-label="تأكيد الفاتورة">
   <div class="modal-box">
-    <div class="modal-title"><i class="fas fa-receipt" style="color:var(--accent)"></i> تأكيد الفاتورة</div>
+    <div class="modal-title"><i class="fas fa-receipt" style="color:var(--accent)" aria-hidden="true"></i> تأكيد الفاتورة</div>
     <div id="receiptItems" style="margin-bottom:16px;"></div>
     <div style="background:rgba(212,160,23,.06);border:1px solid rgba(212,160,23,.2);border-radius:10px;padding:14px;margin-bottom:18px;">
       <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
@@ -816,36 +876,126 @@
       </div>
     </div>
     <div style="margin-bottom:18px;">
-      <label style="display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">ملاحظة البيع (اختياري)</label>
+      <label for="saleNote" style="display:block;font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:6px;">ملاحظة البيع (اختياري)</label>
       <input type="text" id="saleNote" class="modal-input" placeholder="اسم العميل أو ملاحظة..."/>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
       <button onclick="closeCheckout()" style="background:var(--bg-input);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;padding:9px 18px;font-family:'Cairo',sans-serif;cursor:pointer;font-size:13px;">إلغاء</button>
-      <button class="btn-gold" onclick="confirmSale()"><i class="fas fa-check me-1"></i>تأكيد البيع</button>
+      <button class="btn-gold" id="confirmSaleBtn" onclick="confirmSale()"><i class="fas fa-check me-1" aria-hidden="true"></i>تأكيد البيع</button>
     </div>
   </div>
 </div>
 
 <!-- Modal نجاح البيع -->
-<div class="modal-overlay" id="successModal" style="display:none;">
+<div class="modal-overlay" id="successModal" style="display:none;" role="dialog" aria-modal="true" aria-label="تم البيع بنجاح">
   <div class="modal-box" style="max-width:360px;text-align:center;">
     <div style="width:70px;height:70px;background:rgba(63,185,80,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:32px;color:var(--success);">
-      <i class="fas fa-check-circle"></i>
+      <i class="fas fa-check-circle" aria-hidden="true"></i>
     </div>
     <div style="font-size:20px;font-weight:900;margin-bottom:8px;">تم البيع بنجاح!</div>
     <div id="successSummary" style="color:var(--text-muted);font-size:14px;margin-bottom:22px;"></div>
     <button class="btn-gold" style="width:100%;" onclick="closeSuccess()">
-      <i class="fas fa-plus me-1"></i> بيع جديد
+      <i class="fas fa-plus me-1" aria-hidden="true"></i> بيع جديد
     </button>
   </div>
 </div>
 
-<div class="toast-container-custom" id="toastContainer"></div>
+<!-- شريط وضع التجربة -->
+<div class="demo-bar" role="status">
+  <span>🧪 وضع التجربة — بِع بحرية، لا شيء يُحفظ في النظام الحقيقي</span>
+  <button type="button" onclick="resetDemoData()">↺ إعادة تعيين</button>
+</div>
+
+<div class="toast-container-custom" id="toastContainer" aria-live="polite"></div>
 
 <script type="module">
   import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getDatabase, ref, onValue, push, set, get, update }
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+  /* ═════════════════════════════════════════════
+     وضع التجربة (Demo Mode) — ?demo=1
+     - بيانات وهمية مشتركة مع لوحة التحكم (نفس المفتاح)
+     - البيع يخصم من مخزون localStorage ويُسجَّل فيه
+     - لا اتصال بقاعدة البيانات الحقيقية إطلاقاً
+  ═════════════════════════════════════════════ */
+  const DEMO = new URLSearchParams(location.search).get('demo') === '1';
+  const DEMO_KEY = 'salesDemoDB_v2';
+
+  if (DEMO) document.body.classList.add('demo-mode');
+
+  function seedDemoData() {
+    const now = Date.now();
+    const day = 24 * 60 * 60 * 1000;
+
+    const products = {
+      p01: { name: 'ماء صحة 330مل — قوصرة',   category: 'مشروبات',     purchasePrice: 3000,  salePrice: 4000,  minPrice: 3500,  quantity: 42 },
+      p02: { name: 'شاي محمود 450غ',           category: 'مواد غذائية', purchasePrice: 4500,  salePrice: 6000,  minPrice: 5000,  quantity: 18 },
+      p03: { name: 'رز عنبر 5كغ',              category: 'مواد غذائية', purchasePrice: 12000, salePrice: 15000, minPrice: 13000, quantity: 9  },
+      p04: { name: 'بيبسي عائلي 2.25ل',        category: 'مشروبات',     purchasePrice: 1750,  salePrice: 2500,  minPrice: 2000,  quantity: 30 },
+      p05: { name: 'شوكولاتة كيندر 8 قطع',     category: 'حلويات',      purchasePrice: 3250,  salePrice: 4500,  minPrice: 3750,  quantity: 4  },
+      p06: { name: 'معجون أسنان سيجنال',        category: 'عناية شخصية', purchasePrice: 2000,  salePrice: 3000,  minPrice: 2500,  quantity: 12 },
+      p07: { name: 'مسحوق غسيل أومو 3كغ',      category: 'منظفات',      purchasePrice: 8500,  salePrice: 11000, minPrice: 9500,  quantity: 7  },
+      p08: { name: 'زيت زير 1.8ل',             category: 'مواد غذائية', purchasePrice: 5000,  salePrice: 6500,  minPrice: 5500,  quantity: 0  },
+      p09: { name: 'بسكويت أولكر شاي',          category: 'حلويات',      purchasePrice: 750,   salePrice: 1000,  minPrice: 850,   quantity: 55 },
+      p10: { name: 'صابون لوكس 3 قطع',          category: 'عناية شخصية', purchasePrice: 2250,  salePrice: 3250,  minPrice: 2750,  quantity: 3  },
+      p11: { name: 'عصير راني برتقال',          category: 'مشروبات',     purchasePrice: 900,   salePrice: 1250,  minPrice: 1000,  quantity: 26 },
+      p12: { name: 'كلينكس 550 منديل',          category: 'منظفات',      purchasePrice: 1500,  salePrice: 2250,  minPrice: 1750,  quantity: 14 }
+    };
+
+    const categories = {
+      c1: { name: 'مشروبات' }, c2: { name: 'مواد غذائية' }, c3: { name: 'حلويات' },
+      c4: { name: 'منظفات' }, c5: { name: 'عناية شخصية' }
+    };
+
+    const pick = ids => ids.map(id => ({
+      id, name: products[id].name, qty: 1,
+      price: products[id].salePrice, subtotal: products[id].salePrice
+    }));
+    const mk = (daysAgo, hour, ids, total, profit) => ({
+      items: pick(ids), total, profit, note: '',
+      timestamp: now - daysAgo * day - (24 - hour) * 3600 * 1000 + Math.floor(Math.random() * 3600 * 1000)
+    });
+
+    const salesArr = [
+      mk(6, 11, ['p01','p04'], 6500, 1750),   mk(6, 18, ['p03'], 15000, 3000),
+      mk(5, 10, ['p09','p11'], 2250, 600),    mk(5, 20, ['p07'], 11000, 2500),
+      mk(4, 12, ['p02','p06'], 9000, 2500),   mk(4, 17, ['p04','p04','p01'], 9000, 2500), mk(4, 21, ['p12'], 2250, 750),
+      mk(3, 9,  ['p05'], 4500, 1250),         mk(3, 16, ['p03','p08'], 21500, 4500),
+      mk(2, 11, ['p10','p06'], 6250, 2000),   mk(2, 14, ['p01'], 4000, 1000),  mk(2, 19, ['p09','p09','p11'], 3250, 850),
+      mk(1, 10, ['p02'], 6000, 1500),         mk(1, 15, ['p07','p12'], 13250, 3250), mk(1, 20, ['p04','p05'], 7000, 2000),
+      mk(0, 9,  ['p01','p09'], 5000, 1250),   mk(0, 12, ['p03'], 15000, 3000), mk(0, 14, ['p11','p06'], 4250, 1350)
+    ];
+    const sales = {};
+    salesArr.forEach((s, i) => sales['demo_s' + String(i).padStart(2, '0')] = s);
+
+    const data = {
+      settings: { storeName: 'متجر النخبة (تجريبي)', currency: 'د.ع', lowStockThreshold: 5 },
+      products, categories, sales, inventory: {}
+    };
+    try { localStorage.setItem(DEMO_KEY, JSON.stringify(data)); } catch(e) {}
+    return data;
+  }
+
+  function getDemoData() {
+    try {
+      const raw = localStorage.getItem(DEMO_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d && d.products && d.sales) return d;
+      }
+    } catch(e) {}
+    return seedDemoData();
+  }
+
+  function saveDemoData(d) {
+    try { localStorage.setItem(DEMO_KEY, JSON.stringify(d)); } catch(e) {}
+  }
+
+  window.resetDemoData = function() {
+    try { localStorage.removeItem(DEMO_KEY); } catch(e) {}
+    location.reload();
+  };
 
   const firebaseConfig = {
     apiKey:"AIzaSyC7EVNCSl48CQgIC_a8wdC5UG2tKLtNKjQ",
@@ -857,14 +1007,22 @@
     appId:"1:330947022055:web:d0c9d378e200c7de45a642"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
+  // في وضع التجربة لا يُنشأ أي اتصال بقاعدة البيانات
+  const app = DEMO ? null : initializeApp(firebaseConfig);
+  const db  = DEMO ? null : getDatabase(app);
 
   let allProducts  = [];
   let cart         = [];
   let currency     = 'د.ع';
   let currentCat   = '';
   let profitVisible = false;
+
+  // ===== حماية من XSS: تهريب النصوص القادمة من البيانات قبل حقنها في HTML =====
+  function escapeHtml(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
 
   // ===== CLOCK =====
   function tick() {
@@ -949,30 +1107,45 @@
   };
 
   // ===== SETTINGS =====
-  get(ref(db, 'settings')).then(s => {
-    if (s.exists()) {
-      const st = s.val();
-      if (st.storeName) document.getElementById('storeName').textContent = st.storeName;
-    }
-  });
+  function applySettings(st) {
+    if (st.storeName) document.getElementById('storeName').textContent = st.storeName;
+    if (st.currency)  currency = st.currency;
+  }
+  if (DEMO) {
+    applySettings(getDemoData().settings || {});
+  } else {
+    get(ref(db, 'settings')).then(s => { if (s.exists()) applySettings(s.val()); });
+  }
 
   // ===== CATEGORIES =====
-  onValue(ref(db, 'categories'), snap => {
-    const cats = snap.exists() ? Object.values(snap.val()) : [];
+  if (DEMO) {
+    const cats = Object.values(getDemoData().categories || {});
     buildCatTabs(cats);
-  });
+  } else {
+    onValue(ref(db, 'categories'), snap => {
+      const cats = snap.exists() ? Object.values(snap.val()) : [];
+      buildCatTabs(cats);
+    });
+  }
 
   // ===== PRODUCTS =====
-  onValue(ref(db, 'products'), snap => {
-    allProducts = snap.exists()
-      ? Object.entries(snap.val()).map(([id,v]) => ({ id, ...v }))
+  function setProducts(obj) {
+    allProducts = obj
+      ? Object.entries(obj).map(([id,v]) => ({ id, ...v }))
       : [];
     renderProducts(filterList());
-  });
+  }
+  if (DEMO) {
+    setProducts(getDemoData().products || {});
+  } else {
+    onValue(ref(db, 'products'), snap => setProducts(snap.exists() ? snap.val() : null));
+  }
 
   function buildCatTabs(cats) {
     const tabs = document.getElementById('catTabs');
-    const existing = cats.map(c => `<button class="cat-tab" onclick="filterByCat('${c.name}', this)">${c.name}</button>`).join('');
+    const existing = cats.map(c =>
+      `<button class="cat-tab" data-cat="${escapeHtml(c.name)}" onclick="filterByCat(this.dataset.cat, this)">${escapeHtml(c.name)}</button>`
+    ).join('');
     tabs.innerHTML = `<button class="cat-tab ${currentCat === '' ? 'active' : ''}" onclick="filterByCat('', this)">الكل</button>` + existing;
   }
 
@@ -1004,15 +1177,15 @@
     grid.innerHTML = list.map(p => {
       const isOut  = (p.quantity || 0) === 0;
       const imgEl  = p.imageUrl
-        ? `<img src="${p.imageUrl}" class="prod-card-img" alt="" onerror="this.style.display='none'">`
-        : `<div class="prod-card-img-placeholder"><i class="fas fa-image"></i></div>`;
-      const noteEl = p.note ? `<div class="prod-card-note">⚠️ ${p.note}</div>` : '';
+        ? `<img src="${escapeHtml(p.imageUrl)}" class="prod-card-img" alt="" onerror="this.style.display='none'">`
+        : `<div class="prod-card-img-placeholder"><i class="fas fa-image" aria-hidden="true"></i></div>`;
+      const noteEl = p.note ? `<div class="prod-card-note">⚠️ ${escapeHtml(p.note)}</div>` : '';
       return `
-        <div class="prod-card ${isOut ? 'out-of-stock' : ''}" onclick="${isOut ? '' : `addToCart('${p.id}')`}">
+        <div class="prod-card ${isOut ? 'out-of-stock' : ''}" data-id="${escapeHtml(p.id)}" onclick="${isOut ? '' : 'addToCart(this.dataset.id)'}">
           ${isOut ? '<span class="out-badge">نفذ</span>' : ''}
           ${imgEl}
-          <div class="prod-card-name" title="${p.name}">${p.name}</div>
-          <div class="prod-card-price">${formatNum(p.salePrice)} ${currency}</div>
+          <div class="prod-card-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</div>
+          <div class="prod-card-price">${formatNum(p.salePrice)} ${escapeHtml(currency)}</div>
           <div class="prod-card-qty">متوفر: ${p.quantity || 0}</div>
           ${noteEl}
         </div>`;
@@ -1050,7 +1223,7 @@
     const el = document.getElementById('cartItems');
     updateFab();
     if (!cart.length) {
-      el.innerHTML = `<div class="cart-empty"><i class="fas fa-shopping-cart"></i><span>لم يتم إضافة منتجات</span><span style="font-size:12px;">انقر على المنتج لإضافته</span></div>`;
+      el.innerHTML = `<div class="cart-empty"><i class="fas fa-shopping-cart" aria-hidden="true"></i><span>لم يتم إضافة منتجات</span><span style="font-size:12px;">انقر على المنتج لإضافته</span></div>`;
       document.getElementById('cartCount').textContent = '0';
       document.getElementById('totalItems').textContent  = '0';
       document.getElementById('grandTotal').textContent  = '0.00';
@@ -1064,21 +1237,21 @@
       return `
       <div class="cart-item">
         <div class="cart-item-row">
-          <span class="cart-item-name" title="${item.name}">${item.name}</span>
-          <button class="cart-item-remove" onclick="removeFromCart(${i})"><i class="fas fa-times"></i></button>
+          <span class="cart-item-name" title="${escapeHtml(item.name)}">${escapeHtml(item.name)}</span>
+          <button class="cart-item-remove" onclick="removeFromCart(${i})" aria-label="إزالة المنتج"><i class="fas fa-times" aria-hidden="true"></i></button>
         </div>
-        ${item.note ? `<div class="cart-item-note">⚠️ ${item.note}</div>` : ''}
+        ${item.note ? `<div class="cart-item-note">⚠️ ${escapeHtml(item.note)}</div>` : ''}
         <div class="cart-item-controls">
-          <button class="qty-btn" onclick="changeQty(${i}, -1)"><i class="fas fa-minus"></i></button>
+          <button class="qty-btn" onclick="changeQty(${i}, -1)" aria-label="إنقاص الكمية"><i class="fas fa-minus" aria-hidden="true"></i></button>
           <span class="qty-display">${item.qty}</span>
-          <button class="qty-btn" onclick="changeQty(${i}, 1)"><i class="fas fa-plus"></i></button>
+          <button class="qty-btn" onclick="changeQty(${i}, 1)" aria-label="زيادة الكمية"><i class="fas fa-plus" aria-hidden="true"></i></button>
           <span style="font-size:11px;color:var(--text-muted);margin-right:2px;">× السعر:</span>
           <input type="number" class="price-input ${isBelowMin ? 'below-min' : ''}" id="price-${i}" value="${item.price}"
-            oninput="updatePrice(${i}, this)" min="0"/>
+            oninput="updatePrice(${i}, this)" min="0" aria-label="سعر البيع"/>
         </div>
         <div class="cart-item-row">
-          <span style="font-size:11px;color:var(--text-muted);">الحد الأدنى: ${formatNum(item.minPrice)} ${currency}</span>
-          <span class="item-subtotal">${formatNum(item.qty * (parseFloat(item.price) || 0))} ${currency}</span>
+          <span style="font-size:11px;color:var(--text-muted);">الحد الأدنى: ${formatNum(item.minPrice)} ${escapeHtml(currency)}</span>
+          <span class="item-subtotal">${formatNum(item.qty * (parseFloat(item.price) || 0))} ${escapeHtml(currency)}</span>
         </div>
         ${isBelowMin ? `<div style="font-size:11px;color:var(--warning);background:rgba(210,153,34,.08);padding:2px 8px;border-radius:4px;">⚠️ السعر أقل من الحد الأدنى المسموح</div>` : ''}
       </div>`;
@@ -1178,8 +1351,8 @@
 
     document.getElementById('receiptItems').innerHTML = cart.map(item => `
       <div class="receipt-item">
-        <span>${item.name} × ${item.qty}</span>
-        <span style="font-weight:700;">${formatNum(item.qty * (parseFloat(item.price) || 0))} ${currency}</span>
+        <span>${escapeHtml(item.name)} × ${item.qty}</span>
+        <span style="font-weight:700;">${formatNum(item.qty * (parseFloat(item.price) || 0))} ${escapeHtml(currency)}</span>
       </div>`).join('');
     document.getElementById('receiptTotal').textContent  = formatNum(total) + ' ' + currency;
     document.getElementById('receiptProfit').textContent = formatNum(profit) + ' ' + currency;
@@ -1192,6 +1365,10 @@
   };
 
   window.confirmSale = async function() {
+    const btn = document.getElementById('confirmSaleBtn');
+    if (btn && btn.disabled) return; // حماية من الضغط المزدوج
+    if (btn) btn.disabled = true;
+
     const note   = document.getElementById('saleNote').value.trim();
     const total  = cart.reduce((s, c) => s + c.qty * (parseFloat(c.price) || 0), 0);
     const profit = cart.reduce((s, c) => s + c.qty * ((parseFloat(c.price) || 0) - c.purchasePrice), 0);
@@ -1203,29 +1380,54 @@
     };
 
     try {
-      await push(ref(db, 'sales'), saleData);
-      for (const item of cart) {
-        const pSnap = await get(ref(db, `products/${item.id}`));
-        if (pSnap.exists()) {
-          const p = pSnap.val();
-          const newQty = Math.max(0, (p.quantity || 0) - item.qty);
-          await update(ref(db, `products/${item.id}`), { quantity: newQty });
-          await push(ref(db, 'inventory'), {
-            productId: item.id,
-            productName: item.name,
-            type: 'بيع',
-            quantity: -item.qty,
-            note: `فاتورة بيع - ${note || ''}`,
-            timestamp: ts
-          });
+      if (DEMO) {
+        /* ── البيع في وضع التجربة: كل شيء في localStorage ── */
+        const d = getDemoData();
+        d.sales['demo_s' + ts] = saleData;
+        d.inventory = d.inventory || {};
+        for (const item of cart) {
+          const p = d.products[item.id];
+          if (p) {
+            p.quantity = Math.max(0, (p.quantity || 0) - item.qty);
+            d.inventory['demo_i' + ts + '_' + item.id] = {
+              productId: item.id,
+              productName: item.name,
+              type: 'بيع',
+              quantity: -item.qty,
+              note: `فاتورة بيع - ${note || ''}`,
+              timestamp: ts
+            };
+          }
+        }
+        saveDemoData(d);
+        // تحديث الشبكة فوراً ليرى الزائر خصم الكميات
+        setProducts(d.products);
+      } else {
+        await push(ref(db, 'sales'), saleData);
+        for (const item of cart) {
+          const pSnap = await get(ref(db, `products/${item.id}`));
+          if (pSnap.exists()) {
+            const p = pSnap.val();
+            const newQty = Math.max(0, (p.quantity || 0) - item.qty);
+            await update(ref(db, `products/${item.id}`), { quantity: newQty });
+            await push(ref(db, 'inventory'), {
+              productId: item.id,
+              productName: item.name,
+              type: 'بيع',
+              quantity: -item.qty,
+              note: `فاتورة بيع - ${note || ''}`,
+              timestamp: ts
+            });
+          }
         }
       }
 
       closeCheckout();
       const total2 = cart.reduce((s, c) => s + c.qty * (parseFloat(c.price) || 0), 0);
       document.getElementById('successSummary').innerHTML =
-        `إجمالي الفاتورة: <strong style="color:var(--accent)">${formatNum(total2)} ${currency}</strong><br>
-         ربح: <strong style="color:var(--success)">${formatNum(profit)} ${currency}</strong>`;
+        `إجمالي الفاتورة: <strong style="color:var(--accent)">${formatNum(total2)} ${escapeHtml(currency)}</strong><br>
+         ربح: <strong style="color:var(--success)">${formatNum(profit)} ${escapeHtml(currency)}</strong>` +
+        (DEMO ? `<br><span style="font-size:12px;color:var(--info);">🧪 بيع تجريبي — ستجده في لوحة التحكم التجريبية</span>` : '');
 
       document.getElementById('successModal').style.display = 'flex';
       cart = [];
@@ -1233,6 +1435,8 @@
       if (isMobile()) closeMobileCart();
     } catch (e) {
       showToast('❌ خطأ في حفظ البيع: ' + e.message, 'error');
+    } finally {
+      if (btn) btn.disabled = false;
     }
   };
 
@@ -1262,6 +1466,24 @@
       if (closeBtn) closeBtn.style.display = 'none';
     }
   });
+
+  // ===== مفتاح Escape يغلق النوافذ المنبثقة والسلة =====
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('checkoutModal').style.display !== 'none') { closeCheckout(); return; }
+    if (document.getElementById('successModal').style.display !== 'none')  { closeSuccess(); return; }
+    closeSidebar();
+    if (isMobile()) closeMobileCart();
+  });
+
+  // ===== في وضع التجربة: تمرير ?demo=1 لكل روابط الصفحات الداخلية =====
+  if (DEMO) {
+    document.querySelectorAll('a[href$=".html"]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (href && !href.includes('demo=')) a.setAttribute('href', href + '?demo=1');
+    });
+    showToast('🧪 وضع التجربة — أضف منتجات للسلة وأتمم بيعاً وهمياً بحرية');
+  }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
