@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>لوحة التحكم - نظام المبيعات</title>
+  <meta name="description" content="نظام مبيعات ومخزون متكامل — لوحة تحكم بإحصائيات فورية، تقارير، وإدارة منتجات."/>
+  <meta name="theme-color" content="#0d1117"/>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230d1117'/%3E%3Ctext x='32' y='44' font-size='34' text-anchor='middle'%3E%F0%9F%9B%92%3C/text%3E%3C/svg%3E">
+
+  <!-- Preconnect لتحسين سرعة التحميل -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
   <!-- Bootstrap RTL -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css"/>
@@ -36,6 +43,13 @@
       background: var(--bg-dark);
       color: var(--text-main);
       min-height: 100vh;
+    }
+
+    /* وضوح التركيز للوحة المفاتيح */
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 4px;
     }
 
     /* ===== SIDEBAR ===== */
@@ -95,6 +109,15 @@
       font-size: 11px; color: var(--text-muted); text-align: center;
     }
 
+    /* خلفية معتمة عند فتح القائمة في الموبايل */
+    .sidebar-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 990;
+    }
+    .sidebar-backdrop.show { display: block; }
+
     /* ===== TOPBAR ===== */
     .topbar {
       position: fixed; top: 0; left: 0;
@@ -115,6 +138,41 @@
       padding: 4px 12px; border-radius: 20px;
       font-size: 12px; font-weight: 700;
     }
+    .demo-badge {
+      background: rgba(88,166,255,.12);
+      color: var(--info);
+      border: 1px dashed rgba(88,166,255,.4);
+      padding: 4px 12px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+      display: none;
+    }
+    body.demo-mode .demo-badge { display: inline-block; }
+
+    /* ===== شريط وضع التجربة ===== */
+    .demo-bar {
+      display: none;
+      position: fixed; bottom: 16px; right: 50%;
+      transform: translateX(50%);
+      background: #10243d;
+      border: 1px solid rgba(88,166,255,.4);
+      border-radius: 30px;
+      padding: 9px 18px;
+      z-index: 8000;
+      font-size: 13px; font-weight: 600;
+      color: var(--info);
+      box-shadow: 0 8px 30px rgba(0,0,0,.5);
+      align-items: center; gap: 14px;
+      max-width: calc(100vw - 32px);
+      flex-wrap: wrap; justify-content: center;
+    }
+    body.demo-mode .demo-bar { display: flex; }
+    .demo-bar a, .demo-bar button {
+      color: var(--accent-light); text-decoration: none;
+      background: none; border: none; cursor: pointer;
+      font-family: 'Cairo', sans-serif; font-size: 12px; font-weight: 700;
+      padding: 2px 6px; border-radius: 6px;
+    }
+    .demo-bar a:hover, .demo-bar button:hover { background: rgba(240,192,64,.1); }
 
     /* ===== MAIN ===== */
     .main-content {
@@ -132,6 +190,7 @@
       padding: 22px;
       transition: transform .2s, box-shadow .2s;
       position: relative; overflow: hidden;
+      height: 100%;
     }
     .stat-card::before {
       content: '';
@@ -239,6 +298,7 @@
       .main-content { margin-right: 0; padding: 16px; }
       .topbar { right: 0; }
       .stat-value { font-size: 20px; }
+      .topbar-time { display: none; }
     }
 
     /* toast */
@@ -254,49 +314,61 @@
       animation: slideIn .3s ease;
     }
     @keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+
+    /* تقليل الحركة لمن يفضّل ذلك */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
 
 <!-- Loading -->
-<div class="loading-overlay" id="loadingOverlay">
+<div class="loading-overlay" id="loadingOverlay" role="status" aria-label="جارٍ التحميل">
   <div class="loader-ring"></div>
   <p style="color:var(--text-muted);font-size:14px;">جارٍ تحميل البيانات...</p>
 </div>
 
+<!-- خلفية القائمة في الموبايل -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
 <!-- Sidebar -->
-<nav class="sidebar" id="sidebar">
+<nav class="sidebar" id="sidebar" aria-label="القائمة الرئيسية">
   <div class="sidebar-brand">
-    <div class="brand-icon"><i class="fas fa-store"></i></div>
+    <div class="brand-icon"><i class="fas fa-store" aria-hidden="true"></i></div>
     <div>
       <div class="brand-name" id="storeName">نظام المبيعات</div>
-      <div class="brand-sub">POS & Inventory</div>
+      <div class="brand-sub">POS &amp; Inventory</div>
     </div>
   </div>
 
   <p class="nav-section-title">القائمة الرئيسية</p>
   <ul class="sidebar-nav">
-    <li><a href="index.html" class="active"><i class="fas fa-chart-pie"></i> لوحة التحكم</a></li>
-    <li><a href="sales.html"><i class="fas fa-cash-register"></i> البيع</a></li>
-    <li><a href="products.html"><i class="fas fa-boxes"></i> المنتجات</a></li>
-    <li><a href="inventory.html"><i class="fas fa-warehouse"></i> الجرد</a></li>
-    <li><a href="reports.html"><i class="fas fa-chart-bar"></i> التقارير</a></li>
-    <li><a href="categories.html"><i class="fas fa-tags"></i> الأقسام</a></li>
-    <li><a href="settings.html"><i class="fas fa-cog"></i> الإعدادات</a></li>
+    <li><a href="index.html" class="active"><i class="fas fa-chart-pie" aria-hidden="true"></i> لوحة التحكم</a></li>
+    <li><a href="sales.html"><i class="fas fa-cash-register" aria-hidden="true"></i> البيع</a></li>
+    <li><a href="products.html"><i class="fas fa-boxes" aria-hidden="true"></i> المنتجات</a></li>
+    <li><a href="inventory.html"><i class="fas fa-warehouse" aria-hidden="true"></i> الجرد</a></li>
+    <li><a href="reports.html"><i class="fas fa-chart-bar" aria-hidden="true"></i> التقارير</a></li>
+    <li><a href="categories.html"><i class="fas fa-tags" aria-hidden="true"></i> الأقسام</a></li>
+    <li><a href="settings.html"><i class="fas fa-cog" aria-hidden="true"></i> الإعدادات</a></li>
   </ul>
 
   <div class="sidebar-footer">
-    <i class="fas fa-shield-alt me-1"></i> النظام يعمل بشكل طبيعي
+    <i class="fas fa-shield-alt me-1" aria-hidden="true"></i> النظام يعمل بشكل طبيعي
   </div>
 </nav>
 
 <!-- Topbar -->
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:12px;">
-    <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-    <span class="topbar-title"><i class="fas fa-chart-pie me-2" style="color:var(--accent)"></i>لوحة التحكم</span>
+    <button class="sidebar-toggle" onclick="toggleSidebar()" aria-label="فتح القائمة" aria-expanded="false" id="sidebarToggleBtn"><i class="fas fa-bars" aria-hidden="true"></i></button>
+    <span class="topbar-title"><i class="fas fa-chart-pie me-2" style="color:var(--accent)" aria-hidden="true"></i>لوحة التحكم</span>
   </div>
   <div class="topbar-right">
+    <span class="demo-badge"><i class="fas fa-flask me-1" aria-hidden="true"></i> DEMO</span>
     <span class="topbar-time" id="clockDisplay"></span>
     <span class="store-badge" id="storeNameBadge">المتجر</span>
   </div>
@@ -309,14 +381,14 @@
   <div class="row g-3 mb-4">
     <div class="col-6 col-md-4 col-lg-2">
       <div class="stat-card gold">
-        <div class="stat-icon gold"><i class="fas fa-boxes"></i></div>
+        <div class="stat-icon gold"><i class="fas fa-boxes" aria-hidden="true"></i></div>
         <div class="stat-value" id="totalProducts">0</div>
         <div class="stat-label">عدد المنتجات</div>
       </div>
     </div>
     <div class="col-6 col-md-4 col-lg-2">
       <div class="stat-card green">
-        <div class="stat-icon green"><i class="fas fa-coins"></i></div>
+        <div class="stat-icon green"><i class="fas fa-coins" aria-hidden="true"></i></div>
         <div class="stat-value" id="stockValue">0</div>
         <div class="stat-label">قيمة المخزون</div>
         <div class="stat-sub" id="currencyLabel">ر.س</div>
@@ -324,14 +396,14 @@
     </div>
     <div class="col-6 col-md-4 col-lg-2">
       <div class="stat-card blue">
-        <div class="stat-icon blue"><i class="fas fa-receipt"></i></div>
+        <div class="stat-icon blue"><i class="fas fa-receipt" aria-hidden="true"></i></div>
         <div class="stat-value" id="todaySales">0</div>
         <div class="stat-label">مبيعات اليوم</div>
       </div>
     </div>
     <div class="col-6 col-md-4 col-lg-2">
       <div class="stat-card green">
-        <div class="stat-icon green"><i class="fas fa-arrow-trend-up"></i></div>
+        <div class="stat-icon green"><i class="fas fa-arrow-trend-up" aria-hidden="true"></i></div>
         <div class="stat-value" id="todayProfit">0</div>
         <div class="stat-label">أرباح اليوم</div>
         <div class="stat-sub" id="currencyLabel2">ر.س</div>
@@ -339,14 +411,14 @@
     </div>
     <div class="col-6 col-md-4 col-lg-2">
       <div class="stat-card warn">
-        <div class="stat-icon warn"><i class="fas fa-triangle-exclamation"></i></div>
+        <div class="stat-icon warn"><i class="fas fa-triangle-exclamation" aria-hidden="true"></i></div>
         <div class="stat-value" id="lowStockCount">0</div>
         <div class="stat-label">منتجات قليلة</div>
       </div>
     </div>
     <div class="col-6 col-md-4 col-lg-2">
       <div class="stat-card blue">
-        <div class="stat-icon blue"><i class="fas fa-tag"></i></div>
+        <div class="stat-icon blue"><i class="fas fa-tag" aria-hidden="true"></i></div>
         <div class="stat-value" id="totalCategories">0</div>
         <div class="stat-label">عدد الأقسام</div>
       </div>
@@ -358,21 +430,21 @@
     <div class="col-lg-8">
       <div class="section-card">
         <div class="section-header">
-          <span class="section-title"><i class="fas fa-chart-line me-2" style="color:var(--accent)"></i>مبيعات آخر 7 أيام</span>
+          <span class="section-title"><i class="fas fa-chart-line me-2" style="color:var(--accent)" aria-hidden="true"></i>مبيعات آخر 7 أيام</span>
         </div>
         <div class="chart-wrap">
-          <canvas id="salesChart" height="100"></canvas>
+          <canvas id="salesChart" height="100" role="img" aria-label="رسم بياني لمبيعات آخر سبعة أيام"></canvas>
         </div>
       </div>
     </div>
     <div class="col-lg-4">
       <div class="section-card h-100">
         <div class="section-header">
-          <span class="section-title"><i class="fas fa-triangle-exclamation me-2" style="color:var(--warning)"></i>منتجات قليلة الكمية</span>
+          <span class="section-title"><i class="fas fa-triangle-exclamation me-2" style="color:var(--warning)" aria-hidden="true"></i>منتجات قليلة الكمية</span>
         </div>
         <div style="padding:16px;" id="lowStockList">
           <p style="color:var(--text-muted);font-size:13px;text-align:center;margin-top:20px;">
-            <i class="fas fa-check-circle" style="color:var(--success)"></i> لا توجد منتجات قليلة الكمية
+            <i class="fas fa-check-circle" style="color:var(--success)" aria-hidden="true"></i> لا توجد منتجات قليلة الكمية
           </p>
         </div>
       </div>
@@ -382,20 +454,20 @@
   <!-- Last Sales -->
   <div class="section-card">
     <div class="section-header">
-      <span class="section-title"><i class="fas fa-clock me-2" style="color:var(--info)"></i>آخر عمليات البيع</span>
+      <span class="section-title"><i class="fas fa-clock me-2" style="color:var(--info)" aria-hidden="true"></i>آخر عمليات البيع</span>
       <a href="sales.html" style="font-size:12px;color:var(--accent);text-decoration:none;">
-        عرض الكل <i class="fas fa-arrow-left ms-1"></i>
+        عرض الكل <i class="fas fa-arrow-left ms-1" aria-hidden="true"></i>
       </a>
     </div>
     <div style="overflow-x:auto;">
       <table class="custom-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>المنتجات</th>
-            <th>الإجمالي</th>
-            <th>الربح</th>
-            <th>التاريخ</th>
+            <th scope="col">#</th>
+            <th scope="col">المنتجات</th>
+            <th scope="col">الإجمالي</th>
+            <th scope="col">الربح</th>
+            <th scope="col">التاريخ</th>
           </tr>
         </thead>
         <tbody id="lastSalesBody">
@@ -407,15 +479,105 @@
 
 </main>
 
+<!-- شريط وضع التجربة -->
+<div class="demo-bar" role="status">
+  <span>🧪 وضع التجربة — البيانات وهمية ولا تؤثر على النظام الحقيقي</span>
+  <button type="button" onclick="resetDemoData()">↺ إعادة تعيين</button>
+  <a href="index.html">خروج من التجربة</a>
+</div>
+
 <!-- Toast container -->
-<div class="toast-container-custom" id="toastContainer"></div>
+<div class="toast-container-custom" id="toastContainer" aria-live="polite"></div>
 
 <!-- Firebase SDK -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  // ===== إعداد Firebase =====
+  /* ═════════════════════════════════════════════
+     وضع التجربة (Demo Mode)
+     - يُفعَّل عبر  ?demo=1
+     - بيانات وهمية في localStorage فقط
+     - لا يتصل بقاعدة البيانات إطلاقاً (لا قراءة ولا كتابة)
+  ═════════════════════════════════════════════ */
+  const DEMO = new URLSearchParams(location.search).get('demo') === '1';
+  const DEMO_KEY = 'salesDemoDB_v2';
+
+  if (DEMO) document.body.classList.add('demo-mode');
+
+  function seedDemoData() {
+    const now = Date.now();
+    const day = 24 * 60 * 60 * 1000;
+
+    const products = {
+      p01: { name: 'ماء صحة 330مل — قوصرة',   category: 'مشروبات',     purchasePrice: 3000,  salePrice: 4000,  minPrice: 3500,  quantity: 42 },
+      p02: { name: 'شاي محمود 450غ',           category: 'مواد غذائية', purchasePrice: 4500,  salePrice: 6000,  minPrice: 5000,  quantity: 18 },
+      p03: { name: 'رز عنبر 5كغ',              category: 'مواد غذائية', purchasePrice: 12000, salePrice: 15000, minPrice: 13000, quantity: 9  },
+      p04: { name: 'بيبسي عائلي 2.25ل',        category: 'مشروبات',     purchasePrice: 1750,  salePrice: 2500,  minPrice: 2000,  quantity: 30 },
+      p05: { name: 'شوكولاتة كيندر 8 قطع',     category: 'حلويات',      purchasePrice: 3250,  salePrice: 4500,  minPrice: 3750,  quantity: 4  },
+      p06: { name: 'معجون أسنان سيجنال',        category: 'عناية شخصية', purchasePrice: 2000,  salePrice: 3000,  minPrice: 2500,  quantity: 12 },
+      p07: { name: 'مسحوق غسيل أومو 3كغ',      category: 'منظفات',      purchasePrice: 8500,  salePrice: 11000, minPrice: 9500,  quantity: 7  },
+      p08: { name: 'زيت زير 1.8ل',             category: 'مواد غذائية', purchasePrice: 5000,  salePrice: 6500,  minPrice: 5500,  quantity: 0  },
+      p09: { name: 'بسكويت أولكر شاي',          category: 'حلويات',      purchasePrice: 750,   salePrice: 1000,  minPrice: 850,   quantity: 55 },
+      p10: { name: 'صابون لوكس 3 قطع',          category: 'عناية شخصية', purchasePrice: 2250,  salePrice: 3250,  minPrice: 2750,  quantity: 3  },
+      p11: { name: 'عصير راني برتقال',          category: 'مشروبات',     purchasePrice: 900,   salePrice: 1250,  minPrice: 1000,  quantity: 26 },
+      p12: { name: 'كلينكس 550 منديل',          category: 'منظفات',      purchasePrice: 1500,  salePrice: 2250,  minPrice: 1750,  quantity: 14 }
+    };
+
+    const categories = {
+      c1: { name: 'مشروبات' }, c2: { name: 'مواد غذائية' }, c3: { name: 'حلويات' },
+      c4: { name: 'منظفات' }, c5: { name: 'عناية شخصية' }
+    };
+
+    // مبيعات موزّعة على آخر 7 أيام ليظهر الرسم البياني حيّاً
+    const pick = ids => ids.map(id => ({
+      id, name: products[id].name, qty: 1,
+      price: products[id].salePrice, subtotal: products[id].salePrice
+    }));
+    const mk = (daysAgo, hour, ids, total, profit) => ({
+      items: pick(ids), total, profit, note: '',
+      timestamp: now - daysAgo * day - (24 - hour) * 3600 * 1000 + Math.floor(Math.random() * 3600 * 1000)
+    });
+
+    const salesArr = [
+      mk(6, 11, ['p01','p04'], 6500, 1750),   mk(6, 18, ['p03'], 15000, 3000),
+      mk(5, 10, ['p09','p11'], 2250, 600),    mk(5, 20, ['p07'], 11000, 2500),
+      mk(4, 12, ['p02','p06'], 9000, 2500),   mk(4, 17, ['p04','p04','p01'], 9000, 2500), mk(4, 21, ['p12'], 2250, 750),
+      mk(3, 9,  ['p05'], 4500, 1250),         mk(3, 16, ['p03','p08'], 21500, 4500),
+      mk(2, 11, ['p10','p06'], 6250, 2000),   mk(2, 14, ['p01'], 4000, 1000),  mk(2, 19, ['p09','p09','p11'], 3250, 850),
+      mk(1, 10, ['p02'], 6000, 1500),         mk(1, 15, ['p07','p12'], 13250, 3250), mk(1, 20, ['p04','p05'], 7000, 2000),
+      mk(0, 9,  ['p01','p09'], 5000, 1250),   mk(0, 12, ['p03'], 15000, 3000), mk(0, 14, ['p11','p06'], 4250, 1350)
+    ];
+    const sales = {};
+    salesArr.forEach((s, i) => sales['demo_s' + String(i).padStart(2, '0')] = s);
+
+    const data = {
+      settings: { storeName: 'متجر النخبة (تجريبي)', currency: 'د.ع', lowStockThreshold: 5 },
+      products, categories, sales, inventory: {}
+    };
+    try { localStorage.setItem(DEMO_KEY, JSON.stringify(data)); } catch(e) {}
+    return data;
+  }
+
+  function getDemoData() {
+    try {
+      const raw = localStorage.getItem(DEMO_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d && d.products && d.sales) return d;
+      }
+    } catch(e) {}
+    return seedDemoData();
+  }
+
+  window.resetDemoData = function() {
+    try { localStorage.removeItem(DEMO_KEY); } catch(e) {}
+    location.reload();
+  };
+
+  const demoData = DEMO ? getDemoData() : null;
+
+  // ===== إعداد Firebase (لا يُنشأ أي اتصال في وضع التجربة) =====
   const firebaseConfig = {
     apiKey: "AIzaSyC7EVNCSl48CQgIC_a8wdC5UG2tKLtNKjQ",
     authDomain: "garag-system.firebaseapp.com",
@@ -426,13 +588,49 @@
     appId: "1:330947022055:web:d0c9d378e200c7de45a642"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
+  const app = DEMO ? null : initializeApp(firebaseConfig);
+  const db  = DEMO ? null : getDatabase(app);
 
   // ===== متغيرات عامة =====
   let currency = 'ر.س';
   let lowStockThreshold = 5;
   let salesChart = null;
+
+  // ===== حماية من XSS: تهريب أي نص قادم من البيانات قبل حقنه في HTML =====
+  function escapeHtml(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // ===== إشعارات =====
+  function showToast(text) {
+    const box = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'my-toast';
+    t.textContent = text;
+    box.appendChild(t);
+    setTimeout(() => t.remove(), 4500);
+  }
+
+  // ===== إخفاء شاشة التحميل =====
+  function hideLoading() {
+    const ov = document.getElementById('loadingOverlay');
+    if (!ov || ov.style.display === 'none') return;
+    ov.style.opacity = '0';
+    setTimeout(() => ov.style.display = 'none', 400);
+  }
+
+  // مهلة أمان: إن تعذّر الاتصال لا تبقى شاشة التحميل للأبد
+  if (!DEMO) {
+    setTimeout(() => {
+      const ov = document.getElementById('loadingOverlay');
+      if (ov && ov.style.display !== 'none' && ov.style.opacity !== '0') {
+        hideLoading();
+        showToast('⚠️ تعذّر تحميل البيانات. تحقق من اتصالك بالإنترنت.');
+      }
+    }, 10000);
+  }
 
   // ===== ساعة =====
   function updateClock() {
@@ -442,27 +640,25 @@
         hour:'2-digit', minute:'2-digit' });
   }
   updateClock();
-  setInterval(updateClock, 1000);
+  setInterval(updateClock, 30000); // الدقائق فقط معروضة — تحديث كل 30 ثانية يكفي ويوفر معالجة
 
   // ===== تحميل الإعدادات =====
   function loadSettings() {
-    get(ref(db, 'settings')).then(snap => {
-      if (snap.exists()) {
-        const s = snap.val();
-        currency = s.currency || 'ر.س';
-        lowStockThreshold = s.lowStockThreshold || 5;
-        const nm = s.storeName || 'نظام المبيعات';
-        document.getElementById('storeName').textContent = nm;
-        document.getElementById('storeNameBadge').textContent = nm;
-        document.querySelectorAll('[id^="currencyLabel"]').forEach(el => el.textContent = currency);
-      }
-    });
+    const apply = (s) => {
+      currency = s.currency || 'ر.س';
+      lowStockThreshold = s.lowStockThreshold || 5;
+      const nm = s.storeName || 'نظام المبيعات';
+      document.getElementById('storeName').textContent = nm;
+      document.getElementById('storeNameBadge').textContent = nm;
+      document.querySelectorAll('[id^="currencyLabel"]').forEach(el => el.textContent = currency);
+    };
+    if (DEMO) { apply(demoData.settings || {}); return; }
+    get(ref(db, 'settings')).then(snap => { if (snap.exists()) apply(snap.val()); });
   }
 
   // ===== تحميل المنتجات =====
   function loadProducts() {
-    onValue(ref(db, 'products'), snap => {
-      const products = snap.exists() ? snap.val() : {};
+    const apply = (products) => {
       const list = Object.values(products);
 
       // إحصائيات
@@ -476,23 +672,25 @@
 
       // منتجات قليلة الكمية
       renderLowStock(low);
-    });
+    };
+    if (DEMO) { apply(demoData.products || {}); return; }
+    onValue(ref(db, 'products'), snap => apply(snap.exists() ? snap.val() : {}));
   }
 
   // ===== تحميل الأقسام =====
   function loadCategories() {
-    onValue(ref(db, 'categories'), snap => {
-      const cats = snap.exists() ? snap.val() : {};
+    const apply = (cats) => {
       document.getElementById('totalCategories').textContent = Object.keys(cats).length;
-    });
+    };
+    if (DEMO) { apply(demoData.categories || {}); return; }
+    onValue(ref(db, 'categories'), snap => apply(snap.exists() ? snap.val() : {}));
   }
 
   // ===== تحميل المبيعات =====
   function loadSales() {
-    onValue(ref(db, 'sales'), snap => {
-      const sales = snap.exists() ? snap.val() : {};
-      const list  = Object.entries(sales).map(([id, v]) => ({ id, ...v }))
-                         .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+    const apply = (sales) => {
+      const list = Object.entries(sales).map(([id, v]) => ({ id, ...v }))
+                        .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
       // مبيعات اليوم
       const today = new Date(); today.setHours(0,0,0,0);
@@ -509,9 +707,10 @@
       renderSalesChart(list);
 
       // إخفاء التحميل
-      document.getElementById('loadingOverlay').style.opacity = '0';
-      setTimeout(() => document.getElementById('loadingOverlay').style.display = 'none', 400);
-    });
+      hideLoading();
+    };
+    if (DEMO) { apply(demoData.sales || {}); return; }
+    onValue(ref(db, 'sales'), snap => apply(snap.exists() ? snap.val() : {}));
   }
 
   // ===== رسم المنتجات قليلة الكمية =====
@@ -524,9 +723,9 @@
     }
     el.innerHTML = list.slice(0, 6).map(p => `
       <div class="low-stock-item">
-        <span style="font-size:13px;font-weight:600;">${p.name}</span>
+        <span style="font-size:13px;font-weight:600;">${escapeHtml(p.name)}</span>
         <span class="${p.quantity == 0 ? 'badge-low' : 'badge-warn'}">
-          ${p.quantity == 0 ? 'نفذ' : p.quantity + ' قطعة'}
+          ${p.quantity == 0 ? 'نفذ' : escapeHtml(p.quantity) + ' قطعة'}
         </span>
       </div>
     `).join('');
@@ -542,9 +741,9 @@
     tbody.innerHTML = list.map((s, i) => `
       <tr>
         <td style="color:var(--text-muted)">${i + 1}</td>
-        <td>${(s.items || []).map(it => it.name).join('، ')}</td>
-        <td style="color:var(--accent);font-weight:700;">${formatNum(s.total || 0)} ${currency}</td>
-        <td style="color:var(--success);">${formatNum(s.profit || 0)} ${currency}</td>
+        <td>${(s.items || []).map(it => escapeHtml(it.name)).join('، ')}</td>
+        <td style="color:var(--accent);font-weight:700;">${formatNum(s.total || 0)} ${escapeHtml(currency)}</td>
+        <td style="color:var(--success);">${formatNum(s.profit || 0)} ${escapeHtml(currency)}</td>
         <td style="color:var(--text-muted);font-size:12px;">${formatDate(s.timestamp)}</td>
       </tr>
     `).join('');
@@ -610,8 +809,22 @@
 
   // ===== تبديل السايدبار في الموبايل =====
   window.toggleSidebar = function() {
-    document.getElementById('sidebar').classList.toggle('open');
+    const open = document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarBackdrop').classList.toggle('show', open);
+    const btn = document.getElementById('sidebarToggleBtn');
+    if (btn) btn.setAttribute('aria-expanded', open);
   };
+
+  // ===== في وضع التجربة: تمرير ?demo=1 لكل روابط الصفحات الداخلية =====
+  if (DEMO) {
+    document.querySelectorAll('a[href$=".html"]').forEach(a => {
+      const href = a.getAttribute('href');
+      if (href && !href.includes('demo=')) a.setAttribute('href', href + '?demo=1');
+    });
+    // رابط "خروج من التجربة" يبقى بدون المعامل
+    document.querySelector('.demo-bar a')?.setAttribute('href', 'index.html');
+    showToast('🧪 أنت في وضع التجربة — جرّب بحرية، لا شيء يُحفظ في النظام الحقيقي');
+  }
 
   // ===== تشغيل =====
   loadSettings();
