@@ -321,7 +321,9 @@
       z-index: 20;
       margin: -18px -18px 14px;
       padding: 18px 18px 10px;
-      background: linear-gradient(var(--bg-dark) 78%, transparent);
+      background: var(--bg-dark); /* ✨ UI Enhancement — خلفية صلبة تمنع تداخل المنتجات خلف التصنيفات */
+      border-bottom: 1px solid var(--border-soft);
+      box-shadow: 0 6px 14px -8px rgba(0,0,0,.35);
       transition: background .3s;
     }
 
