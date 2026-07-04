@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
-    /* ===== CSS VARIABLES  - DARK MODE (DEFAULT) ===== */
+    /* ===== CSS VARIABLES - DARK MODE (DEFAULT) ===== */
     :root {
       --bg-dark: #0d1117;
       --bg-card: #161b22;
@@ -315,16 +315,9 @@
     }
 
     /* ✨ UI Enhancement — شريط أدوات لاصق (بحث + تصنيفات) */
+    /* ✨ UI Enhancement — الشريط يتحرك مع الصفحة (غير لاصق) ليمنح المنتجات كامل المساحة */
     .pos-toolbar {
-      position: sticky;
-      top: -18px;
-      z-index: 20;
-      margin: -18px -18px 14px;
-      padding: 18px 18px 10px;
-      background: var(--bg-dark); /* ✨ UI Enhancement — خلفية صلبة تمنع تداخل المنتجات خلف التصنيفات */
-      border-bottom: 1px solid var(--border-soft);
-      box-shadow: 0 6px 14px -8px rgba(0,0,0,.35);
-      transition: background .3s;
+      margin-bottom: 14px;
     }
 
     .search-filters { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -995,12 +988,6 @@
         -webkit-overflow-scrolling: touch;
       }
 
-      /* ✨ UI Enhancement — شريط الأدوات لاصق بالموبايل */
-      .pos-toolbar {
-        top: -14px;
-        margin: -14px -14px 12px;
-        padding: 14px 14px 8px;
-      }
       .search-bar input {
         font-size: 16px; /* ✨ UI Enhancement — يمنع تكبير iOS التلقائي */
         padding: 12px 42px 12px 38px;
