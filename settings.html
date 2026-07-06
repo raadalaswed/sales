@@ -1,6 +1,148 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style id="ra-lock-style">
+  /* قفل فوري: أخفِ كل محتوى الصفحة حتى انتهاء التحقق. لا يُخفى إلا محتوى الصفحة، أما كتلة الحماية فتبقى ظاهرة. */
+  html.ra-locked body > *:not(#ra-secure-block){ display:none !important; }
+  html.ra-locked{ overflow:hidden; }
+ 
+  #ra-secure-block *{ box-sizing:border-box; }
+  #ra-secure-block{
+    --ra-ink:#0b1120; --ra-surface:#ffffff; --ra-muted:#5b6472; --ra-line:#e5e9f0;
+    --ra-accent:#0ea5a4; --ra-accent-ink:#0b7d7c; --ra-danger:#dc2626; --ra-warn:#b45309;
+    --ra-field:#f6f8fb; --ra-shadow:0 24px 60px -20px rgba(11,17,32,.35);
+    --ra-radius:16px; --ra-font:"IBM Plex Sans Arabic","Segoe UI",system-ui,Tahoma,sans-serif;
+  }
+  #ra-secure-block{
+    position:fixed; inset:0; z-index:2147483000;
+    font-family:var(--ra-font); color:var(--ra-ink);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+  #ra-secure-block[hidden]{ display:none !important; }
+ 
+  /* طبقة التحقق الكاملة (تغطي كل شيء) */
+  .ra-scrim{
+    position:absolute; inset:0; display:grid; place-items:center; padding:24px;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(14,165,164,.10), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(59,130,246,.08), transparent 55%),
+      #f2f5f9;
+    overflow:auto;
+  }
+ 
+  /* شاشة التحميل */
+  .ra-loading{ display:flex; flex-direction:column; align-items:center; gap:20px; text-align:center; }
+  .ra-spinner{
+    width:56px; height:56px; border-radius:50%;
+    border:4px solid var(--ra-line); border-top-color:var(--ra-accent);
+    animation:ra-spin .8s linear infinite;
+  }
+  @keyframes ra-spin{ to{ transform:rotate(360deg); } }
+  .ra-loading-text{ font-weight:600; font-size:18px; color:var(--ra-ink); }
+  .ra-loading-sub{ font-size:14px; color:var(--ra-muted); max-width:340px; line-height:1.7; }
+ 
+  /* البطاقات (تسجيل الدخول / التسجيل / الرسائل) */
+  .ra-card{
+    width:100%; max-width:440px; background:var(--ra-surface);
+    border:1px solid var(--ra-line); border-radius:var(--ra-radius);
+    box-shadow:var(--ra-shadow); padding:32px 28px; animation:ra-rise .35s cubic-bezier(.2,.7,.2,1);
+  }
+  @keyframes ra-rise{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+ 
+  .ra-brand{ display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+  .ra-brand-mark{
+    width:38px; height:38px; border-radius:11px; display:grid; place-items:center;
+    background:linear-gradient(135deg,var(--ra-accent),#2563eb); color:#fff; font-weight:700; font-size:15px;
+    box-shadow:0 8px 20px -8px rgba(14,165,164,.6);
+  }
+  .ra-brand-name{ font-weight:700; font-size:16px; letter-spacing:-.2px; }
+  .ra-brand-sub{ font-size:12px; color:var(--ra-muted); }
+ 
+  .ra-title{ font-size:22px; font-weight:700; margin:0 0 4px; letter-spacing:-.3px; }
+  .ra-lede{ font-size:14px; color:var(--ra-muted); margin:0 0 22px; line-height:1.7; }
+ 
+  .ra-field{ margin-bottom:14px; }
+  .ra-field label{ display:block; font-size:13px; font-weight:600; margin-bottom:7px; color:#2b333f; }
+  .ra-input{
+    width:100%; height:46px; padding:0 14px; font:inherit; font-size:15px; color:var(--ra-ink);
+    background:var(--ra-field); border:1.5px solid transparent; border-radius:11px; outline:none;
+    transition:border-color .15s, background .15s;
+  }
+  .ra-input::placeholder{ color:#9aa3b2; }
+  .ra-input:focus{ background:#fff; border-color:var(--ra-accent); }
+  .ra-input:disabled{ opacity:.6; cursor:not-allowed; }
+ 
+  .ra-btn{
+    width:100%; height:48px; border:0; border-radius:11px; cursor:pointer;
+    font:inherit; font-size:15px; font-weight:600; color:#fff;
+    background:linear-gradient(135deg,var(--ra-accent),var(--ra-accent-ink));
+    transition:transform .06s, box-shadow .15s, opacity .15s;
+    box-shadow:0 10px 24px -12px rgba(14,165,164,.9); display:flex; align-items:center; justify-content:center; gap:9px;
+  }
+  .ra-btn:hover{ box-shadow:0 14px 30px -12px rgba(14,165,164,.95); }
+  .ra-btn:active{ transform:translateY(1px); }
+  .ra-btn[disabled]{ opacity:.65; cursor:not-allowed; box-shadow:none; }
+  .ra-btn.ra-ghost{
+    background:transparent; color:var(--ra-accent-ink); box-shadow:none; height:auto; padding:0;
+    font-size:14px; width:auto; text-decoration:none;
+  }
+  .ra-btn.ra-ghost:hover{ text-decoration:underline; }
+  .ra-btn.ra-secondary{
+    background:var(--ra-field); color:var(--ra-ink); box-shadow:none;
+    border:1.5px solid var(--ra-line);
+  }
+ 
+  .ra-btn-spin{ width:18px; height:18px; border-radius:50%; border:2.5px solid rgba(255,255,255,.45); border-top-color:#fff; animation:ra-spin .7s linear infinite; }
+ 
+  .ra-row{ display:flex; align-items:center; justify-content:space-between; margin:6px 0 18px; gap:10px; flex-wrap:wrap; }
+  .ra-check{ display:flex; align-items:center; gap:8px; font-size:13.5px; color:#2b333f; cursor:pointer; user-select:none; }
+  .ra-check input{ width:16px; height:16px; accent-color:var(--ra-accent); }
+ 
+  .ra-alt{ text-align:center; margin-top:20px; font-size:14px; color:var(--ra-muted); }
+  .ra-alt a{ color:var(--ra-accent-ink); font-weight:600; cursor:pointer; text-decoration:none; }
+  .ra-alt a:hover{ text-decoration:underline; }
+ 
+  .ra-feedback{
+    display:none; align-items:flex-start; gap:9px; margin-bottom:16px; padding:12px 14px;
+    border-radius:11px; font-size:13.5px; line-height:1.6; border:1px solid transparent;
+  }
+  .ra-feedback.show{ display:flex; }
+  .ra-feedback.err{ background:#fef2f2; border-color:#fecaca; color:#991b1b; }
+  .ra-feedback.ok{ background:#ecfdf5; border-color:#a7f3d0; color:#065f46; }
+  .ra-feedback .ra-fi{ flex:0 0 auto; margin-top:1px; }
+ 
+  /* شاشات حالة الحساب / الرسائل */
+  .ra-state{ text-align:center; }
+  .ra-state-icon{
+    width:64px; height:64px; border-radius:18px; display:grid; place-items:center; margin:0 auto 18px;
+    font-size:30px;
+  }
+  .ra-state-icon.wait{ background:#fffbeb; color:#b45309; }
+  .ra-state-icon.stop{ background:#fef2f2; color:#dc2626; }
+  .ra-state-icon.ok{ background:#ecfdf5; color:#059669; }
+  .ra-state-reason{
+    margin-top:14px; padding:12px 14px; background:var(--ra-field); border:1px solid var(--ra-line);
+    border-radius:11px; font-size:13.5px; color:#2b333f; text-align:start; line-height:1.7;
+  }
+  .ra-state-reason b{ display:block; margin-bottom:4px; color:var(--ra-muted); font-weight:600; font-size:12px; }
+  .ra-state .ra-actions{ margin-top:22px; display:flex; flex-direction:column; gap:10px; }
+ 
+  @media (max-width:480px){
+    .ra-card{ padding:26px 20px; border-radius:14px; }
+    .ra-title{ font-size:20px; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    #ra-secure-block *{ animation-duration:.001ms !important; }
+    .ra-spinner,.ra-btn-spin{ animation-duration:.8s !important; }
+  }
+</style>
+<script>
+  /* قفل فوري متزامن: يُنفَّذ قبل رسم الصفحة، فلا يظهر أي جزء منها ولو لجزء من الثانية. */
+  document.documentElement.classList.add('ra-locked');
+</script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>الإعدادات - نظام المبيعات</title>
@@ -700,5 +842,609 @@
   })();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <div id="ra-secure-block" role="region" aria-label="حماية الصفحة">
+  <div class="ra-scrim">
+ 
+    <!-- (1) شاشة التحميل -->
+    <div class="ra-loading" data-ra-view="loading">
+      <div class="ra-spinner" aria-hidden="true"></div>
+      <div class="ra-loading-text" data-ra-loading-text>جاري التحقق...</div>
+      <div class="ra-loading-sub" data-ra-loading-sub>يرجى الانتظار قليلًا بينما نتأكد من صلاحية حسابك.</div>
+    </div>
+ 
+    <!-- (2) تسجيل الدخول -->
+    <div class="ra-card" data-ra-view="login" hidden>
+      <div class="ra-brand">
+        <div class="ra-brand-mark">RA</div>
+        <div>
+          <div class="ra-brand-name">RA Secure Block</div>
+          <div class="ra-brand-sub">تسجيل الدخول الآمن</div>
+        </div>
+      </div>
+      <h2 class="ra-title">تسجيل الدخول</h2>
+      <p class="ra-lede">أدخل بيانات حسابك للمتابعة إلى الخدمة.</p>
+ 
+      <div class="ra-feedback" data-ra-fb="login"><span class="ra-fi">⚠️</span><span data-ra-fb-text></span></div>
+ 
+      <div class="ra-field">
+        <label for="ra-login-email">البريد الإلكتروني</label>
+        <input class="ra-input" id="ra-login-email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" />
+      </div>
+      <div class="ra-field">
+        <label for="ra-login-pass">كلمة المرور</label>
+        <input class="ra-input" id="ra-login-pass" type="password" autocomplete="current-password" placeholder="••••••••" />
+      </div>
+ 
+      <div class="ra-row">
+        <label class="ra-check"><input type="checkbox" id="ra-remember" /> تذكّرني</label>
+        <a class="ra-btn ra-ghost" data-ra-go="forgot">نسيت كلمة المرور؟</a>
+      </div>
+ 
+      <button class="ra-btn" data-ra-action="login">
+        <span data-ra-btn-label>تسجيل الدخول</span>
+      </button>
+ 
+      <p class="ra-alt">ليس لديك حساب؟ <a data-ra-go="register">إنشاء حساب</a></p>
+    </div>
+ 
+    <!-- (3) إنشاء حساب -->
+    <div class="ra-card" data-ra-view="register" hidden>
+      <div class="ra-brand">
+        <div class="ra-brand-mark">RA</div>
+        <div>
+          <div class="ra-brand-name">RA Secure Block</div>
+          <div class="ra-brand-sub">حساب جديد</div>
+        </div>
+      </div>
+      <h2 class="ra-title">إنشاء حساب</h2>
+      <p class="ra-lede">أنشئ حسابك، وسيتم تفعيله بعد موافقة الإدارة.</p>
+ 
+      <div class="ra-feedback" data-ra-fb="register"><span class="ra-fi">⚠️</span><span data-ra-fb-text></span></div>
+ 
+      <div class="ra-field">
+        <label for="ra-reg-name">الاسم الكامل</label>
+        <input class="ra-input" id="ra-reg-name" type="text" autocomplete="name" placeholder="الاسم كما تريد ظهوره" />
+      </div>
+      <div class="ra-field">
+        <label for="ra-reg-email">البريد الإلكتروني</label>
+        <input class="ra-input" id="ra-reg-email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" />
+      </div>
+      <div class="ra-field">
+        <label for="ra-reg-pass">كلمة المرور</label>
+        <input class="ra-input" id="ra-reg-pass" type="password" autocomplete="new-password" placeholder="٦ أحرف على الأقل" />
+      </div>
+ 
+      <button class="ra-btn" data-ra-action="register" style="margin-top:6px;">
+        <span data-ra-btn-label>إنشاء الحساب</span>
+      </button>
+ 
+      <p class="ra-alt">لديك حساب بالفعل؟ <a data-ra-go="login">تسجيل الدخول</a></p>
+    </div>
+ 
+    <!-- (4) استعادة كلمة المرور -->
+    <div class="ra-card" data-ra-view="forgot" hidden>
+      <div class="ra-brand">
+        <div class="ra-brand-mark">RA</div>
+        <div>
+          <div class="ra-brand-name">RA Secure Block</div>
+          <div class="ra-brand-sub">استعادة الوصول</div>
+        </div>
+      </div>
+      <h2 class="ra-title">استعادة كلمة المرور</h2>
+      <p class="ra-lede">أدخل بريدك الإلكتروني وسنرسل إليك رابط إعادة التعيين.</p>
+ 
+      <div class="ra-feedback" data-ra-fb="forgot"><span class="ra-fi">⚠️</span><span data-ra-fb-text></span></div>
+ 
+      <div class="ra-field">
+        <label for="ra-forgot-email">البريد الإلكتروني</label>
+        <input class="ra-input" id="ra-forgot-email" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com" />
+      </div>
+ 
+      <button class="ra-btn" data-ra-action="forgot">
+        <span data-ra-btn-label>إرسال الرابط</span>
+      </button>
+ 
+      <p class="ra-alt"><a data-ra-go="login">العودة لتسجيل الدخول</a></p>
+    </div>
+ 
+    <!-- (5) شاشة حالة الحساب / الرسائل (تُملأ ديناميكيًا) -->
+    <div class="ra-card ra-state" data-ra-view="state" hidden>
+      <div class="ra-state-icon wait" data-ra-state-icon>⏳</div>
+      <h2 class="ra-title" data-ra-state-title>—</h2>
+      <p class="ra-lede" data-ra-state-text style="margin-bottom:0;">—</p>
+      <div class="ra-state-reason" data-ra-state-reason hidden><b>سبب الرفض</b><span data-ra-state-reason-text></span></div>
+      <div class="ra-actions">
+        <button class="ra-btn ra-secondary" data-ra-action="switch-account">العودة لتسجيل الدخول بحساب آخر</button>
+      </div>
+    </div>
+ 
+  </div>
+</div>
+ 
+<script type="module">
+  /* ====================================================================
+     RA Secure Block — إعدادات المشروع (المكان الوحيد الذي قد تعدّله)
+     ==================================================================== */
+  const firebaseConfig = {
+    apiKey: "AIzaSyC7EVNCSl48CQgIC_a8wdC5UG2tKLtNKjQ",
+    authDomain: "garag-system.firebaseapp.com",
+    databaseURL: "https://garag-system-default-rtdb.firebaseio.com",
+    projectId: "garag-system",
+    storageBucket: "garag-system.firebasestorage.app",
+    messagingSenderId: "330947022055",
+    appId: "1:330947022055:web:d0c9d378e200c7de45a642"
+  };
+ 
+  /* الرسائل الافتراضية — يمكن للأدمن تجاوزها عبر settings/general إذا كانت قابلة للقراءة. */
+  const DEFAULT_MESSAGES = {
+    pending:  "حسابك بانتظار موافقة الإدارة. ستتمكن من استخدام الخدمات فور الموافقة.",
+    blocked:  "تم إيقاف حسابك. يرجى التواصل مع الإدارة لمزيد من المعلومات.",
+    rejected: "تم رفض طلب التسجيل الخاص بك."
+  };
+  const DEFAULT_SETTINGS = { registrationEnabled: true, emailVerificationRequired: false };
+ 
+  /* ====================================================================
+     تحميل حزم Firebase (نفس إصدار 10.12.0)
+     ==================================================================== */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import {
+    getAuth, browserLocalPersistence, browserSessionPersistence, setPersistence,
+    createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+    sendPasswordResetEmail, sendEmailVerification
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp, increment,
+    collection, addDoc, onSnapshot
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+ 
+  /* ====================================================================
+     أدوات الواجهة
+     ==================================================================== */
+  const root  = document.getElementById('ra-secure-block');
+  const $      = (sel, ctx=root) => ctx.querySelector(sel);
+  const views  = {
+    loading:  $('[data-ra-view="loading"]'),
+    login:    $('[data-ra-view="login"]'),
+    register: $('[data-ra-view="register"]'),
+    forgot:   $('[data-ra-view="forgot"]'),
+    state:    $('[data-ra-view="state"]'),
+  };
+ 
+  function showView(name){
+    Object.entries(views).forEach(([k, el]) => { el.hidden = (k !== name); });
+    clearAllFeedback();
+  }
+  function setLoading(text, sub){
+    $('[data-ra-loading-text]').textContent = text || 'جاري التحقق...';
+    if (sub !== undefined) $('[data-ra-loading-sub]').textContent = sub;
+    showView('loading');
+  }
+  function revealPage(userData){
+    // تعبئة عناصر الصفحة الاختيارية بمعلومات المستخدم
+    document.querySelectorAll('[data-ra-name]').forEach(el => el.textContent = userData?.name || '');
+    document.querySelectorAll('[data-ra-email]').forEach(el => el.textContent = userData?.email || '');
+    root.setAttribute('hidden', '');
+    document.documentElement.classList.remove('ra-locked');
+  }
+  function lockPage(){
+    root.removeAttribute('hidden');
+    document.documentElement.classList.add('ra-locked');
+  }
+ 
+  function feedback(form, message, type='err'){
+    const box = $(`[data-ra-fb="${form}"]`);
+    if (!box) return;
+    $('[data-ra-fb-text]', box).textContent = message;
+    box.querySelector('.ra-fi').textContent = type === 'ok' ? '✓' : '⚠️';
+    box.classList.remove('err','ok'); box.classList.add(type, 'show');
+  }
+  function clearFeedback(form){ const b = $(`[data-ra-fb="${form}"]`); if (b) b.classList.remove('show'); }
+  function clearAllFeedback(){ root.querySelectorAll('.ra-feedback').forEach(b => b.classList.remove('show')); }
+ 
+  function busy(btn, on, label){
+    if (!btn) return;
+    const span = btn.querySelector('[data-ra-btn-label]');
+    if (on){
+      btn.disabled = true; btn.dataset.raLabel = span ? span.textContent : '';
+      if (span) span.textContent = label || 'جاري المعالجة...';
+      const s = document.createElement('span'); s.className = 'ra-btn-spin'; s.setAttribute('data-ra-spin',''); btn.prepend(s);
+    } else {
+      btn.disabled = false;
+      const s = btn.querySelector('[data-ra-spin]'); if (s) s.remove();
+      if (span && btn.dataset.raLabel !== undefined) span.textContent = btn.dataset.raLabel;
+    }
+  }
+ 
+  /* ترجمة أخطاء Firebase إلى رسائل عربية واضحة (بدون كشف رسائل Firebase الأصلية) */
+  function humanError(err){
+    const code = (err && (err.code || err.message) || '').toString();
+    const map = {
+      'auth/invalid-email': 'صيغة البريد الإلكتروني غير صحيحة.',
+      'auth/missing-password': 'يرجى إدخال كلمة المرور.',
+      'auth/wrong-password': 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+      'auth/user-not-found': 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+      'auth/invalid-credential': 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+      'auth/invalid-login-credentials': 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+      'auth/email-already-in-use': 'هذا البريد الإلكتروني مسجّل بالفعل.',
+      'auth/weak-password': 'كلمة المرور ضعيفة — استخدم ٦ أحرف على الأقل.',
+      'auth/too-many-requests': 'محاولات كثيرة جدًا. يرجى المحاولة بعد قليل.',
+      'auth/network-request-failed': 'تعذّر الاتصال بالشبكة. تحقّق من اتصالك بالإنترنت.',
+      'auth/user-disabled': 'تم تعطيل هذا الحساب.',
+      'permission-denied': 'ليست لديك صلاحية لتنفيذ هذه العملية.',
+      'unavailable': 'الخدمة غير متاحة حاليًا. حاول مرة أخرى.',
+    };
+    for (const key in map){ if (code.includes(key)) return map[key]; }
+    return 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.';
+  }
+ 
+  /* ====================================================================
+     تهيئة Firebase (المرحلة الثالثة) — والتحقق من نجاح التهيئة
+     ==================================================================== */
+  let app, auth, db;
+  try {
+    app  = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db   = getFirestore(app);
+  } catch (e) {
+    setLoading('تعذّر تشغيل النظام', 'حدثت مشكلة أثناء تهيئة الاتصال. يرجى إعادة تحميل الصفحة لاحقًا.');
+    throw e;
+  }
+ 
+  /* قراءة إعدادات النظام إن كانت متاحة (وإلا نستخدم الافتراضيات) */
+  let SETTINGS = { ...DEFAULT_SETTINGS };
+  let MESSAGES = { ...DEFAULT_MESSAGES };
+  (async () => {
+    try {
+      const snap = await getDoc(doc(db, 'settings', 'general'));
+      if (snap.exists()){
+        const d = snap.data();
+        SETTINGS = {
+          registrationEnabled: d.registrationEnabled ?? DEFAULT_SETTINGS.registrationEnabled,
+          emailVerificationRequired: d.emailVerificationRequired ?? DEFAULT_SETTINGS.emailVerificationRequired,
+        };
+        MESSAGES = {
+          pending:  d.pendingMessage  || DEFAULT_MESSAGES.pending,
+          blocked:  d.blockedMessage  || DEFAULT_MESSAGES.blocked,
+          rejected: d.rejectedMessage || DEFAULT_MESSAGES.rejected,
+        };
+      }
+    } catch (_) { /* غير مسموح بالقراءة للمستخدم العادي — نكمل بالافتراضيات */ }
+  })();
+ 
+  /* ====================================================================
+     تسجيل النشاط (Activity Logs)
+     ملاحظة: عنوان IP لا يمكن الحصول عليه بشكل موثوق من الواجهة الأمامية،
+     لذا يُترك null ويُملأ لاحقًا عبر خدمة إدارية آمنة إن لزم.
+     ==================================================================== */
+  async function logActivity(action, extra = {}){
+    try {
+      const u = auth.currentUser;
+      await addDoc(collection(db, 'activityLogs'), {
+        action,
+        uid: extra.uid ?? (u ? u.uid : null),
+        userEmail: extra.userEmail ?? (u ? u.email : null),
+        performedBy: u ? u.uid : null,
+        performedByEmail: u ? u.email : null,
+        details: extra.details ?? '',
+        ip: null,
+        browser: navigator.userAgent,
+        timestamp: serverTimestamp(),
+      });
+    } catch (_) { /* لا نُفشل العملية الأساسية إذا فشل التسجيل */ }
+  }
+ 
+  /* ====================================================================
+     الحالة الداخلية
+     ==================================================================== */
+  let justLoggedIn = false;   // يُرفع فقط عند تسجيل دخول صريح لتحديث loginCount
+  let processing   = false;   // يمنع التعامل المزدوج مع onAuthStateChanged
+  let liveUnsub    = null;    // مستمع مستند المستخدم الحي (سحب الصلاحية / إنهاء الجلسات)
+  let sessionBaseline = 0;    // قيمة forceLogoutAt وقت الدخول — أي قيمة أحدث تعني إنهاء الجلسة
+ 
+  /* ====================================================================
+     المُراقب الأساسي للجلسة (المرحلة الرابعة فصاعدًا)
+     ==================================================================== */
+  onAuthStateChanged(auth, async (user) => {
+    if (!user){
+      stopLiveGuard();
+      lockPage();
+      showView('login');
+      return;
+    }
+    if (processing) return;
+    processing = true;
+    lockPage();
+    setLoading('جاري التحقق...', 'يتم الآن التأكد من صلاحية حسابك.');
+    try {
+      await handleSignedInUser(user);
+    } catch (err) {
+      handleFatal(err);
+    } finally {
+      processing = false;
+    }
+  });
+ 
+  async function handleSignedInUser(user){
+    // المرحلة الخامسة: قراءة Document المستخدم
+    const ref  = doc(db, 'users', user.uid);
+    let snap;
+    try {
+      snap = await getDoc(ref);
+    } catch (err) {
+      throw err; // تُعالَج في handleFatal
+    }
+ 
+    if (!snap.exists()){
+      // Document مفقود → الحساب غير مكتمل → تسجيل خروج ومنع
+      await signOut(auth);
+      showState({
+        icon: 'stop', title: 'حساب غير مكتمل',
+        text: 'تعذّر العثور على بيانات حسابك. يرجى التواصل مع الإدارة أو إنشاء الحساب من جديد.'
+      });
+      return;
+    }
+ 
+    const data = snap.data();
+ 
+    // المرحلة السادسة: فحص الحالة
+    switch (data.status){
+      case 'pending':
+        showState({ icon:'wait', title:'بانتظار الموافقة', text: MESSAGES.pending });
+        return;
+      case 'blocked':
+        showState({ icon:'stop', title:'حساب موقوف', text: MESSAGES.blocked });
+        return;
+      case 'rejected':
+        showState({
+          icon:'stop', title:'تم رفض الطلب', text: MESSAGES.rejected,
+          reason: (data.rejectReason && String(data.rejectReason).trim()) ? data.rejectReason : null
+        });
+        return;
+      case 'approved':
+        break; // متابعة
+      default:
+        showState({ icon:'stop', title:'حالة غير معروفة', text:'حالة حسابك غير صالحة. يرجى التواصل مع الإدارة.' });
+        return;
+    }
+ 
+    // المرحلة السابعة: تحديث بيانات الدخول عند تسجيل الدخول الصريح فقط (لتقليل عمليات الكتابة)
+    if (justLoggedIn){
+      justLoggedIn = false;
+      try {
+        await updateDoc(ref, {
+          lastLogin: serverTimestamp(),
+          loginCount: increment(1),
+          updatedAt: serverTimestamp(),
+        });
+      } catch (_) { /* لا يمنع الدخول إن فشل التحديث */ }
+      logActivity('login', { uid:user.uid, userEmail:user.email, details:'تسجيل دخول ناجح' });
+    }
+ 
+    // المرحلة الثامنة: إظهار الصفحة
+    sessionBaseline = tsMillis(data.forceLogoutAt);
+    revealPage(data);
+    startLiveGuard(ref);
+  }
+ 
+  // تحويل Timestamp إلى ميلي ثانية بأمان
+  function tsMillis(t){ return (t && typeof t.toMillis === 'function') ? t.toMillis() : 0; }
+ 
+  // المستمع الحي: يراقب مستند المستخدم أثناء عرض الصفحة.
+  // يسحب الوصول فورًا إذا تغيّرت الحالة، أو حُذف الحساب، أو طلب الأدمن إنهاء الجلسات.
+  function startLiveGuard(ref){
+    stopLiveGuard();
+    liveUnsub = onSnapshot(ref, (snap) => {
+      if (!snap.exists()){ forceSignOut(); return; }              // حُذف الحساب
+      const d = snap.data();
+      if (d.status !== 'approved'){ liveRelock(d); return; }      // سُحبت الصلاحية (blocked/rejected/pending)
+      if (tsMillis(d.forceLogoutAt) > sessionBaseline){ forceSignOut(); return; } // إنهاء كل الجلسات
+    }, () => { /* تجاهل أخطاء المستمع المؤقتة */ });
+  }
+  function stopLiveGuard(){ if (liveUnsub){ liveUnsub(); liveUnsub = null; } }
+ 
+  // إعادة قفل الصفحة وإظهار شاشة الحالة المناسبة عند سحب الصلاحية أثناء الاستخدام
+  function liveRelock(d){
+    stopLiveGuard();
+    switch (d.status){
+      case 'pending':
+        showState({ icon:'wait', title:'بانتظار الموافقة', text: MESSAGES.pending }); break;
+      case 'blocked':
+        showState({ icon:'stop', title:'حساب موقوف', text: MESSAGES.blocked }); break;
+      case 'rejected':
+        showState({ icon:'stop', title:'تم رفض الطلب', text: MESSAGES.rejected,
+          reason: (d.rejectReason && String(d.rejectReason).trim()) ? d.rejectReason : null }); break;
+      default:
+        showState({ icon:'stop', title:'تعذّر المتابعة', text:'تم تغيير حالة حسابك. يرجى تسجيل الدخول مجددًا.' });
+    }
+  }
+  async function forceSignOut(){
+    stopLiveGuard();
+    try { await signOut(auth); } catch(_) {}
+    // onAuthStateChanged سيتكفّل بإظهار شاشة تسجيل الدخول وقفل الصفحة.
+  }
+ 
+  function handleFatal(err){
+    const code = (err && (err.code || err.message) || '').toString();
+    if (code.includes('permission-denied')){
+      showState({ icon:'stop', title:'صلاحية مرفوضة', text:'تعذّر الوصول إلى بياناتك. يرجى التواصل مع الإدارة.' });
+    } else if (code.includes('unavailable') || code.includes('network')){
+      setLoading('مشكلة في الاتصال', 'تعذّر الاتصال بالخادم. تحقّق من اتصالك بالإنترنت ثم أعد تحميل الصفحة.');
+    } else {
+      setLoading('حدث خطأ', 'حدث خطأ غير متوقع. يرجى إعادة تحميل الصفحة.');
+    }
+  }
+ 
+  function showState({ icon, title, text, reason=null }){
+    lockPage();
+    const iconEl = $('[data-ra-state-icon]');
+    iconEl.className = 'ra-state-icon ' + (icon || 'wait');
+    iconEl.textContent = icon === 'stop' ? '⛔' : icon === 'ok' ? '✓' : '⏳';
+    $('[data-ra-state-title]').textContent = title;
+    $('[data-ra-state-text]').textContent  = text;
+    const reasonBox = $('[data-ra-state-reason]');
+    if (reason){ $('[data-ra-state-reason-text]').textContent = reason; reasonBox.hidden = false; }
+    else { reasonBox.hidden = true; }
+    showView('state');
+  }
+ 
+  /* ====================================================================
+     الإجراءات: تسجيل الدخول / التسجيل / استعادة كلمة المرور / الخروج
+     ==================================================================== */
+ 
+  // تسجيل الدخول (Login Flow — القسم 17)
+  async function doLogin(btn){
+    clearFeedback('login');
+    const email = $('#ra-login-email').value.trim();
+    const pass  = $('#ra-login-pass').value;
+    const remember = $('#ra-remember').checked;
+ 
+    if (!email){ feedback('login','يرجى إدخال البريد الإلكتروني.'); return; }
+    if (!pass){  feedback('login','يرجى إدخال كلمة المرور.'); return; }
+ 
+    busy(btn, true, 'جاري تسجيل الدخول...');
+    try {
+      await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
+      justLoggedIn = true;
+      await signInWithEmailAndPassword(auth, email, pass);
+      // onAuthStateChanged سيتولّى بقية الدورة (فحص Firestore والحالة).
+    } catch (err) {
+      justLoggedIn = false;
+      busy(btn, false);
+      feedback('login', humanError(err));
+    }
+  }
+ 
+  // إنشاء الحساب (Registration Flow — القسم 16)
+  async function doRegister(btn){
+    clearFeedback('register');
+    if (SETTINGS.registrationEnabled === false){
+      feedback('register','التسجيل مغلق حاليًا. يرجى التواصل مع الإدارة.'); return;
+    }
+    const name  = $('#ra-reg-name').value.trim();
+    const email = $('#ra-reg-email').value.trim();
+    const pass  = $('#ra-reg-pass').value;
+ 
+    if (name.length < 2){ feedback('register','يرجى إدخال الاسم الكامل.'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ feedback('register','صيغة البريد الإلكتروني غير صحيحة.'); return; }
+    if (pass.length < 6){ feedback('register','كلمة المرور يجب أن تكون ٦ أحرف على الأقل.'); return; }
+ 
+    busy(btn, true, 'جاري إنشاء الحساب...');
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      const uid  = cred.user.uid;
+ 
+      // إنشاء Document فورًا في Firestore — لا يُترك مستخدم في Authentication بلا Document
+      await setDoc(doc(db, 'users', uid), {
+        uid,
+        name,
+        email,
+        photoURL: '',
+        role: 'user',
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+        approvedAt: null,
+        disabledAt: null,
+        lastLogin: null,
+        loginCount: 0,
+        emailVerified: false,
+        adminNote: '',
+        rejectReason: '',
+        approvedBy: null,
+        disabledBy: null,
+      });
+ 
+      // إرسال رسالة التحقق إن كانت الخاصية مفعّلة
+      if (SETTINGS.emailVerificationRequired){
+        try { await sendEmailVerification(cred.user); } catch (_) {}
+      }
+ 
+      logActivity('register', { uid, userEmail:email, details:'إنشاء حساب جديد' });
+ 
+      // رسالة نجاح التسجيل ثم شاشة "بانتظار الموافقة" (لأن الحالة pending)
+      showState({
+        icon:'ok', title:'تم إنشاء حسابك بنجاح',
+        text:'حسابك الآن بانتظار موافقة الإدارة. ستتمكن من استخدام جميع الخدمات بعد الموافقة'
+             + (SETTINGS.emailVerificationRequired ? '، وقد أرسلنا رسالة تحقق إلى بريدك.' : '.')
+      });
+    } catch (err) {
+      busy(btn, false);
+      feedback('register', humanError(err));
+    }
+  }
+ 
+  // استعادة كلمة المرور (Password Reset Flow — القسم 19)
+  async function doForgot(btn){
+    clearFeedback('forgot');
+    const email = $('#ra-forgot-email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ feedback('forgot','يرجى إدخال بريد إلكتروني صحيح.'); return; }
+ 
+    busy(btn, true, 'جاري الإرسال...');
+    try {
+      await sendPasswordResetEmail(auth, email);
+      feedback('forgot','إذا كان البريد مسجّلًا لدينا، فقد أُرسل إليه رابط إعادة التعيين. تحقّق من صندوق الوارد.', 'ok');
+      $('#ra-forgot-email').value = '';
+    } catch (err) {
+      feedback('forgot', humanError(err));
+    } finally {
+      busy(btn, false);
+    }
+  }
+ 
+  // تسجيل الخروج (Logout Flow — القسم 18)
+  async function doLogout(){
+    try {
+      const u = auth.currentUser;
+      if (u) await logActivity('logout', { uid:u.uid, userEmail:u.email, details:'تسجيل خروج' });
+      stopLiveGuard();
+      await signOut(auth);
+      // onAuthStateChanged يعيد شاشة تسجيل الدخول ويقفل الصفحة تلقائيًا.
+    } catch (err) {
+      alert(humanError(err));
+    }
+  }
+ 
+  /* ====================================================================
+     ربط الأحداث
+     ==================================================================== */
+  // التنقل بين الواجهات
+  root.querySelectorAll('[data-ra-go]').forEach(link => {
+    link.addEventListener('click', () => showView(link.dataset.raGo));
+  });
+ 
+  // أزرار الإجراءات داخل الكتلة
+  root.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-ra-action]');
+    if (!btn) return;
+    const action = btn.dataset.raAction;
+    if (action === 'login')          doLogin(btn);
+    else if (action === 'register')  doRegister(btn);
+    else if (action === 'forgot')    doForgot(btn);
+    else if (action === 'switch-account'){ signOut(auth); }
+  });
+ 
+  // إرسال النماذج بمفتاح Enter
+  const enterMap = [
+    ['#ra-login-pass',  'login'], ['#ra-login-email', 'login'],
+    ['#ra-reg-pass',    'register'],
+    ['#ra-forgot-email','forgot'],
+  ];
+  enterMap.forEach(([sel, action]) => {
+    const el = $(sel);
+    if (el) el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter'){ e.preventDefault(); const b = $(`[data-ra-action="${action}"]`); if (b) b.click(); }
+    });
+  });
+ 
+  // زر تسجيل الخروج في محتوى الصفحة (اختياري — أي عنصر يحمل data-ra-logout)
+  document.querySelectorAll('[data-ra-logout]').forEach(b => b.addEventListener('click', doLogout));
+ 
+  // كشف انقطاع الاتصال بالإنترنت
+  window.addEventListener('offline', () => {
+    if (root.hasAttribute('hidden')) return; // الصفحة ظاهرة بالفعل، لا نقفلها
+  });
+</script>
+<!-- ======================  نهاية الجزء (ب) من RA Secure Block  ====================== -->
+ 
 </body>
 </html>
