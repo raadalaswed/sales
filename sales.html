@@ -171,6 +171,7 @@
       --warning: #d29922;
       --sidebar-w: 260px;
       --topbar-h: 60px;
+      --notice-h: 34px; /* ✨ ارتفاع شريط الملاحظة العلوي (التليغرام) */
       --bg-input: rgba(255,255,255,.04);
       --shadow: 0 4px 20px rgba(0,0,0,.5);
       --transition: all .25s ease;
@@ -249,11 +250,11 @@
     /* ===== SIDEBAR ===== */
     .sidebar {
       position: fixed;
-      top: 0;
+      top: var(--notice-h);
       right: 0;
       width: var(--sidebar-w);
-      height: 100vh;
-      height: 100dvh; /* ✨ UI Enhancement */
+      height: calc(100vh - var(--notice-h));
+      height: calc(100dvh - var(--notice-h)); /* ✨ UI Enhancement */
       background: var(--bg-sidebar);
       border-left: 1px solid var(--border);
       display: flex;
@@ -359,7 +360,7 @@
     /* ===== TOPBAR ===== */
     .topbar {
       position: fixed;
-      top: 0;
+      top: var(--notice-h);
       left: 0;
       right: var(--sidebar-w);
       height: var(--topbar-h);
@@ -437,9 +438,9 @@
     /* ===== MAIN CONTENT ===== */
     .main-content {
       margin-right: var(--sidebar-w);
-      margin-top: var(--topbar-h);
-      height: calc(100vh - var(--topbar-h));
-      height: calc(100dvh - var(--topbar-h)); /* ✨ UI Enhancement */
+      margin-top: calc(var(--topbar-h) + var(--notice-h));
+      height: calc(100vh - var(--topbar-h) - var(--notice-h));
+      height: calc(100dvh - var(--topbar-h) - var(--notice-h)); /* ✨ UI Enhancement */
       display: grid;
       grid-template-columns: 1fr 380px;
       gap: 0;
@@ -1099,7 +1100,7 @@
     }
 
     @media (max-width: 768px) {
-      :root { --sidebar-w: 272px; }
+      :root { --sidebar-w: 272px; --notice-h: 46px; }
 
       .sidebar {
         transform: translateX(100%);
@@ -1117,8 +1118,8 @@
       .main-content {
         margin-right: 0 !important;
         grid-template-columns: 1fr;
-        height: calc(100vh - var(--topbar-h));
-        height: calc(100dvh - var(--topbar-h));
+        height: calc(100vh - var(--topbar-h) - var(--notice-h));
+        height: calc(100dvh - var(--topbar-h) - var(--notice-h));
         overflow: hidden;
       }
 
@@ -1214,6 +1215,90 @@
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
+    /* ===== ✨ شريط ملاحظة التليغرام (أعلى الموقع) ===== */
+    .notice-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      min-height: var(--notice-h);
+      z-index: 1002;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 5px 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: #0d1117;
+      font-family: 'Cairo', sans-serif;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.5;
+      box-shadow: var(--shadow-sm);
+    }
+    .notice-bar a {
+      color: #0d1117;
+      font-weight: 900;
+      text-decoration: underline;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+    .notice-bar a:hover { opacity: .82; }
+    @media (max-width: 480px) {
+      .notice-bar { font-size: 11.5px; gap: 5px; }
+    }
+
+    /* ===== ✨ صندوق تكبير صورة المنتج (Lightbox) ===== */
+    .lightbox-overlay {
+      z-index: 3000;
+      background: rgba(0,0,0,.9);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 24px;
+    }
+    .lightbox-img {
+      max-width: 92vw;
+      max-height: 88vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      animation: modalIn .25s var(--ease-out);
+      cursor: default;
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-main);
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      z-index: 3001;
+    }
+    .lightbox-close:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+    @media (max-width: 480px) {
+      .lightbox-close { top: 12px; left: 12px; width: 40px; height: 40px; }
+      .lightbox-img { max-width: 94vw; max-height: 84vh; }
+    }
+
     /* تقليل الحركة لمن يفضّل ذلك */
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -1224,6 +1309,14 @@
   </style>
 </head>
 <body>
+
+<!-- ✨ شريط ملاحظة أعلى الموقع (تواصل مع المهندس عبر التليغرام) -->
+<div class="notice-bar" role="note">
+  <span>لديك مشكلة أو فكرة؟ تواصل مع المهندس عبر التليغرام:</span>
+  <a href="https://t.me/raad2a" target="_blank" rel="noopener noreferrer">
+    <i class="fab fa-telegram-plane" aria-hidden="true"></i> @raad2a
+  </a>
+</div>
 
 <!-- Sidebar Overlay (mobile) -->
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -1385,6 +1478,14 @@
       <i class="fas fa-plus me-1" aria-hidden="true"></i> بيع جديد
     </button>
   </div>
+</div>
+
+<!-- ✨ نافذة تكبير صورة المنتج (Lightbox) -->
+<div class="modal-overlay lightbox-overlay" id="imageLightbox" style="display:none;" role="dialog" aria-modal="true" aria-label="عرض صورة المنتج بالحجم الكبير" onclick="closeImageLightbox()">
+  <button class="lightbox-close" onclick="event.stopPropagation(); closeImageLightbox()" aria-label="إغلاق الصورة">
+    <i class="fas fa-times" aria-hidden="true"></i>
+  </button>
+  <img id="lightboxImg" class="lightbox-img" src="" alt="صورة المنتج" onclick="event.stopPropagation()"/>
 </div>
 
 <div class="toast-container-custom" id="toastContainer" aria-live="polite"></div>
@@ -1560,7 +1661,7 @@
     grid.innerHTML = list.map(p => {
       const isOut  = (p.quantity || 0) === 0;
       const imgEl  = p.imageUrl
-        ? `<img src="${escapeHtml(p.imageUrl)}" class="prod-card-img" alt="" onerror="this.style.display='none'">`
+        ? `<img src="${escapeHtml(p.imageUrl)}" class="prod-card-img" alt="" onerror="this.style.display='none'" onclick="event.stopPropagation(); openImageLightbox(this.src)">`
         : `<div class="prod-card-img-placeholder"><i class="fas fa-image" aria-hidden="true"></i></div>`;
       const noteEl = p.note ? `<div class="prod-card-note">⚠️ ${escapeHtml(p.note)}</div>` : '';
       return `
@@ -1802,6 +1903,21 @@
     document.getElementById('successModal').style.display = 'none';
   };
 
+  // ===== ✨ IMAGE LIGHTBOX (تكبير صورة المنتج) =====
+  window.openImageLightbox = function(src) {
+    if (!src) return;
+    const overlay = document.getElementById('imageLightbox');
+    const img = document.getElementById('lightboxImg');
+    if (img) img.src = src;
+    if (overlay) overlay.style.display = 'flex';
+  };
+  window.closeImageLightbox = function() {
+    const overlay = document.getElementById('imageLightbox');
+    const img = document.getElementById('lightboxImg');
+    if (overlay) overlay.style.display = 'none';
+    if (img) img.src = '';
+  };
+
   // ===== HELPERS =====
   function formatNum(n) {
     return Number(n || 0).toLocaleString('ar-SA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1828,6 +1944,7 @@
   // ===== مفتاح Escape يغلق النوافذ المنبثقة والسلة =====
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
+    if (document.getElementById('imageLightbox').style.display !== 'none') { closeImageLightbox(); return; }
     if (document.getElementById('checkoutModal').style.display !== 'none') { closeCheckout(); return; }
     if (document.getElementById('successModal').style.display !== 'none')  { closeSuccess(); return; }
     closeSidebar();
