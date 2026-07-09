@@ -560,8 +560,16 @@
 <!--
   [تعديل 1] استبدال Firebase Storage بـ Supabase Storage.
   تم إضافة Supabase JS Client عبر CDN.
-  ملاحظة: SUPABASE_KEY أدناه هو مفتاح سري مؤقت للبيئة المحلية فقط.
-  يجب استبداله بـ anon key قبل النشر للإنتاج.
+
+  ⚠️⚠️ تحذير أمني مهم ⚠️⚠️
+  المفتاح المستخدم أدناه (SUPABASE_KEY) هو "service/secret key" يتجاوز كل سياسات
+  الحماية (RLS) ويمنح صلاحية كاملة على مشروع Supabase. وضعه في كود يعمل في
+  المتصفح يعني أنه مكشوف لأي شخص يفتح "عرض المصدر" — بوابة تسجيل الدخول لا تخفيه.
+  الإجراء الصحيح للإنتاج:
+    1) قم بتدوير (Rotate) المفتاح القديم والجديد فورًا من لوحة Supabase.
+    2) استخدم في المتصفح مفتاح "publishable/anon" فقط.
+    3) فعّل سياسات RLS على مخزن product-images للرفع/الحذف، أو نفّذ الرفع/الحذف
+       عبر دالة خادمية (Edge/Server) بحيث لا يصل أي مفتاح سري إلى المتصفح.
 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -592,14 +600,16 @@
   const db  = getDatabase(app);
 
   // ─────────────────────────────────────────────
-  // [تعديل 3] إعداد Supabase Client
+  // [تعديل 3] إعداد Supabase Client — مشروع Supabase الجديد
   //   - حذف: const storage = getStorage(app)
-  //   - إضافة: supabase client يتصل بـ Supabase Storage
-  // ملاحظة: المفتاح أدناه مؤقت للبيئة المحلية فقط.
+  //   - إضافة: supabase client يتصل بمخزن Supabase الجديد
+  // ⚠️ SUPABASE_KEY أدناه مفتاح سري (service key). راجع تحذير الأمان في الأعلى:
+  //    يجب تدويره واستبداله بمفتاح publishable/anon + سياسات RLS قبل الإنتاج.
   // ─────────────────────────────────────────────
-  const SUPABASE_URL    = 'https://djdfuekxzzvgmbmcqyks.supabase.co';
-  const SUPABASE_KEY    = 'sb_secret_nHPk2Drx6uLV6_DF1uJ-5g_L0sox_iP'; // مؤقت — استبدله بـ anon key للإنتاج
-  const SUPABASE_BUCKET = 'products';
+  const SUPABASE_URL    = 'https://pprwcqcqsrocnfhlbyqq.supabase.co';
+  const SUPABASE_KEY    = 'sb_secret_Tk7uvn8x8jDFxUm8WS8E3A_7vT3k6iN'; // ⚠️ سرّي — راجع تحذير الأمان بالأعلى
+  const SUPABASE_BUCKET = 'product-images';
+  const SUPABASE_PREFIX = ''; // NEW_SUPABASE_PREFIX (فارغ) — لا مجلد فرعي داخل المخزن
 
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -724,9 +734,65 @@
   };
 
   // ─────────────────────────────────────────────
-  // [تعديل 5] رفع الصورة إلى Supabase Storage
+  // [ضغط الصورة في المتصفح] تحويل أي صورة إلى WebP قبل الرفع
+  //   • يحافظ على نسبة الأبعاد   • لا يكبّر الصور الصغيرة (No upscale)
+  //   • أقصى عرض 1200px          • جودة تكيّفية للوصول إلى ~200–280KB
+  //   • جودة بصرية عالية         • يُرجع Blob بصيغة image/webp
+  //   في حال عدم دعم WebP في المتصفح، يُرجع الملف الأصلي دون تعطيل الرفع.
+  // ─────────────────────────────────────────────
+  async function compressImageToWebP(file, {
+    maxWidth    = 1200,
+    targetMaxKB = 280,
+    minQuality  = 0.45,
+    maxQuality  = 0.92
+  } = {}) {
+    // فكّ ترميز الصورة مع احترام اتجاه EXIF إن أمكن
+    let bitmap;
+    try {
+      bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    } catch (_) {
+      try { bitmap = await createImageBitmap(file); }
+      catch (_) { return file; } // تعذّر فكّ الترميز — ارفع الأصل
+    }
+
+    // حساب الأبعاد مع الحفاظ على النسبة وعدم التكبير
+    const scale = Math.min(1, maxWidth / bitmap.width);
+    const w = Math.max(1, Math.round(bitmap.width  * scale));
+    const h = Math.max(1, Math.round(bitmap.height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(bitmap, 0, 0, w, h);
+    if (bitmap.close) bitmap.close();
+
+    const targetMax = targetMaxKB * 1024;
+    const encode = (q) => new Promise(res => canvas.toBlob(res, 'image/webp', q));
+
+    // محاولة بأعلى جودة أولًا
+    let best = await encode(maxQuality);
+    if (!best) return file;                 // المتصفح لا يدعم ترميز WebP — ارفع الأصل
+    if (best.size <= targetMax) return best; // ضمن الميزانية بأعلى جودة
+
+    // بحث ثنائي عن أعلى جودة يظل حجمها ضمن الحد الأقصى
+    let lo = minQuality, hi = maxQuality, bestUnder = null;
+    for (let i = 0; i < 7; i++) {
+      const mid  = (lo + hi) / 2;
+      const blob = await encode(mid);
+      if (blob && blob.size <= targetMax) { bestUnder = blob; lo = mid; }
+      else { hi = mid; }
+    }
+    if (bestUnder) return bestUnder;
+
+    // لم يتسع شيء تحت الهدف — أرجِع أصغر نتيجة ممكنة (أدنى جودة)
+    const minBlob = await encode(minQuality);
+    return minBlob || best;
+  }
+
+  // ─────────────────────────────────────────────
+  // [تعديل 5] رفع الصورة إلى Supabase Storage (المشروع الجديد)
   //   قبل: كان يستخدم Firebase Storage (uploadBytes / getDownloadURL)
-  //   بعد: يستخدم supabase.storage.from(BUCKET).upload() و getPublicUrl()
+  //   بعد: ضغط الصورة في المتصفح إلى WebP ثم supabase.storage.upload() و getPublicUrl()
   //   لا يُخزَّن أي Base64 — يُرفع الملف مباشرة والـ Public URL يُحفظ في Firebase
   // ─────────────────────────────────────────────
   window.handleImageUpload = async function(e) {
@@ -748,18 +814,23 @@
 
     const progress = document.getElementById('uploadProgress');
     progress.style.display = 'block';
-    progress.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>جارٍ رفع الصورة إلى Supabase...';
+    progress.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>جارٍ ضغط الصورة...';
 
     try {
-      // اسم فريد: timestamp + اسم الملف الأصلي
-      const ext      = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const filePath = `products/${fileName}`;
+      // (1) ضغط الصورة في المتصفح إلى WebP بجودة تكيّفية قبل الرفع
+      const webpBlob = await compressImageToWebP(file);
 
-      // رفع الملف إلى Supabase Storage
+      // (2) إظهار تقدّم الرفع المعتاد بعد انتهاء الضغط
+      progress.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>جارٍ رفع الصورة إلى Supabase...';
+
+      // اسم فريد بامتداد webp: timestamp + قيمة عشوائية
+      const fileName = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}.webp`;
+      const filePath = SUPABASE_PREFIX ? `${SUPABASE_PREFIX}/${fileName}` : fileName;
+
+      // رفع الملف المضغوط إلى Supabase Storage (المشروع الجديد)
       const { error: uploadError } = await supabase.storage
         .from(SUPABASE_BUCKET)
-        .upload(filePath, file, { cacheControl: '3600', upsert: false });
+        .upload(filePath, webpBlob, { cacheControl: '3600', upsert: false, contentType: 'image/webp' });
 
       if (uploadError) throw uploadError;
 
@@ -787,9 +858,10 @@
   };
 
   // ─────────────────────────────────────────────
-  // [تعديل 6] حذف صورة المنتج من Supabase
+  // [تعديل 6] حذف صورة المنتج من Supabase (المشروع الجديد)
   //   دالة مستقلة قابلة لإعادة الاستخدام.
-  //   تستخرج مسار الملف من الـ Public URL وتحذفه.
+  //   تستخرج مسار الملف من الـ Public URL وتحذفه من مخزن product-images.
+  //   الروابط التي لا تنتمي للمخزن الجديد تُتجاهَل بأمان (توافق خلفي).
   //   الفشل لا يوقف عملية الحذف من Firebase — يسجَّل فقط.
   // ─────────────────────────────────────────────
   async function deleteImageFromSupabase(imageUrl) {
@@ -801,7 +873,7 @@
       const url      = new URL(imageUrl);
       const marker   = `/object/public/${SUPABASE_BUCKET}/`;
       const markerIdx = url.pathname.indexOf(marker);
-      if (markerIdx === -1) return; // الرابط ليس من Supabase — تجاهل
+      if (markerIdx === -1) return; // الرابط ليس من المخزن الجديد — تجاهل (توافق خلفي)
 
       const filePath = url.pathname.slice(markerIdx + marker.length);
 
