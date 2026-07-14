@@ -479,6 +479,20 @@
       </div>
     </div>
     <div class="col-6 col-md-4 col-lg-2">
+      <div class="stat-card purple">
+        <div class="stat-icon purple"><i class="fas fa-rotate-left"></i></div>
+        <div class="stat-value" id="statTotalRefunds">0</div>
+        <div class="stat-label">إجمالي الاسترجاعات</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
+      <div class="stat-card teal">
+        <div class="stat-icon teal"><i class="fas fa-wallet"></i></div>
+        <div class="stat-value" id="statNetSales">0</div>
+        <div class="stat-label">صافي المبيعات</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-2">
       <div class="stat-card blue">
         <canvas class="sparkline" id="sparkProfit"></canvas>
         <div class="stat-icon blue"><i class="fas fa-arrow-trend-up"></i></div>
@@ -907,6 +921,7 @@
   // ===== متغيرات عامة =====
   let allSales    = [];
   let allProducts = [];
+  let allReturns  = [];   // ✨ حركات الاسترجاع من عقدة inventory (type === 'استرجاع')
   let currency    = 'ر.س';
   let lowThr      = 5;
 
@@ -950,10 +965,11 @@
   // ===== تحميل كل البيانات =====
   async function loadAll() {
     // ✨ جديد: تمت إضافة جلب المصاريف ضمن نفس الطلب المتوازي (بدون تغيير المنطق الأصلي)
-    const [salesSnap, productsSnap, expensesSnap] = await Promise.all([
+    const [salesSnap, productsSnap, expensesSnap, inventorySnap] = await Promise.all([
       get(ref(db, 'sales')),
       get(ref(db, 'products')),
-      get(ref(db, 'expenses'))
+      get(ref(db, 'expenses')),
+      get(ref(db, 'inventory'))
     ]);
 
     allSales = salesSnap.exists()
@@ -967,6 +983,11 @@
     // ✨ جديد: تحميل المصاريف
     allExpenses = expensesSnap.exists()
       ? Object.entries(expensesSnap.val()).map(([id,v]) => ({ id, ...v }))
+      : [];
+
+    // ✨ حركات الاسترجاع فقط (متوافق مع البيانات القديمة: أي حركة بلا هذا النوع تُستبعد)
+    allReturns = inventorySnap.exists()
+      ? Object.entries(inventorySnap.val()).map(([id,v]) => ({ id, ...v })).filter(m => m.type === 'استرجاع')
       : [];
 
     // ✨ جديد (أداء): بناء خريطة اسم المنتج → المنتج مرة واحدة بدل البحث المتكرر داخل الحلقات
@@ -1057,6 +1078,13 @@
     animateCounter('statStockValue', stockVal);
     animateCounter('statLowStock',   lowCount, v => Math.round(v).toLocaleString('ar-SA'));
 
+    // ✨ استرجاعات الفترة: صافي المبيعات = إجمالي المبيعات − مجموع refundAmount
+    const periodReturns = allReturns.filter(r => (r.timestamp || 0) >= start && (r.timestamp || 0) <= end);
+    const totalRefunds  = periodReturns.reduce((s, r) => s + (Number(r.refundAmount) || 0), 0);
+    const netSales      = revenue - totalRefunds;
+    animateCounter('statTotalRefunds', totalRefunds);
+    animateCounter('statNetSales',     netSales);
+
     // --- إجمالي المبيعات المتوقعة (salePrice × quantity لكل المنتجات) ---
     const expectedRevenue = allProducts.reduce((s, p) => s + (p.salePrice || 0) * (p.quantity || 0), 0);
     // --- إجمالي الربح المتوقع ((salePrice - purchasePrice) × quantity لكل المنتجات) ---
@@ -1114,7 +1142,7 @@
     const periodExpenses  = allExpenses.filter(e => (e.timestamp || 0) >= start && (e.timestamp || 0) <= end);
     const totalExpenses   = periodExpenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
 
-    lastReport = { sales, prodList, periodExpenses, totalExpenses, revenue, profit, margin, label, start, end };
+    lastReport = { sales, prodList, periodExpenses, totalExpenses, revenue, profit, margin, label, start, end, totalRefunds, netSales };
 
     renderTrendsAndSparklines(sales, revenue, profit, margin, totalExpenses, start, end);
     renderFinancialCards(revenue, profit, totalExpenses, periodExpenses, start, end);
@@ -1987,6 +2015,8 @@
       ['التقرير', r.label || ''],
       ['عدد الفواتير', (r.sales || []).length],
       ['إجمالي المبيعات', r.revenue || 0],
+      ['إجمالي الاسترجاعات', r.totalRefunds || 0],
+      ['صافي المبيعات', r.netSales || 0],
       ['إجمالي الأرباح', r.profit || 0],
       ['إجمالي المصاريف', r.totalExpenses || 0],
       ['صافي الربح بعد المصاريف', (r.profit || 0) - (r.totalExpenses || 0)],
@@ -2694,5 +2724,6 @@
 </script>
 <!-- ======================  نهاية الجزء (ب) من RA Secure Block  ====================== -->
  
+
 </body>
 </html>
