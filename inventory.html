@@ -315,6 +315,10 @@
 
     <div style="margin-bottom:14px;">
       <label class="form-label-dark">المنتج *</label>
+      <input type="text" class="form-control-dark" id="movProductSearch"
+             placeholder="🔍 اكتب اسم المنتج للبحث..."
+             oninput="filterProductOptions()" autocomplete="off"
+             style="margin-bottom:8px;"/>
       <select class="form-control-dark" id="movProduct">
         <option value="">اختر المنتج</option>
       </select>
@@ -405,10 +409,28 @@
   function buildProductSelect() {
     const sel = document.getElementById('movProduct');
     const val = sel.value;
-    sel.innerHTML = '<option value="">اختر المنتج</option>' +
-      allProducts.map(p => `<option value="${p.id}" data-qty="${p.quantity || 0}">${p.name} (متوفر: ${p.quantity || 0})</option>`).join('');
-    sel.value = val;
+    const searchEl = document.getElementById('movProductSearch');
+    const q = (searchEl ? searchEl.value : '').trim().toLowerCase();
+
+    const list = q
+      ? allProducts.filter(p => (p.name || '').toLowerCase().includes(q))
+      : allProducts;
+
+    sel.innerHTML = `<option value="">${list.length ? 'اختر المنتج' : 'لا توجد نتائج مطابقة'}</option>` +
+      list.map(p => `<option value="${p.id}" data-qty="${p.quantity || 0}">${p.name} (متوفر: ${p.quantity || 0})</option>`).join('');
+
+    if (list.some(p => p.id === val)) {
+      sel.value = val;                 // إبقاء الاختيار السابق إن كان ضمن النتائج
+    } else if (q && list.length === 1) {
+      sel.value = list[0].id;          // اختيار تلقائي عند وجود نتيجة واحدة
+    } else {
+      sel.value = '';
+    }
   }
+
+  window.filterProductOptions = function() {
+    buildProductSelect();
+  };
 
   function renderTable(list) {
     const tbody = document.getElementById('movementsBody');
@@ -453,6 +475,8 @@
   };
 
   window.openAddModal = function() {
+    document.getElementById('movProductSearch').value = '';
+    buildProductSelect();
     document.getElementById('movProduct').value = '';
     document.getElementById('movType').value    = 'إضافة بضاعة';
     document.getElementById('movQty').value     = 1;
